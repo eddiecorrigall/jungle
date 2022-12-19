@@ -29,6 +29,7 @@ public enum TokenType {
   RETURN,
 
   DOT,
+  PIPE,
 
   NUMBER,
   TEXT,
