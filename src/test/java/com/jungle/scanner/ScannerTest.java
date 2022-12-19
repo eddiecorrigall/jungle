@@ -2,8 +2,10 @@ package com.jungle.scanner;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import com.jungle.token.Token;
 import com.jungle.token.TokenType;
 
@@ -30,29 +32,29 @@ public class ScannerTest {
       "}\n"                             // line 8
     );
     // line 1: "var inputNumber = 123;\n"
-    assertEquals(new Token(TokenType.KEYWORD, "var"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("var"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.SYMBOL, "inputNumber"), scanner.scan());
+    assertEquals(new Token(TokenType.SYMBOL).withValue("inputNumber"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.EQUALS), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.NUMBER, "123"), scanner.scan());
+    assertEquals(new Token(TokenType.NUMBER).withValue("123"), scanner.scan());
     assertEquals(new Token(TokenType.SEMICOLON), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 2: "if (inputNumber % 2 == 0) {\n"
-    assertEquals(new Token(TokenType.KEYWORD, "if"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("if"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_OPEN), scanner.scan());
-    assertEquals(new Token(TokenType.SYMBOL, "inputNumber"), scanner.scan());
+    assertEquals(new Token(TokenType.SYMBOL).withValue("inputNumber"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.PERCENT), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.NUMBER, "2"), scanner.scan());
+    assertEquals(new Token(TokenType.NUMBER).withValue("2"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.EQUALS), scanner.scan());
     assertEquals(new Token(TokenType.EQUALS), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.NUMBER, "0"), scanner.scan());
+    assertEquals(new Token(TokenType.NUMBER).withValue("0"), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_CLOSE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_CURLY_OPEN), scanner.scan());
@@ -60,42 +62,42 @@ public class ScannerTest {
     // line 3: "  println(\"It's even!\");\n"
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "println"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("println"), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_OPEN), scanner.scan());
-    assertEquals(new Token(TokenType.TEXT, "It's even!"), scanner.scan());
+    assertEquals(new Token(TokenType.TEXT).withValue("It's even!"), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_CLOSE), scanner.scan());
     assertEquals(new Token(TokenType.SEMICOLON), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 4: "  return true;\n"
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "return"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("return"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "true"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("true"), scanner.scan());
     assertEquals(new Token(TokenType.SEMICOLON), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 5: "} else {\n"
     assertEquals(new Token(TokenType.BRACKET_CURLY_CLOSE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "else"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("else"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_CURLY_OPEN), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 6: "  println(\"It's odd!\");\n"
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "println"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("println"), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_OPEN), scanner.scan());
-    assertEquals(new Token(TokenType.TEXT, "It's odd!"), scanner.scan());
+    assertEquals(new Token(TokenType.TEXT).withValue("It's odd!"), scanner.scan());
     assertEquals(new Token(TokenType.BRACKET_ROUND_CLOSE), scanner.scan());
     assertEquals(new Token(TokenType.SEMICOLON), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 7: "  return false;\n"
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "return"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("return"), scanner.scan());
     assertEquals(new Token(TokenType.SPACE), scanner.scan());
-    assertEquals(new Token(TokenType.KEYWORD, "false"), scanner.scan());
+    assertEquals(new Token(TokenType.KEYWORD).withValue("false"), scanner.scan());
     assertEquals(new Token(TokenType.SEMICOLON), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // line 8: "}\n"

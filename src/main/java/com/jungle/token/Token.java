@@ -1,57 +1,42 @@
 package com.jungle.token;
 
-import java.util.Objects;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-public class Token {
-  private int row;
-  private int column;
-
+public class Token implements IToken {
   @NonNull
   private final TokenType type;
 
   @Nullable
-  private final String value;
+  private String value;
 
-  public Token(@NonNull TokenType type, @Nullable String value) {
-    super();
-    Objects.requireNonNull(type);
-    this.type = type;
-    this.value = value;
-    this.row = -1;
-    this.column = -1;
-  }
+  int lineNumber, characterNumber;
 
   public Token(@NonNull TokenType type) {
-    this(type, null);
+    super();
+    this.type = type;
   }
 
-  public Token withRow(int row) {
-    this.row = row;
-    return this;
-  }
-
-  public Token withColumn(int column) {
-    this.column = column;
-    return this;
-  }
-
-  public int getRow() {
-    return row;
-  }
-
-  public int getColumn() {
-    return column;
-  }
-
+  @Override
+  @NonNull
   public TokenType getType() {
     return type;
   }
 
+  @Override
   public String getValue() {
     return value;
+  }
+
+  @Override
+  public int getLineNumber() {
+    return lineNumber;
+  }
+
+  @Override
+  public int getCharacterNumber() {
+    return characterNumber;
   }
 
   @Override
@@ -77,5 +62,18 @@ public class Token {
   @Override
   public String toString() {
     return String.format("<Token type=%s value=%s />", getType(), getValue());
+  }
+
+  @NonNull
+  public Token withValue(@NonNull String value) {
+    this.value = value;
+    return this;
+  }
+
+  @NonNull
+  public Token withPosition(int lineNumber, int characterNumber) {
+    this.lineNumber = lineNumber;
+    this.characterNumber = characterNumber;
+    return this;
   }
 }

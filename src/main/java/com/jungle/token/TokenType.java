@@ -37,4 +37,5 @@ public enum TokenType {
   SYMBOL,
 
   TERMINAL,
+  UNKNOWN,
 }

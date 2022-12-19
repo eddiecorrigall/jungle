@@ -1,13 +1,10 @@
 package com.jungle.scanner;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.jungle.token.Token;
+import com.jungle.token.IToken;
 
-public abstract class AbstractScanner {
+public abstract class AbstractScanner implements IScanner {
   protected static boolean isLowercaseAlphabetic(char c) {
     return 'a' <= c && c <= 'z';
   }
@@ -24,20 +21,28 @@ public abstract class AbstractScanner {
     return '0' <= c && c <= '9';
   }
 
+  @NonNull
   private String code;
+
   private int position;
   private int lineNumber;
   private int characterNumber;
 
-  public String getCode() {
+  public AbstractScanner() {
+    super();
+    this.code = new String();
+  }
+
+  @NonNull
+  protected String getCode() {
     return code;
   }
 
-  public void setCode(String code) {
+  protected void setCode(@NonNull String code) {
     this.code = code;
   }
 
-  public int getPosition() {
+  protected int getPosition() {
     return position;
   }
 
@@ -45,31 +50,20 @@ public abstract class AbstractScanner {
     this.position = position;
   }
 
-  public int getLineNumber() {
+  protected int getLineNumber() {
     return lineNumber;
   }
 
-  public void setLineNumber(int lineNumber) {
+  protected void setLineNumber(int lineNumber) {
     this.lineNumber = lineNumber;
   }
 
-  public int getCharacterNumber() {
+  protected int getCharacterNumber() {
     return characterNumber;
   }
 
-  public void setCharacterNumber(int characterNumber) {
+  protected void setCharacterNumber(int characterNumber) {
     this.characterNumber = characterNumber;
-  }
-
-  @NonNull
-  public abstract Token scan();
-
-  public List<Token> scanAll() {
-    List<Token> tokens = new LinkedList<>();
-    while (!isDone()) {
-      tokens.add(scan());
-    }
-    return tokens;
   }
 
   protected boolean isValidOffset(int offset) {
@@ -80,9 +74,13 @@ public abstract class AbstractScanner {
     return !isValidOffset(0);
   }
 
-  public void load(String code, int position) {
+  @Override
+  @NonNull
+  public abstract IToken scan();
+
+  public void load(@NonNull String code, int position) {
     setCode(code);
-    if (position < 0) {
+    if (getPosition() < 0) {
       throw new UnsupportedOperationException("position cannot be negative");
     }
     setPosition(position);
@@ -90,7 +88,8 @@ public abstract class AbstractScanner {
     setCharacterNumber(1);
   }
 
-  public void load(String code) {
+  @Override
+  public void load(@NonNull String code) {
     load(code, 0);
   }
 
