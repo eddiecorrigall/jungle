@@ -1,8 +1,14 @@
 package com.jungle.scanner;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.jungle.token.IToken;
+import com.jungle.token.TokenType;
 
 public abstract class AbstractScanner implements IScanner {
   protected static boolean isLowercaseAlphabetic(char c) {
@@ -47,6 +53,9 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   protected void setPosition(int position) {
+    if (position < 0) {
+      throw new IndexOutOfBoundsException("position must not be negative");
+    }
     this.position = position;
   }
 
@@ -55,6 +64,9 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   protected void setLineNumber(int lineNumber) {
+    if (lineNumber <= 0) {
+      throw new UnsupportedOperationException("line number must be positive");
+    }
     this.lineNumber = lineNumber;
   }
 
@@ -63,6 +75,9 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   protected void setCharacterNumber(int characterNumber) {
+    if (characterNumber <= 0) {
+      throw new UnsupportedOperationException("character number must be positive");
+    }
     this.characterNumber = characterNumber;
   }
 
@@ -78,28 +93,22 @@ public abstract class AbstractScanner implements IScanner {
   @NonNull
   public abstract IToken scan();
 
-  public void load(@NonNull String code, int position) {
-    setCode(code);
-    if (getPosition() < 0) {
-      throw new UnsupportedOperationException("position cannot be negative");
-    }
-    setPosition(position);
-    setLineNumber(1);
-    setCharacterNumber(1);
-  }
-
   @Override
-  public void load(@NonNull String code) {
-    load(code, 0);
+  public void load(@NonNull String code, int startLineNumber) {
+    setCode(code);
+    setPosition(0);
+    setLineNumber(startLineNumber);
+    setCharacterNumber(1);
   }
 
   protected char consume() {
     if (!isDone()) {
       char c = getCode().charAt(getPosition());
       setPosition(getPosition() + 1);
+      setCharacterNumber(getCharacterNumber() + 1);
       if (c == '\n') {
         setLineNumber(getLineNumber() + 1);
-        setCharacterNumber(0);
+        setCharacterNumber(1);
       }
       return c;
     }
@@ -154,5 +163,33 @@ public abstract class AbstractScanner implements IScanner {
     String s = consume(offset);
     consume(); // skip terminal
     return s;
+  }
+
+  public static void tokenize(
+    BufferedReader reader,
+    BufferedWriter writer,
+    IScanner scanner
+  ) throws IOException {
+    Iterator<String> lineIterator = reader.lines().iterator();
+    int lineNumber = 1;
+    while (lineIterator.hasNext()) {
+      String line = lineIterator.next() + '\n';
+      scanner.load(line, lineNumber);
+      lineNumber++;
+      IToken token;
+      while (true) {
+        token = scanner.scan();
+        String output = String.format(
+          "%d\t%d\t%s\n",
+          token.getLineNumber(),
+          token.getCharacterNumber(),
+          token.getValue() == null
+            ? token.getType()
+            : token.getType().name() + '\t' + token.getValue()
+        );
+        writer.write(output);
+        if (token.getType() == TokenType.TERMINAL) break;
+      }
+    }
   }
 }

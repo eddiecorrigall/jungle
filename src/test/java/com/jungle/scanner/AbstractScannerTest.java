@@ -32,57 +32,81 @@ public class AbstractScannerTest {
 
   @Test
   public void consumeAlphabeticToEndOfFile() {
-    scanner.load("while");
+    scanner.load("while", 1);
     assertEquals("while", scanner.consumeAlphabetical());
   }
 
   @Test
   public void consumeAlphabeticalNotToEndOfFile() {
-    scanner.load("var x = 123;");
+    scanner.load("var x = 123;", 1);
     assertEquals("var", scanner.consumeAlphabetical());
   }
 
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void testSetPositionNegative() {
+    scanner.setPosition(-1);
+  }
+
   @Test(expected = UnsupportedOperationException.class)
-  public void testLoadPositionNegative() {
-    scanner.load("console.log(\"hello world\");", -1);
+  public void testSetLineNumberNegative() {
+    scanner.setLineNumber(-1);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testSetLineNumberZero() {
+    scanner.setLineNumber(0);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testSetCharacterNumberNegative() {
+    scanner.setCharacterNumber(-1);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testSetCharacterNumberZero() {
+    scanner.setCharacterNumber(0);
   }
 
   @Test
   public void testConsumeChar() {
-    scanner.load("hello", 4);
+    scanner.load("hello", 1);
+    scanner.setPosition(4);
     assertEquals('o', scanner.consume());
     assertEquals(5, scanner.getPosition());
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testConsumeOffsetNegative() {
-    scanner.load("var abc = 123;\n");
+    scanner.load("var abc = 123;\n", 1);
     scanner.consume(-1);
   }
 
   @Test
   public void testConsumeOffsetZero() {
-    scanner.load("hello", 4);
+    scanner.load("hello", 1);
+    scanner.setPosition(4);
     assertEquals("", scanner.consume(0));
   }
 
   @Test
   public void testConsumeOffsetPositive() {
-    scanner.load("var abc = 123;\n");
+    scanner.load("var abc = 123;\n", 1);
     assertEquals("var", scanner.consume(3));
     assertEquals(3, scanner.getPosition());
   }
 
   @Test
   public void testConsumeNumeric() {
-    scanner.load("var abc = 123;\n", 10);
+    scanner.load("var abc = 123;\n", 1);
+    scanner.setPosition(10);
     assertEquals("123", scanner.consumeNumberical());
     assertEquals(13, scanner.getPosition());
   }
 
   @Test
   public void testConsumeUntilAndSkip() {
-    scanner.load("var text = \"Hello world!\";", 12);
+    scanner.load("var text = \"Hello world!\";", 1);
+    scanner.setPosition(12);
     assertEquals("Hello world!", scanner.consumeUntilAndSkip('\"'));
     assertEquals(25, scanner.getPosition());
   }

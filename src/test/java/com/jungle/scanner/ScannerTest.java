@@ -29,7 +29,8 @@ public class ScannerTest {
       "} else {\n"                    + // line 5
       "  println(\"It's odd!\");\n"   + // line 6
       "  return false;\n"             + // line 7
-      "}\n"                             // line 8
+      "}\n",                            // line 8
+      1
     );
     // line 1: "var inputNumber = 123;\n"
     assertEquals(new Token(TokenType.KEYWORD).withValue("var"), scanner.scan());
