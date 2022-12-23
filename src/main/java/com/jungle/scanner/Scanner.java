@@ -17,6 +17,10 @@ import com.jungle.token.Token;
 import com.jungle.token.TokenType;;
 
 public class Scanner extends AbstractScanner {
+  public static final List<String> KEYWORDS = Arrays.asList(
+    "true", "false"
+  );
+
   @NonNull
   private final Set<String> keywords;
 
@@ -26,6 +30,10 @@ public class Scanner extends AbstractScanner {
     if (keywords != null) {
       this.keywords.addAll(keywords);
     }
+  }
+
+  public Scanner() {
+    this(KEYWORDS);
   }
 
   protected boolean isKeyword(@NonNull String keyword) {
@@ -90,14 +98,10 @@ public class Scanner extends AbstractScanner {
     return token.withPosition(lineNumber, characterNumber);
   }
 
-  public static final List<String> KEYWORDS = Arrays.asList(
-    "true", "false"
-  );
-
   public static void main(String[] args) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
-    tokenize(reader, writer, new Scanner(KEYWORDS));
+    tokenize(reader, writer, new Scanner());
     writer.flush();
     writer.close();
     reader.close();

@@ -1,0 +1,46 @@
+package com.jungle.parser;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.jungle.ast.INode;
+import com.jungle.ast.NodeType;
+import com.jungle.scanner.IScanner;
+import com.jungle.scanner.Scanner;
+
+public class ParserTest {
+  @NonNull IScanner scanner = new Scanner();
+  @Nullable Parser parser;
+
+  @Before
+  public void setup() {
+    parser = new Parser(scanner);
+  }
+
+  @Test
+  public void testSingleNewlineSequence() {
+    scanner.load("\n", 1);
+    INode ast = parser.parse();
+    assertNotNull(ast);
+    assertEquals(ast.getType(), NodeType.SEQUENCE);
+  }
+
+  @Test
+  public void testDoubleNewlineSequence() {
+    scanner.load("\n\n", 1);
+    INode ast = parser.parse();
+    assertNotNull(ast);
+    assertEquals(ast.getType(), NodeType.SEQUENCE);
+    assertNotNull(ast.getLeft());
+    assertEquals(ast.getLeft().getType(), NodeType.SEQUENCE);
+    assertNull(ast.getLeft().getLeft());
+    assertNull(ast.getLeft().getRight());
+    assertNull(ast.getRight());
+  }
+}
