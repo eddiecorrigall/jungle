@@ -40,4 +40,10 @@ public abstract class AbstractParser implements IParser {
     }
     throw new Error("expected token " + tokenType.name());
   }
+
+  protected void expectKeyword(@NonNull String keywordValue) {
+    if (!keywordValue.equals(expect(TokenType.KEYWORD))) {
+      throw new Error("expected keyword token with value " + keywordValue);
+    }
+  }
 }

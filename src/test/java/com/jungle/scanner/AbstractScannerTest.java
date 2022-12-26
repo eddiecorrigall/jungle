@@ -9,6 +9,8 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+// TODO: Test abstract class only
+
 public class AbstractScannerTest {
   Scanner scanner;
 

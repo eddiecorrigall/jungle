@@ -22,18 +22,14 @@ public class Node implements INode {
   @Nullable
   private INode right;
 
-  public Node(@NonNull NodeType type, @Nullable String value) {
+  public Node(@NonNull NodeType type) {
     super();
     this.type = type;
-    this.value = value;
-  }
-
-  public Node(@NonNull NodeType type) {
-    this(type, (String) null);
   }
 
   public Node(@NonNull NodeType type, @NonNull IToken token) {
-    this(type, token.getValue());
+    this(type);
+    withValue(token.getValue());
     this.token = token;
   }
 
@@ -45,6 +41,12 @@ public class Node implements INode {
   @Nullable
   public String getValue() {
     return value;
+  }
+
+  @NonNull
+  public INode withValue(@Nullable String value) {
+    this.value = value;
+    return this;
   }
 
   @Nullable

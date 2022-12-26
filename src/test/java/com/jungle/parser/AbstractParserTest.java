@@ -18,7 +18,7 @@ import com.jungle.scanner.Scanner;
 import com.jungle.token.TokenType;
 
 public class AbstractParserTest {
-  @NonNull IScanner scanner = new Scanner();
+  @NonNull IScanner scanner = new Scanner(); // TODO: Use mock IScanner
   @NonNull AbstractParser parser = new AbstractParser(scanner) {
     @Override
     @Nullable
@@ -29,7 +29,7 @@ public class AbstractParserTest {
 
   @Before
   public void setup() {
-    scanner.load("+ 3 4", 1);
+    scanner.load("print + 3 4", 1);
   }
 
   @Test
@@ -41,11 +41,17 @@ public class AbstractParserTest {
   public void testNextToken() {
     parser.nextToken();
     assertNotNull(parser.getCurrentToken());
-    assertEquals(TokenType.PLUS, parser.getCurrentToken().getType());
+    assertEquals(TokenType.KEYWORD, parser.getCurrentToken().getType());
   }
 
   @Test
   public void testAccept() {
+    parser.nextToken();
+    assertTrue(parser.accept(TokenType.KEYWORD));
+
+    parser.nextToken();
+    assertTrue(parser.accept(TokenType.SPACE));
+
     parser.nextToken();
     assertTrue(parser.accept(TokenType.PLUS));
 
@@ -65,12 +71,14 @@ public class AbstractParserTest {
   @Test
   public void testNotAccept() {
     parser.nextToken();
-    assertFalse(parser.accept(TokenType.MINUS));
+    assertFalse(parser.accept(TokenType.PLUS));
   }
 
   @Test
   public void testExpect() {
     parser.nextToken();
+    assertEquals("print", parser.expect(TokenType.KEYWORD));
+    assertNull(parser.expect(TokenType.SPACE));
     assertNull(parser.expect(TokenType.PLUS));
     assertNull(parser.expect(TokenType.SPACE));
     assertEquals("3", parser.expect(TokenType.NUMBER));
@@ -81,6 +89,12 @@ public class AbstractParserTest {
   @Test(expected = Error.class)
   public void testNotExpect() {
     parser.nextToken();
-    parser.expect(TokenType.MINUS);
+    parser.expect(TokenType.PLUS);
+  }
+
+  @Test
+  public void testExpectKeyword() {
+    parser.nextToken();
+    parser.expectKeyword("print");
   }
 }

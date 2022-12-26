@@ -18,7 +18,7 @@ import com.jungle.token.TokenType;;
 
 public class Scanner extends AbstractScanner {
   public static final List<String> KEYWORDS = Arrays.asList(
-    "true", "false"
+    "print"
   );
 
   @NonNull
