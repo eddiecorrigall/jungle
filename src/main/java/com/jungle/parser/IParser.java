@@ -1,6 +1,6 @@
 package com.jungle.parser;
 
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
 

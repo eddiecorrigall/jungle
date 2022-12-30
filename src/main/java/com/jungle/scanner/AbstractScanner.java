@@ -5,7 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import com.jungle.token.IToken;
 import com.jungle.token.TokenType;
@@ -27,7 +27,7 @@ public abstract class AbstractScanner implements IScanner {
     return '0' <= c && c <= '9';
   }
 
-  @NonNull
+  @NotNull
   private String code;
 
   private int position;
@@ -39,12 +39,12 @@ public abstract class AbstractScanner implements IScanner {
     this.code = new String();
   }
 
-  @NonNull
+  @NotNull
   protected String getCode() {
     return code;
   }
 
-  protected void setCode(@NonNull String code) {
+  protected void setCode(@NotNull String code) {
     this.code = code;
   }
 
@@ -90,11 +90,11 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @Override
-  @NonNull
+  @NotNull
   public abstract IToken scan();
 
   @Override
-  public void load(@NonNull String code, int startLineNumber) {
+  public void load(@NotNull String code, int startLineNumber) {
     setCode(code);
     setPosition(0);
     setLineNumber(startLineNumber);
@@ -115,7 +115,7 @@ public abstract class AbstractScanner implements IScanner {
     return '\0';
   }
 
-  @NonNull
+  @NotNull
   protected String consume(int offset) {
     if (offset < 0) {
       throw new UnsupportedOperationException(
@@ -130,7 +130,7 @@ public abstract class AbstractScanner implements IScanner {
     return buffer.toString();
   }
 
-  @NonNull
+  @NotNull
   protected String consumeNumberical() {
     int offset = 0;
     while (isValidOffset(offset)) {
@@ -141,7 +141,7 @@ public abstract class AbstractScanner implements IScanner {
     return consume(offset);
   }
 
-  @NonNull
+  @NotNull
   protected String consumeAlphabetical() {
     int offset = 0;
     while (isValidOffset(offset)) {
@@ -152,7 +152,7 @@ public abstract class AbstractScanner implements IScanner {
     return consume(offset);
   }
 
-  @NonNull
+  @NotNull
   protected  String consumeUntilAndSkip(char terminal) {
     int offset = 0;
     while (isValidOffset(offset)) {

@@ -1,7 +1,7 @@
 package com.jungle.parser;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
@@ -12,7 +12,7 @@ import com.jungle.token.TokenType;
 public class Parser extends AbstractParser {
   public static final String KEYWORD_PRINT = "print";
 
-  public Parser(@NonNull IScanner scanner) {
+  public Parser(@NotNull IScanner scanner) {
     super(scanner);
   }
 
@@ -43,7 +43,7 @@ public class Parser extends AbstractParser {
     return sequence;
   }
 
-  @NonNull
+  @NotNull
   protected INode parseNumber() {
     // Leaf
     String integerPart = expect(TokenType.NUMBER);
@@ -58,7 +58,7 @@ public class Parser extends AbstractParser {
     }
   }
 
-  @NonNull
+  @NotNull
   protected INode parseExpression() {
     switch (getCurrentToken().getType()) {
       case NUMBER: parseNumber();
@@ -67,7 +67,7 @@ public class Parser extends AbstractParser {
     throw new Error("not an expression");
   }
 
-  @NonNull
+  @NotNull
   protected INode parseExpressionParenthesis() {
     expect(TokenType.BRACKET_ROUND_OPEN);
     INode expression = parseExpression();
@@ -75,7 +75,7 @@ public class Parser extends AbstractParser {
     return expression;
   }
 
-  @NonNull
+  @NotNull
   protected INode parseStatementPrint() {
     expectKeyword(KEYWORD_PRINT);
     INode expressionParenthesis = parseExpressionParenthesis();
@@ -84,7 +84,7 @@ public class Parser extends AbstractParser {
       .withLeft(expressionParenthesis);
   }
 
-  @NonNull
+  @NotNull
   protected INode parseKeyword() {
     String keywordValue = getCurrentToken().getValue();
     if (KEYWORD_PRINT.equals(keywordValue)) {

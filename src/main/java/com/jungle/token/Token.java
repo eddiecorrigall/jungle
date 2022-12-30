@@ -1,11 +1,11 @@
 package com.jungle.token;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Token implements IToken {
-  @NonNull
+  @NotNull
   private final TokenType type;
 
   @Nullable
@@ -13,13 +13,13 @@ public class Token implements IToken {
 
   int lineNumber, characterNumber;
 
-  public Token(@NonNull TokenType type) {
+  public Token(@NotNull TokenType type) {
     super();
     this.type = type;
   }
 
   @Override
-  @NonNull
+  @NotNull
   public TokenType getType() {
     return type;
   }
@@ -64,13 +64,13 @@ public class Token implements IToken {
     return String.format("<Token type=%s value=%s />", getType(), getValue());
   }
 
-  @NonNull
-  public Token withValue(@NonNull String value) {
+  @NotNull
+  public Token withValue(@NotNull String value) {
     this.value = value;
     return this;
   }
 
-  @NonNull
+  @NotNull
   public Token withPosition(int lineNumber, int characterNumber) {
     this.lineNumber = lineNumber;
     this.characterNumber = characterNumber;

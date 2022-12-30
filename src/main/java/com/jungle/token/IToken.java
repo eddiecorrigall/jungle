@@ -1,10 +1,10 @@
 package com.jungle.token;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface IToken {
-  @NonNull TokenType getType();
+  @NotNull TokenType getType();
   @Nullable String getValue();
   int getLineNumber();
   int getCharacterNumber();

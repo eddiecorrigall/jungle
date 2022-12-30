@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ import com.jungle.scanner.IScanner;
 import com.jungle.scanner.Scanner;
 
 public class ParserTest {
-  @NonNull IScanner scanner = new Scanner();
+  @NotNull IScanner scanner = new Scanner();
   @Nullable Parser parser;
 
   @Before

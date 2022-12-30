@@ -10,18 +10,18 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.jdt.annotation.NonNull;
 
 import com.jungle.token.IToken;
 import com.jungle.token.Token;
-import com.jungle.token.TokenType;;
+import com.jungle.token.TokenType;
+import org.jetbrains.annotations.NotNull;;
 
 public class Scanner extends AbstractScanner {
   public static final List<String> KEYWORDS = Arrays.asList(
     "print"
   );
 
-  @NonNull
+  @NotNull
   private final Set<String> keywords;
 
   public Scanner(Collection<String> keywords) {
@@ -36,12 +36,12 @@ public class Scanner extends AbstractScanner {
     this(KEYWORDS);
   }
 
-  protected boolean isKeyword(@NonNull String keyword) {
+  protected boolean isKeyword(@NotNull String keyword) {
     return keywords.contains(keyword);
   }
 
   @Override
-  @NonNull
+  @NotNull
   public IToken scan() {
     int lineNumber = getLineNumber();
     int characterNumber = getCharacterNumber();

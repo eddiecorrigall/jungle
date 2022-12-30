@@ -7,8 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,8 +18,8 @@ import com.jungle.scanner.Scanner;
 import com.jungle.token.TokenType;
 
 public class AbstractParserTest {
-  @NonNull IScanner scanner = new Scanner(); // TODO: Use mock IScanner
-  @NonNull AbstractParser parser = new AbstractParser(scanner) {
+  @NotNull IScanner scanner = new Scanner(); // TODO: Use mock IScanner
+  @NotNull AbstractParser parser = new AbstractParser(scanner) {
     @Override
     @Nullable
     public INode parse() {

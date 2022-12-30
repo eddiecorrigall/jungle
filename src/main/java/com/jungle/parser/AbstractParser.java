@@ -1,7 +1,7 @@
 package com.jungle.parser;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
 import com.jungle.scanner.IScanner;
@@ -12,7 +12,7 @@ public abstract class AbstractParser implements IParser {
   private IToken token;
   private IScanner scanner;
 
-  public AbstractParser(@NonNull IScanner scanner) {
+  public AbstractParser(@NotNull IScanner scanner) {
     this.scanner = scanner;
   }
 
@@ -28,11 +28,11 @@ public abstract class AbstractParser implements IParser {
     token = scanner.scan();
   }
 
-  protected boolean accept(@NonNull TokenType tokenType) {
+  protected boolean accept(@NotNull TokenType tokenType) {
     return getCurrentToken().getType() == tokenType;
   }
 
-  protected String expect(@NonNull TokenType tokenType) {
+  protected String expect(@NotNull TokenType tokenType) {
     if (accept(tokenType)) {
       String value = getCurrentToken().getValue();
       nextToken();
@@ -41,7 +41,7 @@ public abstract class AbstractParser implements IParser {
     throw new Error("expected token " + tokenType.name());
   }
 
-  protected void expectKeyword(@NonNull String keywordValue) {
+  protected void expectKeyword(@NotNull String keywordValue) {
     if (!keywordValue.equals(expect(TokenType.KEYWORD))) {
       throw new Error("expected keyword token with value " + keywordValue);
     }

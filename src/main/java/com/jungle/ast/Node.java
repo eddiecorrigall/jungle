@@ -1,13 +1,13 @@
 package com.jungle.ast;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.jungle.token.IToken;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Node implements INode {
-  @NonNull
+  @NotNull
   private NodeType type;
 
   @Nullable
@@ -22,18 +22,18 @@ public class Node implements INode {
   @Nullable
   private INode right;
 
-  public Node(@NonNull NodeType type) {
+  public Node(@NotNull NodeType type) {
     super();
     this.type = type;
   }
 
-  public Node(@NonNull NodeType type, @NonNull IToken token) {
+  public Node(@NotNull NodeType type, @NotNull IToken token) {
     this(type);
     withValue(token.getValue());
     this.token = token;
   }
 
-  @NonNull
+  @NotNull
   public NodeType getType() {
     return type;
   }
@@ -43,7 +43,7 @@ public class Node implements INode {
     return value;
   }
 
-  @NonNull
+  @NotNull
   public INode withValue(@Nullable String value) {
     this.value = value;
     return this;
@@ -63,7 +63,7 @@ public class Node implements INode {
     this.left = left;
   }
 
-  @NonNull
+  @NotNull
   public Node withLeft(@Nullable INode left) {
     setLeft(left);
     return this;
@@ -78,7 +78,7 @@ public class Node implements INode {
     this.right = right;
   }
 
-  @NonNull
+  @NotNull
   public Node withRight(@Nullable INode right) {
     setRight(right);
     return this;
