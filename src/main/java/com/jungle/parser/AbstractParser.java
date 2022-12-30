@@ -10,7 +10,7 @@ import com.jungle.token.TokenType;
 
 public abstract class AbstractParser implements IParser {
   private IToken token;
-  private IScanner scanner;
+  private final IScanner scanner;
 
   public AbstractParser(@NotNull IScanner scanner) {
     this.scanner = scanner;
@@ -38,7 +38,7 @@ public abstract class AbstractParser implements IParser {
       nextToken();
       return value;
     }
-    throw new Error("expected token " + tokenType.name());
+    throw new Error("expected token type " + tokenType.name() + " but got token " + getCurrentToken());
   }
 
   protected void expectKeyword(@NotNull String keywordValue) {

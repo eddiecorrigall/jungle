@@ -17,6 +17,7 @@ public enum NodeType {
   SUBTRACT,
   MULTIPLY,
   DIVIDE,
+  MODULO,
 
   PRINT,
 }
