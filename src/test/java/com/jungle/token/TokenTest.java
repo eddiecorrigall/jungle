@@ -16,9 +16,17 @@ public class TokenTest {
 
   @Test
   public void testHashCode() {
-    assertNotEquals(new Token(TokenType.PLUS).hashCode(), new Token(TokenType.MINUS).hashCode());
-    assertEquals(new Token(TokenType.TEXT).hashCode(), new Token(TokenType.TEXT).hashCode());
-    assertEquals(new Token(TokenType.TEXT).withValue("test").hashCode(), new Token(TokenType.TEXT).withValue("test").hashCode());
-    assertNotEquals(new Token(TokenType.TEXT).hashCode(), new Token(TokenType.TEXT).withValue("test").hashCode());
+    assertNotEquals(
+            new Token(TokenType.PLUS).hashCode(),
+            new Token(TokenType.MINUS).hashCode());
+    assertEquals(
+            new Token(TokenType.TEXT).hashCode(),
+            new Token(TokenType.TEXT).hashCode());
+    assertEquals(
+            new Token(TokenType.TEXT).withValue("test").hashCode(),
+            new Token(TokenType.TEXT).withValue("test").hashCode());
+    assertNotEquals(
+            new Token(TokenType.TEXT).hashCode(),
+            new Token(TokenType.TEXT).withValue("test").hashCode());
   }
 }

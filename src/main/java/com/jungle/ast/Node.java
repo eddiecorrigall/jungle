@@ -1,5 +1,6 @@
 package com.jungle.ast;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.jetbrains.annotations.NotNull;
@@ -66,11 +67,9 @@ public class Node implements INode {
     if (other == this) return true;
     if (!(other instanceof Node)) return false;
     Node otherNode = (Node) other;
-    if (!getType().equals(otherNode.getType())) return false;
-    if (getValue() == null) {
-      return otherNode.getValue() == null;
-    }
-    return getValue().equals(otherNode.getValue());
+    return new EqualsBuilder()
+            .append(getValue(), otherNode.getValue())
+            .append(getType(), otherNode.getType()).isEquals();
   }
 
   @Override

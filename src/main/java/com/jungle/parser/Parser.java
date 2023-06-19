@@ -106,11 +106,11 @@ public class Parser extends AbstractParser {
       case BRACKET_ROUND_OPEN: return parseExpressionParenthesis();
       case NUMBER: return parseNumber();
       case TEXT: return parseText();
-      case PLUS: return parseBinaryOperationAs(NodeType.ADD);
-      case MINUS: return parseBinaryOperationAs(NodeType.SUBTRACT);
-      case ASTERISK: return parseBinaryOperationAs(NodeType.MULTIPLY);
-      case SLASH_RIGHT: return parseBinaryOperationAs(NodeType.DIVIDE);
-      case PERCENT: return parseBinaryOperationAs(NodeType.MODULO);
+      case PLUS: return parseBinaryOperationAs(NodeType.OPERATOR_ADD);
+      case MINUS: return parseBinaryOperationAs(NodeType.OPERATOR_SUBTRACT);
+      case ASTERISK: return parseBinaryOperationAs(NodeType.OPERATOR_MULTIPLY);
+      case SLASH_RIGHT: return parseBinaryOperationAs(NodeType.OPERATOR_DIVIDE);
+      case PERCENT: return parseBinaryOperationAs(NodeType.OPERATOR_MODULO);
       default: break;
     }
     throw new Error("token does not correspond with any expression " + getCurrentToken());
