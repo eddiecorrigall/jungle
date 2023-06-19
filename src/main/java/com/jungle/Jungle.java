@@ -2,15 +2,18 @@ package com.jungle;
 
 import com.jungle.ast.INode;
 import com.jungle.compiler.Compiler;
+import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
+import com.jungle.symbol.SymbolType;
 import com.jungle.walker.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.util.Stack;
 
-import static com.jungle.examples.Examples.EXPRESSION_INT_FLOAT;
+import static com.jungle.examples.Examples.*;
 
 public class Jungle implements IVisitor {
     @Override
@@ -48,12 +51,18 @@ public class Jungle implements IVisitor {
 
         // ...
 
+        // int x = 3;
+        mv.visitInsn(Opcodes.ICONST_3);
+        SymbolEntry entry = symbolTable.set("x", SymbolType.INTEGER);
+        mv.visitVarInsn(Opcodes.ISTORE, entry.getIndex());
+
         printVisitor.visit(mv, ast);
     }
 
     public static void main(String[] args) {
-        INode ast = EXPRESSION_INT_FLOAT;
         // INode ast = new Node(NodeType.LITERAL_STRING).withValue("Hello, world!\n");
+        // INode ast = EXPRESSION_INT_FLOAT;
+        INode ast = EXPRESSION_IDENTIFIER;
         // INode ast = ASSIGNMENT;
         Compiler compiler = new Compiler();
         compiler.compile(new Jungle(), ast);

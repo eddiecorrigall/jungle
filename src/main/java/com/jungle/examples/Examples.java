@@ -25,6 +25,14 @@ public class Examples {
             )
             ;
 
+    public static final INode EXPRESSION_IDENTIFIER = new Node(NodeType.OPERATOR_ADD)
+            .withLeft(
+                    new Node(NodeType.LITERAL_INTEGER).withValue("5")
+            )
+            .withRight(
+                    new Node(NodeType.IDENTIFIER).withValue("x")
+            );
+
     public static final INode ASSIGNMENT = new Node(NodeType.ASSIGN)
             .withLeft(new Node(NodeType.IDENTIFIER).withValue("theVariable"))
             .withRight(new Node(NodeType.LITERAL_INTEGER).withValue("666"))
