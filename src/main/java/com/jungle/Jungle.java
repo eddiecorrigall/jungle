@@ -1,6 +1,8 @@
 package com.jungle;
 
 import com.jungle.ast.INode;
+import com.jungle.ast.Node;
+import com.jungle.ast.NodeType;
 import com.jungle.compiler.Compiler;
 import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
@@ -16,28 +18,58 @@ import java.util.Stack;
 import static com.jungle.examples.Examples.*;
 
 public class Jungle implements IVisitor {
-    @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
-        // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
-        // When the jvm instruction adds to the stack, add the node type to this compile-time stack
-        // When the jvm instruction removes from the stack, remove the type from this compile-time stack
-        final Stack<OperandStackType> operandStackTypeStack = new Stack<>();
 
-        final SymbolTable symbolTable = new SymbolTable();
+    // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
+    // When the jvm instruction adds to the stack, add the node type to this compile-time stack
+    // When the jvm instruction removes from the stack, remove the type from this compile-time stack
+    @NotNull
+    private final Stack<OperandStackType> operandStackTypeStack = new Stack<>();
+
+    @NotNull
+    private final SymbolTable symbolTable = new SymbolTable();
+
+    // region Visitors
+
+    @NotNull
+    private final ExpressionVisitor expressionVisitor;
+
+    @NotNull
+    private final LiteralVisitor literalVisitor;
+
+    @NotNull
+    final IdentifierVisitor identifierVisitor;
+
+    @NotNull
+    final CastIntegerVisitor castIntegerVisitor;
+
+    @NotNull
+    final AssignmentVisitor assignmentVisitor;
+
+    @NotNull
+    final BinaryOperatorVisitor binaryOperatorVisitor;
+
+    @NotNull
+    final PrintVisitor printVisitor;
+
+    // endregion
+
+    public Jungle() {
+        super();
 
         // Chicken before the egg problem...
-        final ExpressionVisitor expressionVisitor = new ExpressionVisitor();
 
-        final LiteralVisitor literalVisitor = new LiteralVisitor(operandStackTypeStack);
-        final IdentifierVisitor identifierVisitor = new IdentifierVisitor(operandStackTypeStack, symbolTable);
+        expressionVisitor = new ExpressionVisitor();
 
-        final CastIntegerVisitor castIntegerVisitor = new CastIntegerVisitor(operandStackTypeStack, symbolTable);
+        literalVisitor = new LiteralVisitor(operandStackTypeStack);
+        identifierVisitor = new IdentifierVisitor(operandStackTypeStack, symbolTable);
+
+        castIntegerVisitor = new CastIntegerVisitor(operandStackTypeStack, symbolTable);
         castIntegerVisitor.withExpressionVisitor(expressionVisitor);
 
-        final AssignmentVisitor assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable);
+        assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable);
         assignmentVisitor.withExpressionVisitor(expressionVisitor);
 
-        final BinaryOperatorVisitor binaryOperatorVisitor = new BinaryOperatorVisitor(operandStackTypeStack);
+        binaryOperatorVisitor = new BinaryOperatorVisitor(operandStackTypeStack);
         binaryOperatorVisitor.withExpressionVisitor(expressionVisitor);
 
         expressionVisitor
@@ -46,24 +78,62 @@ public class Jungle implements IVisitor {
                 .withBinaryOperatorVisitor(binaryOperatorVisitor)
                 .withCastIntegerVisitor(castIntegerVisitor);
 
-        final PrintVisitor printVisitor = new PrintVisitor(operandStackTypeStack);
+        printVisitor = new PrintVisitor(operandStackTypeStack);
         printVisitor.withExpressionVisitor(expressionVisitor);
+    }
 
-        // ...
-
+    @Override
+    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+        /*
         // int x = 3;
         mv.visitInsn(Opcodes.ICONST_3);
         SymbolEntry entry = symbolTable.set("x", SymbolType.INTEGER);
         mv.visitVarInsn(Opcodes.ISTORE, entry.getIndex());
+        */
 
-        printVisitor.visit(mv, ast);
+        if (ast == null) {
+            return;
+        }
+
+        if (ast.getType() == NodeType.SEQUENCE) {
+            visit(mv, ast.getLeft());
+            visit(mv, ast.getRight());
+            return;
+        }
+
+        if (ast.getType() == NodeType.BLOCK) {
+            // TODO: handle scope?
+            visit(mv, ast.getLeft());
+            return;
+        }
+
+        if (ast.getType() == NodeType.ASSIGN) {
+            assignmentVisitor.visit(mv, ast);
+            return;
+        }
+
+        if (NodeType.BINARY_OPERATORS.contains(ast.getType())) {
+            binaryOperatorVisitor.visit(mv, ast);
+            return;
+        }
+
+        if (ast.getType() == NodeType.PRINT) {
+            printVisitor.visit(mv, ast);
+            return;
+        }
+
+        throw new Error("unexpected node " + ast);
     }
 
     public static void main(String[] args) {
         // INode ast = new Node(NodeType.LITERAL_STRING).withValue("Hello, world!\n");
         // INode ast = EXPRESSION_INT_FLOAT;
-        INode ast = EXPRESSION_IDENTIFIER;
+        // INode ast = EXPRESSION_IDENTIFIER;
         // INode ast = ASSIGNMENT;
+
+        INode ast = new Node(NodeType.SEQUENCE)
+                .withLeft(ASSIGNMENT)
+                .withRight(new Node(NodeType.PRINT).withLeft(EXPRESSION_IDENTIFIER));
         Compiler compiler = new Compiler();
         compiler.compile(new Jungle(), ast);
     }

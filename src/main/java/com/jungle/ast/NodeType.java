@@ -6,6 +6,7 @@ import java.util.Set;
 
 public enum NodeType {
   SEQUENCE,
+  BLOCK,
 
   LITERAL_BOOLEAN,
   LITERAL_INTEGER,
@@ -22,10 +23,6 @@ public enum NodeType {
   OPERATOR_MULTIPLY,
   OPERATOR_DIVIDE,
   OPERATOR_MODULO,
-
-  TYPE_BOOLEAN,
-  TYPE_CHARACTER,
-  TYPE_INTEGER,
 
   ASSIGN,
   IDENTIFIER,
@@ -46,10 +43,5 @@ public enum NodeType {
           OPERATOR_MULTIPLY,
           OPERATOR_DIVIDE,
           OPERATOR_MODULO
-  ));
-
-  public static Set<NodeType> TYPES = new HashSet<>(Arrays.asList(
-          TYPE_BOOLEAN,
-          TYPE_INTEGER
   ));
 }

@@ -35,22 +35,29 @@ public class AssignmentVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
-        // assignment = identifier "=" expression
-        if (ast == null) {
-            return;
-        }
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+        System.out.println("visit assignment " + ast);
+
         if (ast.getType() != NodeType.ASSIGN) {
-            throw new Error("expected assignment but got node " + ast);
+            throw new Error("expected assignment");
         }
+
         if (ast.getLeft() == null || ast.getLeft().getType() != NodeType.IDENTIFIER) {
-            throw new Error("expected left ast to be identifier");
+            throw new Error("expected left AST to be identifier");
         }
+
+        if (ast.getRight() == null) {
+            throw new Error("expected right AST to be expression");
+        }
+
         // push expression value(s) onto operand stack...
         expressionVisitor.visit(mv, ast.getRight());
         OperandStackType resolvedOperandStackType = operandStackTypeStack.pop();
         SymbolType resolvedSymbolType = resolvedOperandStackType.getSymbolType();
         String name = ast.getLeft().getValue();
+        if (name == null) {
+            throw new Error("identifier missing name");
+        }
         SymbolEntry entry = symbolTable.get(name);
         boolean isNotDefined = entry == null;
         if (isNotDefined) {

@@ -1,6 +1,7 @@
 package com.jungle.walker;
 
 import com.jungle.ast.INode;
+import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -29,14 +30,19 @@ public class PrintVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
-        expressionVisitor.visit(mv, ast);
+        System.out.println("visit print " + ast);
+        if (ast.getType() != NodeType.PRINT) {
+            throw new Error("expected print");
+        }
+        if (ast.getLeft() == null) {
+            throw new Error("print missing expression");
+        }
+        expressionVisitor.visit(mv, ast.getLeft());
         visitPrint(mv);
     }
 
     protected void visitPrint(@NotNull MethodVisitor mv) {
         // System.out.print(stack[0]);
-
-        System.out.println("visit print");
 
         // Prints what ever value is on the stack
 

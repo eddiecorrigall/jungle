@@ -26,18 +26,21 @@ public class IdentifierVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit identifier " + ast);
-        if (ast == null) {
-            return;
-        }
+
         if (ast.getType() != NodeType.IDENTIFIER) {
-            throw new Error("expected identifier but got node " + ast);
+            throw new Error("expected identifier");
         }
+
         String name = ast.getValue();
+        if (name == null) {
+            throw new Error("identifier missing name");
+        }
+
         SymbolEntry entry = symbolTable.get(name);
         if (entry == null) {
-            throw new Error("unknown symbol " + name);
+            throw new Error("unknown identifier " + name);
         }
         // ...
         switch (entry.getType()) {

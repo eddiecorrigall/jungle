@@ -3,7 +3,6 @@ package com.jungle.walker;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Stack;
@@ -17,35 +16,73 @@ public class LiteralVisitor implements IVisitor {
        this.operandStackTypeStack = operandStackTypeStack;
     }
 
-    public Object getLiteralValue(@NotNull INode ast) {
-        switch (ast.getType()) {
-            case LITERAL_BOOLEAN: return Boolean.valueOf(ast.getValue());
-            case LITERAL_CHARACTER: return ast.getValue().charAt(0);
-            case LITERAL_INTEGER: return Integer.parseInt(ast.getValue());
-            case LITERAL_FLOAT: return Float.parseFloat(ast.getValue());
-            case LITERAL_STRING: return ast.getValue();
-            default: throw new Error("cannot visit literal node " + ast);
+    protected static Boolean stringToBoolean(@NotNull String value) {
+        return Boolean.valueOf(value);
+    }
+
+    protected static Character stringToCharacter(@NotNull String value) {
+        if (value.length() != 1) {
+            throw new Error("failed to parse character as integer");
+        }
+        return new Character(value.charAt(0));
+    }
+
+    protected static Integer stringToInteger(@NotNull String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new Error("failed to parse string as integer", e);
+        }
+    }
+
+    protected static Float stringToFloat(@NotNull String value) {
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            throw new Error("failed to parse string as float", e);
         }
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
-        if (ast == null) {
-            return;
-        }
-        if (!NodeType.LITERALS.contains(ast.getType())) {
-            throw new Error("expected literal but got " + ast);
-        }
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit literal " + ast);
-        switch (ast.getType()) {
-            case LITERAL_BOOLEAN: operandStackTypeStack.push(OperandStackType.BOOLEAN); break;
-            case LITERAL_CHARACTER: operandStackTypeStack.push(OperandStackType.CHARACTER); break;
-            case LITERAL_INTEGER: operandStackTypeStack.push(OperandStackType.INTEGER); break;
-            case LITERAL_FLOAT: operandStackTypeStack.push(OperandStackType.FLOAT); break;
-            case LITERAL_STRING: operandStackTypeStack.push(OperandStackType.REFERENCE_OBJECT); break;
-            default: throw new Error("cannot push operand stack type - unhandled literal");
+
+        if (!NodeType.LITERALS.contains(ast.getType())) {
+            throw new Error("expected literal");
         }
-        Object value = getLiteralValue(ast);
-        mv.visitLdcInsn(value);
+
+        if (ast.getValue() == null) {
+            throw new Error("literal missing value");
+        }
+
+        Object objectValue;
+        OperandStackType type;
+
+        switch (ast.getType()) {
+            case LITERAL_BOOLEAN: {
+                objectValue = stringToBoolean(ast.getValue());
+                type = OperandStackType.BOOLEAN;
+            } break;
+            case LITERAL_CHARACTER: {
+                objectValue = stringToCharacter(ast.getValue());
+                type = OperandStackType.CHARACTER;
+            } break;
+            case LITERAL_INTEGER: {
+                objectValue = stringToInteger(ast.getValue());
+                type = OperandStackType.INTEGER;
+            } break;
+            case LITERAL_FLOAT: {
+                objectValue = stringToFloat(ast.getValue());
+                type = OperandStackType.FLOAT;
+            } break;
+            case LITERAL_STRING: {
+                objectValue = ast.getValue();
+                type = OperandStackType.REFERENCE_OBJECT;
+            } break;
+            default: throw new Error("unhandled literal");
+        }
+
+        mv.visitLdcInsn(objectValue);
+        operandStackTypeStack.push(type);
     }
 }

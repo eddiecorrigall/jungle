@@ -48,12 +48,8 @@ public class ExpressionVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit expression " + ast);
-
-        if (ast == null) {
-            return;
-        }
 
         if (NodeType.IDENTIFIER == ast.getType()) {
             identifierVisitor.visit(mv, ast);
@@ -74,8 +70,6 @@ public class ExpressionVisitor implements IVisitor {
             binaryOperatorVisitor.visit(mv, ast);
             return;
         }
-
-        // TODO: cast types...
 
         throw new Error("expected expression " + ast);
     }

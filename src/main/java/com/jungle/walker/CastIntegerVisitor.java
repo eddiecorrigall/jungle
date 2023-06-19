@@ -38,15 +38,15 @@ public class CastIntegerVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit cast integer " + ast);
 
-        if (ast == null) {
-            return;
+        if (ast.getType() != NodeType.CAST_INTEGER) {
+            throw new Error("expected cast integer");
         }
 
-        if (ast.getType() != NodeType.CAST_INTEGER) {
-            throw new Error("expected cast integer node but got " + ast);
+        if (ast.getLeft() == null) {
+            throw new Error("cast integer missing expression");
         }
 
         expressionVisitor.visit(mv, ast.getLeft());

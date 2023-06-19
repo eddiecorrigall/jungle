@@ -28,15 +28,11 @@ public class BinaryOperatorVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit binary operator " + ast);
 
-        if (ast == null) {
-            return;
-        }
-
         if (!NodeType.BINARY_OPERATORS.contains(ast.getType())) {
-            throw new Error("expected binary operator but got " + ast);
+            throw new Error("expected binary operator");
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
