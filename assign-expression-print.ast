@@ -1,0 +1,25 @@
+SEQUENCE
+  ASSIGN
+    IDENTIFIER	m
+    LITERAL_FLOAT	0.5
+  SEQUENCE
+    ASSIGN
+      IDENTIFIER	x
+      LITERAL_FLOAT	2
+    SEQUENCE
+      ASSIGN
+        IDENTIFIER	b
+        LITERAL_FLOAT	1
+      SEQUENCE
+        ASSIGN
+          IDENTIFIER	y
+          OPERATOR_ADD
+            OPERATOR_MULTIPLY
+              IDENTIFIER	m
+              IDENTIFIER	x
+            IDENTIFIER	b
+        SEQUENCE
+          PRINT
+            IDENTIFIER	y
+            ;
+          ;

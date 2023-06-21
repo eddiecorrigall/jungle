@@ -13,6 +13,11 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import static com.jungle.examples.Examples.*;
@@ -84,12 +89,6 @@ public class Jungle implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
-        /*
-        // int x = 3;
-        mv.visitInsn(Opcodes.ICONST_3);
-        SymbolEntry entry = symbolTable.set("x", SymbolType.INTEGER);
-        mv.visitVarInsn(Opcodes.ISTORE, entry.getIndex());
-        */
 
         if (ast == null) {
             return;
@@ -125,15 +124,20 @@ public class Jungle implements IVisitor {
         throw new Error("unexpected node " + ast);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         // INode ast = new Node(NodeType.LITERAL_STRING).withValue("Hello, world!\n");
         // INode ast = EXPRESSION_INT_FLOAT;
         // INode ast = EXPRESSION_IDENTIFIER;
         // INode ast = ASSIGNMENT;
 
+        /*
         INode ast = new Node(NodeType.SEQUENCE)
                 .withLeft(ASSIGNMENT)
                 .withRight(new Node(NodeType.PRINT).withLeft(EXPRESSION_IDENTIFIER));
+         */
+        // String fileName = "/Users/eddie/repos/jungle/hello-world.ast";
+        String fileName = "/Users/eddie/repos/jungle/assign-expression-print.ast";
+        INode ast = Node.load(fileName);
         Compiler compiler = new Compiler();
         compiler.compile(new Jungle(), ast);
     }
