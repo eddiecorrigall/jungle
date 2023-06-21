@@ -1,0 +1,5 @@
+SEQUENCE
+  ASSERT
+    LITERAL_INTEGER	1
+    ;
+  ;

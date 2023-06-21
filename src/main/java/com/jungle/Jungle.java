@@ -4,23 +4,14 @@ import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.Compiler;
-import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
-import com.jungle.symbol.SymbolType;
 import com.jungle.walker.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
-
-import static com.jungle.examples.Examples.*;
 
 public class Jungle implements IVisitor {
 
@@ -54,6 +45,9 @@ public class Jungle implements IVisitor {
     final BinaryOperatorVisitor binaryOperatorVisitor;
 
     @NotNull
+    final AssertVisitor assertVisitor;
+
+    @NotNull
     final PrintVisitor printVisitor;
 
     // endregion
@@ -82,6 +76,9 @@ public class Jungle implements IVisitor {
                 .withLiteralVisitor(literalVisitor)
                 .withBinaryOperatorVisitor(binaryOperatorVisitor)
                 .withCastIntegerVisitor(castIntegerVisitor);
+
+        assertVisitor = new AssertVisitor();
+        assertVisitor.withExpressionVisitor(expressionVisitor);
 
         printVisitor = new PrintVisitor(operandStackTypeStack);
         printVisitor.withExpressionVisitor(expressionVisitor);
@@ -116,6 +113,11 @@ public class Jungle implements IVisitor {
             return;
         }
 
+        if (ast.getType() == NodeType.ASSERT) {
+            assertVisitor.visit(mv, ast);
+            return;
+        }
+
         if (ast.getType() == NodeType.PRINT) {
             printVisitor.visit(mv, ast);
             return;
@@ -129,14 +131,15 @@ public class Jungle implements IVisitor {
         // INode ast = EXPRESSION_INT_FLOAT;
         // INode ast = EXPRESSION_IDENTIFIER;
         // INode ast = ASSIGNMENT;
-
         /*
         INode ast = new Node(NodeType.SEQUENCE)
                 .withLeft(ASSIGNMENT)
                 .withRight(new Node(NodeType.PRINT).withLeft(EXPRESSION_IDENTIFIER));
          */
-        // String fileName = "/Users/eddie/repos/jungle/hello-world.ast";
-        String fileName = "/Users/eddie/repos/jungle/assign-expression-print.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/hello-world.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/assign-expression-print.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/assert-pass.ast";
+        String fileName = "/Users/eddie/repos/jungle/programs/assert-fail.ast";
         INode ast = Node.load(fileName);
         Compiler compiler = new Compiler();
         compiler.compile(new Jungle(), ast);

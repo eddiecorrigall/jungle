@@ -27,6 +27,7 @@ public enum NodeType {
   ASSIGN,
   IDENTIFIER,
 
+  ASSERT,
   PRINT;
 
   public static Set<NodeType> LITERALS = new HashSet<NodeType>(Arrays.asList(
