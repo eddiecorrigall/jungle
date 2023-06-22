@@ -2,6 +2,7 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
@@ -10,13 +11,12 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.Stack;
 
-public class IfElseVisitor implements IVisitor {
-    @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack;
-
-    public IfElseVisitor(@NotNull Stack<OperandStackType> operandStackTypeStack) {
-        super();
-        this.operandStackTypeStack = operandStackTypeStack;
+public class IfElseVisitor extends BaseVisitor {
+    public IfElseVisitor(
+            @NotNull Stack<OperandStackType> operandStackTypeStack,
+            @NotNull SymbolTable symbolTable
+    ) {
+        super(operandStackTypeStack, symbolTable);
     }
 
     @Nullable

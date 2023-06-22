@@ -2,13 +2,19 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class ExpressionVisitor implements IVisitor {
-    public ExpressionVisitor() {
-        super();
+import java.util.Stack;
+
+public class ExpressionVisitor extends BaseVisitor {
+    public ExpressionVisitor(
+            @NotNull Stack<OperandStackType> operandStackTypeStack,
+            @NotNull SymbolTable symbolTable
+    ) {
+        super(operandStackTypeStack, symbolTable);
     }
 
     @Nullable

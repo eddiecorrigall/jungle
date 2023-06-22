@@ -65,7 +65,7 @@ public class Jungle implements IVisitor {
 
         blockVisitor = new BlockVisitor(this);
 
-        expressionVisitor = new ExpressionVisitor();
+        expressionVisitor = new ExpressionVisitor(operandStackTypeStack, symbolTable);
 
         literalVisitor = new LiteralVisitor(operandStackTypeStack);
         identifierVisitor = new IdentifierVisitor(operandStackTypeStack, symbolTable);
@@ -76,7 +76,7 @@ public class Jungle implements IVisitor {
         assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable);
         assignmentVisitor.withExpressionVisitor(expressionVisitor);
 
-        binaryOperatorVisitor = new BinaryOperatorVisitor(operandStackTypeStack);
+        binaryOperatorVisitor = new BinaryOperatorVisitor(operandStackTypeStack, symbolTable);
         binaryOperatorVisitor.withExpressionVisitor(expressionVisitor);
 
         expressionVisitor
@@ -85,13 +85,13 @@ public class Jungle implements IVisitor {
                 .withBinaryOperatorVisitor(binaryOperatorVisitor)
                 .withCastIntegerVisitor(castIntegerVisitor);
 
-        assertVisitor = new AssertVisitor(operandStackTypeStack);
+        assertVisitor = new AssertVisitor(operandStackTypeStack, symbolTable);
         assertVisitor.withExpressionVisitor(expressionVisitor);
 
         printVisitor = new PrintVisitor(operandStackTypeStack);
         printVisitor.withExpressionVisitor(expressionVisitor);
 
-        ifElseVisitor = new IfElseVisitor(operandStackTypeStack);
+        ifElseVisitor = new IfElseVisitor(operandStackTypeStack, symbolTable);
         ifElseVisitor.withBlockVisitor(blockVisitor);
         ifElseVisitor.withExpressionVisitor(expressionVisitor);
     }

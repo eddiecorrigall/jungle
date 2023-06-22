@@ -6,26 +6,16 @@ import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.util.Stack;
 
-import static org.objectweb.asm.Opcodes.F2I;
-
-public class CastIntegerVisitor implements IVisitor {
-
-    @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack;
-
-    @NotNull
-    private final SymbolTable symbolTable;
-
+public class CastIntegerVisitor extends BaseVisitor {
     public CastIntegerVisitor(
             @NotNull Stack<OperandStackType> operandStackTypeStack,
             @NotNull SymbolTable symbolTable
     ) {
-        super();
-        this.operandStackTypeStack = operandStackTypeStack;
-        this.symbolTable = symbolTable;
+        super(operandStackTypeStack, symbolTable);
     }
 
     @Nullable
@@ -56,7 +46,7 @@ public class CastIntegerVisitor implements IVisitor {
                 System.out.println("WARN: value is already an integer");
             } break;
             case FLOAT: {
-                mv.visitInsn(F2I);
+                mv.visitInsn(Opcodes.F2I);
             } break;
             default: {
                 throw new Error("integer cast not supported for " + ast);
