@@ -45,10 +45,16 @@ public class Jungle implements IVisitor {
     final BinaryOperatorVisitor binaryOperatorVisitor;
 
     @NotNull
+    final BlockVisitor blockVisitor;
+
+    @NotNull
     final AssertVisitor assertVisitor;
 
     @NotNull
     final PrintVisitor printVisitor;
+
+    @NotNull
+    final IfElseVisitor ifElseVisitor;
 
     // endregion
 
@@ -56,6 +62,8 @@ public class Jungle implements IVisitor {
         super();
 
         // Chicken before the egg problem...
+
+        blockVisitor = new BlockVisitor(this);
 
         expressionVisitor = new ExpressionVisitor();
 
@@ -77,11 +85,15 @@ public class Jungle implements IVisitor {
                 .withBinaryOperatorVisitor(binaryOperatorVisitor)
                 .withCastIntegerVisitor(castIntegerVisitor);
 
-        assertVisitor = new AssertVisitor();
+        assertVisitor = new AssertVisitor(operandStackTypeStack);
         assertVisitor.withExpressionVisitor(expressionVisitor);
 
         printVisitor = new PrintVisitor(operandStackTypeStack);
         printVisitor.withExpressionVisitor(expressionVisitor);
+
+        ifElseVisitor = new IfElseVisitor(operandStackTypeStack);
+        ifElseVisitor.withBlockVisitor(blockVisitor);
+        ifElseVisitor.withExpressionVisitor(expressionVisitor);
     }
 
     @Override
@@ -98,8 +110,7 @@ public class Jungle implements IVisitor {
         }
 
         if (ast.getType() == NodeType.BLOCK) {
-            // TODO: handle scope?
-            visit(mv, ast.getLeft());
+            blockVisitor.visit(mv, ast);
             return;
         }
 
@@ -123,6 +134,11 @@ public class Jungle implements IVisitor {
             return;
         }
 
+        if (ast.getType() == NodeType.IF) {
+            ifElseVisitor.visit(mv, ast);
+            return;
+        }
+
         throw new Error("unexpected node " + ast);
     }
 
@@ -139,7 +155,10 @@ public class Jungle implements IVisitor {
         // String fileName = "/Users/eddie/repos/jungle/programs/hello-world.ast";
         // String fileName = "/Users/eddie/repos/jungle/programs/assign-expression-print.ast";
         // String fileName = "/Users/eddie/repos/jungle/programs/assert-pass.ast";
-        String fileName = "/Users/eddie/repos/jungle/programs/assert-fail.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/assert-fail.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/reassign.ast";
+        // String fileName = "/Users/eddie/repos/jungle/programs/if.ast";
+        String fileName = "/Users/eddie/repos/jungle/programs/if-else.ast";
         INode ast = Node.load(fileName);
         Compiler compiler = new Compiler();
         compiler.compile(new Jungle(), ast);

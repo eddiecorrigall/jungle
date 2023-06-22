@@ -8,13 +8,20 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.util.Stack;
+
 public class AssertVisitor implements IVisitor {
+
+    @NotNull
+    private final Stack<OperandStackType> operandStackTypeStack;
+
+    public AssertVisitor(@NotNull Stack<OperandStackType> operandStackTypeStack) {
+        super();
+        this.operandStackTypeStack = operandStackTypeStack;
+    }
+
     @Nullable
     private ExpressionVisitor expressionVisitor;
-
-    public AssertVisitor() {
-        super();
-    }
 
     @NotNull
     public AssertVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
@@ -37,6 +44,10 @@ public class AssertVisitor implements IVisitor {
 
     protected void visitAssert(@NotNull MethodVisitor mv) {
         // if (![int expression]) throw new AssertionError();
+
+        if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
+            throw new Error("expected assert expression to be integer");
+        }
 
         // if int value on operand stack is not-equal to zero then throw error
         Label continueLabel = new Label();

@@ -27,6 +27,22 @@ public enum NodeType {
   ASSIGN,
   IDENTIFIER,
 
+  /* new Node(IF)
+   *   .withLeft("expression")
+   *   .withRight("block"")
+   */
+  IF,
+
+  /* new Node(IF)
+   *   .withLeft("expression")
+   *   .withRight(
+   *     new Node(IF_ELSE)
+   *       .withLeft("block")  // if-block
+   *       .withRight("block") // else-block
+   *   )
+   */
+  IF_ELSE,
+
   ASSERT,
   PRINT;
 

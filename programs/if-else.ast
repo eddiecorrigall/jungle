@@ -1,0 +1,21 @@
+SEQUENCE
+  IF
+    LITERAL_INTEGER	1
+    IF_ELSE
+      BLOCK
+        SEQUENCE
+          PRINT
+            LITERAL_STRING	Within if-block - which should not be possible\n
+            ;
+          ASSERT
+            LITERAL_INTEGER	10
+            ;
+        ;
+      BLOCK
+        PRINT
+          LITERAL_STRING	Within else-block\n
+          ;
+        ;
+  PRINT
+    LITERAL_STRING	Resume program\n
+    ;

@@ -13,13 +13,13 @@ public class BinaryOperatorVisitor implements IVisitor {
     @NotNull
     private final Stack<OperandStackType> operandStackTypeStack;
 
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
-
     public BinaryOperatorVisitor(@NotNull Stack<OperandStackType> operandStackTypeStack) {
         super();
         this.operandStackTypeStack = operandStackTypeStack;
     }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
 
     @NotNull
     public BinaryOperatorVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
