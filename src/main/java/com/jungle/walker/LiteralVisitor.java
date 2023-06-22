@@ -2,6 +2,7 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
@@ -64,7 +65,7 @@ public class LiteralVisitor implements IVisitor {
                 type = OperandStackType.BOOLEAN;
             } break;
             case LITERAL_CHARACTER: {
-                objectValue = stringToCharacter(ast.getValue());
+                objectValue = stringToCharacter(StringEscapeUtils.unescapeJava(ast.getValue()));
                 type = OperandStackType.CHARACTER;
             } break;
             case LITERAL_INTEGER: {
@@ -76,7 +77,7 @@ public class LiteralVisitor implements IVisitor {
                 type = OperandStackType.FLOAT;
             } break;
             case LITERAL_STRING: {
-                objectValue = ast.getValue();
+                objectValue = StringEscapeUtils.unescapeJava(ast.getValue());
                 type = OperandStackType.REFERENCE_OBJECT;
             } break;
             default: throw new Error("unhandled literal");
