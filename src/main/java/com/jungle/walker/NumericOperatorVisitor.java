@@ -8,10 +8,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
-public class BinaryOperatorVisitor extends BaseVisitor {
-    public BinaryOperatorVisitor(
+import static com.jungle.ast.NodeType.*;
+
+public class NumericOperatorVisitor extends BaseVisitor {
+    public static final Set<NodeType> NUMERIC_OPERATORS = new HashSet<>(Arrays.asList(
+            OPERATOR_ADD,
+            OPERATOR_SUBTRACT,
+            OPERATOR_MULTIPLY,
+            OPERATOR_DIVIDE,
+            OPERATOR_MODULO
+    ));
+
+    public NumericOperatorVisitor(
             @NotNull Stack<OperandStackType> operandStackTypeStack,
             @NotNull SymbolTable symbolTable) {
         super(operandStackTypeStack, symbolTable);
@@ -21,17 +34,30 @@ public class BinaryOperatorVisitor extends BaseVisitor {
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
-    public BinaryOperatorVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
+    public NumericOperatorVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
         this.expressionVisitor = expressionVisitor;
         return this;
+    }
+
+    @Override
+    public boolean canVisit(@NotNull INode node) {
+        return NUMERIC_OPERATORS.contains(node.getType());
     }
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit binary operator " + ast);
 
-        if (!NodeType.BINARY_OPERATORS.contains(ast.getType())) {
-            throw new Error("expected binary operator");
+        if (!canVisit(ast)) {
+            return;
+        }
+
+        if (ast.getLeft() == null) {
+            throw new Error("binary operator missing left expression");
+        }
+
+        if (ast.getRight() == null) {
+            throw new Error("binary operator missing right expression");
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
@@ -41,7 +67,7 @@ public class BinaryOperatorVisitor extends BaseVisitor {
         OperandStackType rightExpressionType = operandStackTypeStack.pop();
 
         if (leftExpressionType != rightExpressionType) {
-            throw new Error("left or right expression requires type cast " + ast);
+            throw new Error("binary operator left or right expression requires type cast " + ast);
         }
 
         OperandStackType operandStackType = leftExpressionType;

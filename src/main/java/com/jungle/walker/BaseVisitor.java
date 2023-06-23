@@ -1,12 +1,12 @@
 package com.jungle.walker;
 
+import com.jungle.ast.INode;
 import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
 import com.jungle.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.EmptyStackException;
 import java.util.Stack;
 
 public abstract class BaseVisitor implements IVisitor {
@@ -22,6 +22,11 @@ public abstract class BaseVisitor implements IVisitor {
         super();
         this.operandStackTypeStack = operandStackTypeStack;
         this.symbolTable = symbolTable;
+    }
+
+    @Override
+    public boolean canVisit(@NotNull INode ast) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     public void visitLoad(

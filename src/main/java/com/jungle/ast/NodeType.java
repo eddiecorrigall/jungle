@@ -1,5 +1,7 @@
 package com.jungle.ast;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,11 +20,25 @@ public enum NodeType {
   CAST_FLOAT,
   CAST_CHARACTER,
 
+  // region Binary Operators - math
   OPERATOR_ADD,
   OPERATOR_SUBTRACT,
   OPERATOR_MULTIPLY,
   OPERATOR_DIVIDE,
   OPERATOR_MODULO,
+  // endregion
+
+  // region Binary Operators - conditional
+  OPERATOR_AND,
+  OPERATOR_OR,
+  OPERATOR_EQUAL,
+  OPERATOR_GREATER_THAN,
+  OPERATOR_LESS_THAN,
+  // endregion
+
+  // region Unary Operators
+  OPERATOR_NOT,
+  // endregion
 
   ASSIGN,
   IDENTIFIER,
@@ -43,22 +59,12 @@ public enum NodeType {
    */
   IF_ELSE,
 
+  LOOP,
+
   ASSERT,
   PRINT;
 
-  public static Set<NodeType> LITERALS = new HashSet<NodeType>(Arrays.asList(
-          LITERAL_BOOLEAN,
-          LITERAL_CHARACTER,
-          LITERAL_INTEGER,
-          LITERAL_FLOAT,
-          LITERAL_STRING
-  ));
-
-  public static Set<NodeType> BINARY_OPERATORS = new HashSet<>(Arrays.asList(
-          OPERATOR_ADD,
-          OPERATOR_SUBTRACT,
-          OPERATOR_MULTIPLY,
-          OPERATOR_DIVIDE,
-          OPERATOR_MODULO
-  ));
+  public boolean equals(@Nullable INode ast) {
+    throw new UnsupportedOperationException("cannot compare node to node type");
+  }
 }

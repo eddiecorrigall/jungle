@@ -2,10 +2,8 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Stack;
@@ -19,11 +17,16 @@ public class IdentifierVisitor extends BaseVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode node) {
+        return node.getType().equals(NodeType.IDENTIFIER);
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit identifier " + ast);
 
-        if (ast.getType() != NodeType.IDENTIFIER) {
-            throw new Error("expected identifier");
+        if (!canVisit(ast)) {
+            return;
         }
 
         String variableName = ast.getValue();

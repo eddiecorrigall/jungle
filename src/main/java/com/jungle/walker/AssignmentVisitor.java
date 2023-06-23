@@ -27,11 +27,16 @@ public class AssignmentVisitor extends BaseVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return NodeType.ASSIGN.equals(ast.getType());
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit assignment " + ast);
 
-        if (ast.getType() != NodeType.ASSIGN) {
-            throw new Error("expected assignment");
+        if (!canVisit(ast)) {
+            return;
         }
 
         INode identifierNode = ast.getLeft();

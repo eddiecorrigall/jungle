@@ -29,14 +29,22 @@ public class PrintVisitor implements IVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return NodeType.PRINT.equals(ast.getType());
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
         System.out.println("visit print " + ast);
-        if (ast.getType() != NodeType.PRINT) {
+
+        if (!canVisit(ast)) {
             throw new Error("expected print");
         }
+
         if (ast.getLeft() == null) {
             throw new Error("print missing expression");
         }
+
         expressionVisitor.visit(mv, ast.getLeft());
         visitPrint(mv);
     }

@@ -29,14 +29,22 @@ public class AssertVisitor extends BaseVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return NodeType.ASSERT.equals(ast.getType());
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit assert " + ast);
-        if (ast.getType() != NodeType.ASSERT) {
-            throw new Error("expected assert");
+
+        if (!canVisit(ast)) {
+            return;
         }
+
         if (ast.getLeft() == null) {
             throw new Error("assert missing expression");
         }
+
         expressionVisitor.visit(mv, ast.getLeft());
         visitAssert(mv);
     }
@@ -45,12 +53,12 @@ public class AssertVisitor extends BaseVisitor {
         // if (![int expression]) throw new AssertionError();
 
         if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
-            throw new Error("expected assert expression to be integer");
+            throw new Error("assert condition/expression expected to be type integer");
         }
 
         // if int value on operand stack is not-equal to zero then throw error
-        Label continueLabel = new Label();
-        mv.visitJumpInsn(Opcodes.IFEQ, continueLabel);
+        Label endLabel = new Label();
+        mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
 
         // throw new AssertionError();
         mv.visitTypeInsn(Opcodes.NEW, "java/lang/AssertionError"); // create on operand stack
@@ -60,6 +68,6 @@ public class AssertVisitor extends BaseVisitor {
         mv.visitInsn(Opcodes.ATHROW); // throw reference
 
         // continue with program...
-        mv.visitLabel(continueLabel);
+        mv.visitLabel(endLabel);
     }
 }

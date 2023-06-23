@@ -1,7 +1,6 @@
 package com.jungle.walker;
 
 import com.jungle.ast.INode;
-import com.jungle.ast.NodeType;
 import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,11 +35,11 @@ public class ExpressionVisitor extends BaseVisitor {
     }
 
     @Nullable
-    private BinaryOperatorVisitor binaryOperatorVisitor;
+    private NumericOperatorVisitor numericOperatorVisitor;
 
     @NotNull
-    public ExpressionVisitor withBinaryOperatorVisitor(@NotNull BinaryOperatorVisitor binaryOperatorVisitor) {
-        this.binaryOperatorVisitor = binaryOperatorVisitor;
+    public ExpressionVisitor withNumericOperatorVisitor(@NotNull NumericOperatorVisitor numericOperatorVisitor) {
+        this.numericOperatorVisitor = numericOperatorVisitor;
         return this;
     }
 
@@ -53,27 +52,40 @@ public class ExpressionVisitor extends BaseVisitor {
         return this;
     }
 
+    @Nullable BooleanOperatorVisitor booleanOperatorVisitor;
+
+    @NotNull
+    public ExpressionVisitor withBooleanOperatorVisitor(@NotNull BooleanOperatorVisitor booleanOperatorVisitor) {
+        this.booleanOperatorVisitor = booleanOperatorVisitor;
+        return this;
+    }
+
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit expression " + ast);
 
-        if (NodeType.IDENTIFIER == ast.getType()) {
+        if (identifierVisitor.canVisit(ast)) {
             identifierVisitor.visit(mv, ast);
             return;
         }
 
-        if (NodeType.LITERALS.contains(ast.getType())) {
+        if (literalVisitor.canVisit(ast)) {
             literalVisitor.visit(mv, ast);
             return;
         }
 
-        if (NodeType.CAST_INTEGER == ast.getType()) {
+        if (numericOperatorVisitor.canVisit(ast)) {
+            numericOperatorVisitor.visit(mv, ast);
+            return;
+        }
+
+        if (castIntegerVisitor.canVisit(ast)) {
             castIntegerVisitor.visit(mv, ast);
             return;
         }
 
-        if (NodeType.BINARY_OPERATORS.contains(ast.getType())) {
-            binaryOperatorVisitor.visit(mv, ast);
+        if (booleanOperatorVisitor.canVisit(ast)) {
+            booleanOperatorVisitor.visit(mv, ast);
             return;
         }
 

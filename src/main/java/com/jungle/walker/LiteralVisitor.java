@@ -6,7 +6,12 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
+
+import static com.jungle.ast.NodeType.*;
 
 public class LiteralVisitor implements IVisitor {
     @NotNull
@@ -44,12 +49,25 @@ public class LiteralVisitor implements IVisitor {
         }
     }
 
+    public static final Set<NodeType> LITERALS = new HashSet<>(Arrays.asList(
+            LITERAL_BOOLEAN,
+            LITERAL_CHARACTER,
+            LITERAL_INTEGER,
+            LITERAL_FLOAT,
+            LITERAL_STRING
+    ));
+
+    @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return LITERALS.contains(ast.getType());
+    }
+
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit literal " + ast);
 
-        if (!NodeType.LITERALS.contains(ast.getType())) {
-            throw new Error("expected literal");
+        if (!canVisit(ast)) {
+            return;
         }
 
         if (ast.getValue() == null) {

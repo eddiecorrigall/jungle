@@ -15,17 +15,26 @@ public class BlockVisitor implements IVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return NodeType.BLOCK.equals(ast.getType());
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit block " + ast);
-        if (ast.getType() != NodeType.BLOCK) {
-            throw new Error("block expected");
+
+        if (!canVisit(ast)) {
+            return;
         }
+
         if (ast.getLeft() == null) {
             throw new Error("block left AST must be defined");
         }
+
         if (ast.getRight() != null) {
             throw new Error("block right AST must NOT be defined");
         }
+
         mainVisitor.visit(mv, ast.getLeft());
     }
 }

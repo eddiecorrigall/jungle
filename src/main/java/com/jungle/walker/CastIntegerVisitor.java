@@ -28,11 +28,16 @@ public class CastIntegerVisitor extends BaseVisitor {
     }
 
     @Override
+    public boolean canVisit(@NotNull INode ast) {
+        return NodeType.CAST_INTEGER.equals(ast.getType());
+    }
+
+    @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit cast integer " + ast);
 
-        if (ast.getType() != NodeType.CAST_INTEGER) {
-            throw new Error("expected cast integer");
+        if (!canVisit(ast)) {
+            return;
         }
 
         if (ast.getLeft() == null) {
