@@ -9,8 +9,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class MainClassVisitor extends ClassVisitor {
-    public static final String MAIN_CLASS_NAME = "Entrypoint";
-
     @NotNull
     private final IVisitor mainVisitor;
 

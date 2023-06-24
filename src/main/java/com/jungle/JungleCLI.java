@@ -6,11 +6,14 @@ import com.jungle.ast.NodeType;
 import com.jungle.compiler.Compiler;
 import com.jungle.symbol.SymbolTable;
 import com.jungle.walker.*;
+import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.Stack;
 
 public class JungleCLI implements IVisitor {
@@ -167,6 +170,20 @@ public class JungleCLI implements IVisitor {
         throw new Error("unexpected node " + ast);
     }
 
+    public static void helpCommand(@NotNull Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("jungle --output OUTPUT [options]", options);
+    }
+
+    public static void compileCommand(@NotNull CommandLine cli) {
+        String mainClassName = cli.getOptionValue("output");
+        System.out.println("compiling to main class name " + mainClassName);
+        BufferedReader standardInputReader = new BufferedReader(new InputStreamReader(System.in));
+        INode ast = Node.load(standardInputReader);
+        Compiler compiler = new Compiler();
+        compiler.compile(mainClassName, new JungleCLI(), ast);
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         // INode ast = new Node(NodeType.LITERAL_STRING).withValue("Hello, world!\n");
         // INode ast = EXPRESSION_INT_FLOAT;
@@ -178,14 +195,44 @@ public class JungleCLI implements IVisitor {
                 .withRight(new Node(NodeType.PRINT).withLeft(EXPRESSION_IDENTIFIER));
          */
 
-        System.out.println("args " + String.join(", ", args));
-        if (args.length == 1) {
-            String fileName = args[0];
-            INode ast = Node.load(fileName);
-            Compiler compiler = new Compiler();
-            compiler.compile(new JungleCLI(), ast);
-        } else {
-            throw new Error("missing argument - file name");
+        Options options = new Options();
+        options.addOption(
+                "h",
+                "help",
+                false,
+                "Show help options."
+        );
+        options.addOption(
+                "c",
+                "compile",
+                false,
+                "Compile program from stdin. Input format is AST."
+        );
+        options.addRequiredOption(
+                "o",
+                "output",
+                true,
+                "Output file name or class name."
+        );
+
+        CommandLineParser cliParser = new DefaultParser();
+        CommandLine cli = null;
+        try {
+            cli = cliParser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println("cli parsing failed - " + e.getMessage());
+            System.exit(1);
         }
+        if (cli.hasOption("help")) {
+            helpCommand(options);
+            return;
+        }
+        if (cli.hasOption("compile")) {
+            compileCommand(cli);
+            return;
+        }
+
+        System.err.println("Expected command line arguments.");
+        System.exit(1);
     }
 }

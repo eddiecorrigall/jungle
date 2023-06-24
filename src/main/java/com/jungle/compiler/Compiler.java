@@ -32,12 +32,12 @@ public class Compiler {
 
     // endregion
 
-    public void compile(@NotNull IVisitor mainVisitor, @Nullable INode ast) {
+    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
         if (ast == null) {
             System.out.println("Warning: ast is null");
         }
         // Create bytes for entrypoint class
-        ClassWriter initialClassWriter = visitMainClass(MainClassVisitor.MAIN_CLASS_NAME);
+        ClassWriter initialClassWriter = visitMainClass(mainClassName);
         // TODO: handle multi-class
         // mutate main class and method...
         ClassReader classReader = new ClassReader(initialClassWriter.toByteArray());
@@ -46,7 +46,7 @@ public class Compiler {
         classReader.accept(entrypoint, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
         // ...
         try {
-            writeClassFile(MainClassVisitor.MAIN_CLASS_NAME, classWriter.toByteArray());
+            writeClassFile(mainClassName, classWriter.toByteArray());
         } catch (IOException e) {
             System.err.println("failed to compile");
             System.err.println(e);
