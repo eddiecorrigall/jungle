@@ -9,9 +9,13 @@ SEQUENCE
         IDENTIFIER	i
       BLOCK
         SEQUENCE
-          PRINT
-            IDENTIFIER	i
-            ;
+          SEQUENCE
+            PRINT
+              IDENTIFIER	i
+              ;
+            PRINT
+              LITERAL_STRING	\n
+              ;
           ASSIGN
             IDENTIFIER	i
             OPERATOR_SUBTRACT

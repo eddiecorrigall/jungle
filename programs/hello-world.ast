@@ -1,5 +1,5 @@
 SEQUENCE
  PRINT
- LITERAL_STRING	Hello world!
+ LITERAL_STRING	Hello world!\n
  ;
 ;

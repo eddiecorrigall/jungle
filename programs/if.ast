@@ -4,12 +4,12 @@ SEQUENCE
     BLOCK
       SEQUENCE
         PRINT
-          LITERAL_STRING	Within if-block - which should not be possible
+          LITERAL_STRING	Within if-block - which should not be possible\n
           ;
         ASSERT
           LITERAL_INTEGER	10
           ;
       ;
   PRINT
-    LITERAL_STRING	Resume program
+    LITERAL_STRING	Resume program\n
     ;

@@ -13,7 +13,7 @@ import org.objectweb.asm.MethodVisitor;
 import java.io.FileNotFoundException;
 import java.util.Stack;
 
-public class Jungle implements IVisitor {
+public class JungleCLI implements IVisitor {
 
     // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
     // When the jvm instruction adds to the stack, add the node type to this compile-time stack
@@ -64,7 +64,7 @@ public class Jungle implements IVisitor {
 
     // endregion
 
-    public Jungle() {
+    public JungleCLI() {
         super();
 
         // Chicken before the egg problem...
@@ -177,16 +177,15 @@ public class Jungle implements IVisitor {
                 .withLeft(ASSIGNMENT)
                 .withRight(new Node(NodeType.PRINT).withLeft(EXPRESSION_IDENTIFIER));
          */
-        // String fileName = "/Users/eddie/repos/jungle/programs/hello-world.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/assign-expression-print.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/assert-pass.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/assert-fail.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/reassign.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/if.ast";
-        // String fileName = "/Users/eddie/repos/jungle/programs/if-else.ast";
-        String fileName = "/Users/eddie/repos/jungle/programs/loop.ast";
-        INode ast = Node.load(fileName);
-        Compiler compiler = new Compiler();
-        compiler.compile(new Jungle(), ast);
+
+        System.out.println("args " + String.join(", ", args));
+        if (args.length == 1) {
+            String fileName = args[0];
+            INode ast = Node.load(fileName);
+            Compiler compiler = new Compiler();
+            compiler.compile(new JungleCLI(), ast);
+        } else {
+            throw new Error("missing argument - file name");
+        }
     }
 }

@@ -22,4 +22,6 @@ SEQUENCE
           PRINT
             IDENTIFIER	y
             ;
-          ;
+          PRINT
+            LITERAL_STRING	\n
+            ;
