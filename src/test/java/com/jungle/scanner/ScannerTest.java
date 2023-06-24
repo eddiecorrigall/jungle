@@ -1,6 +1,8 @@
 package com.jungle.scanner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 
 import org.junit.Before;
@@ -105,6 +107,6 @@ public class ScannerTest {
     assertEquals(new Token(TokenType.BRACKET_CURLY_CLOSE), scanner.scan());
     assertEquals(new Token(TokenType.NEWLINE), scanner.scan());
     // terminal
-    assertEquals(new Token(TokenType.TERMINAL), scanner.scan());
+    assertNull(scanner.scan());
   }
 }

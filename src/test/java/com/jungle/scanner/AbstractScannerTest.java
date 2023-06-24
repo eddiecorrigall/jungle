@@ -101,7 +101,7 @@ public class AbstractScannerTest {
   public void testConsumeNumeric() {
     scanner.load("var abc = 123;\n", 1);
     scanner.setPosition(10);
-    assertEquals("123", scanner.consumeNumberical());
+    assertEquals("123", scanner.consumeNumerical());
     assertEquals(13, scanner.getPosition());
   }
 

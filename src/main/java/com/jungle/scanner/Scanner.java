@@ -14,40 +14,42 @@ import java.util.Set;
 import com.jungle.token.IToken;
 import com.jungle.token.Token;
 import com.jungle.token.TokenType;
-import org.jetbrains.annotations.NotNull;;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Scanner extends AbstractScanner {
   public static final List<String> KEYWORDS = Arrays.asList(
-    "print"
+          "assert",
+          "if",
+          "loop",
+          "print"
   );
 
   @NotNull
   private final Set<String> keywords;
 
+  protected boolean isKeyword(@NotNull String keyword) {
+    return keywords.contains(keyword);
+  }
+
   public Scanner(Collection<String> keywords) {
     super();
     this.keywords = new HashSet<>();
-    if (keywords != null) {
-      this.keywords.addAll(keywords);
-    }
+    this.keywords.addAll(keywords);
   }
 
   public Scanner() {
     this(KEYWORDS);
   }
 
-  protected boolean isKeyword(@NotNull String keyword) {
-    return keywords.contains(keyword);
-  }
-
   @Override
-  @NotNull
+  @Nullable
   public IToken scan() {
     int lineNumber = getLineNumber();
     int characterNumber = getCharacterNumber();
     Token token;
     if (isDone()) {
-      token = new Token(TokenType.TERMINAL);
+      return null; // end of line
     } else {
       char c = consume();
       switch (c) {
@@ -58,6 +60,8 @@ public class Scanner extends AbstractScanner {
         case '%': token = new Token(TokenType.PERCENT); break;
         case '/': token = new Token(TokenType.SLASH_RIGHT); break;
         case '\\': token = new Token(TokenType.SLASH_LEFT); break;
+        case '<': token = new Token(TokenType.BRACKET_ANGLE_OPEN); break;
+        case '>': token = new Token(TokenType.BRACKET_ANGLE_CLOSE); break;
         case '{': token = new Token(TokenType.BRACKET_CURLY_OPEN); break;
         case '}': token = new Token(TokenType.BRACKET_CURLY_CLOSE); break;
         case '(': token = new Token(TokenType.BRACKET_ROUND_OPEN); break;
@@ -80,7 +84,7 @@ public class Scanner extends AbstractScanner {
         case '\r': token = new Token(TokenType.RETURN); break;
         default: {
           if (isNumeric(c)) {
-            String s = c + consumeNumberical();
+            String s = c + consumeNumerical();
             token = new Token(TokenType.NUMBER).withValue(s);
           } else if (isAlphabetic(c)) {
             String s = c + consumeAlphabetical();

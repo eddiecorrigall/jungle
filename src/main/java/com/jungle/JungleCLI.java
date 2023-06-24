@@ -4,6 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.Compiler;
+import com.jungle.scanner.Scanner;
 import com.jungle.symbol.SymbolTable;
 import com.jungle.walker.*;
 import org.apache.commons.cli.*;
@@ -11,9 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Stack;
 
 public class JungleCLI implements IVisitor {
@@ -172,11 +171,40 @@ public class JungleCLI implements IVisitor {
 
     public static void helpCommand(@NotNull Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("jungle --output OUTPUT [options]", options);
+        formatter.printHelp("jungle", options);
+    }
+
+    public static void scanCommand(@NotNull CommandLine cli) {
+        BufferedReader standardInputReader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
+        try {
+            Scanner.tokenize(standardInputReader, writer, new Scanner());
+        } catch (IOException e) {
+            System.err.println("scanner - failed to tokenize");
+        }
+        try {
+            writer.flush();
+        } catch (IOException e) {
+            System.err.println("scanner - failed to flush write buffer.");
+        }
+        try {
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("scanner - failed to close write buffer");
+        }
+        try {
+            standardInputReader.close();
+        } catch (IOException e) {
+            System.err.println("scanner - failed to close read buffer");
+        }
     }
 
     public static void compileCommand(@NotNull CommandLine cli) {
-        String mainClassName = cli.getOptionValue("output");
+        String mainClassName = cli.getOptionValue("class-name");
+        if (mainClassName == null) {
+            System.err.println("compiler - main class name required");
+            System.exit(1);
+        }
         System.out.println("compiling to main class name " + mainClassName);
         BufferedReader standardInputReader = new BufferedReader(new InputStreamReader(System.in));
         INode ast = Node.load(standardInputReader);
@@ -196,24 +224,10 @@ public class JungleCLI implements IVisitor {
          */
 
         Options options = new Options();
-        options.addOption(
-                "h",
-                "help",
-                false,
-                "Show help options."
-        );
-        options.addOption(
-                "c",
-                "compile",
-                false,
-                "Compile program from stdin. Input format is AST."
-        );
-        options.addRequiredOption(
-                "o",
-                "output",
-                true,
-                "Output file name or class name."
-        );
+        options.addOption("h", "help", false, "Show help options.");
+        options.addOption("s", "scan", false, "Scan program from stdin. Output tokens.");
+        options.addOption("c", "compile", false, "Compile program from stdin. Input format is AST. Output is bytecode.");
+        options.addOption("o", "class-name", true, "Output class name.");
 
         CommandLineParser cliParser = new DefaultParser();
         CommandLine cli = null;
@@ -225,6 +239,10 @@ public class JungleCLI implements IVisitor {
         }
         if (cli.hasOption("help")) {
             helpCommand(options);
+            return;
+        }
+        if (cli.hasOption("scan")) {
+            scanCommand(cli);
             return;
         }
         if (cli.hasOption("compile")) {

@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.jungle.token.Token;
 import org.jetbrains.annotations.NotNull;
 
 import com.jungle.token.IToken;
@@ -131,7 +132,7 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @NotNull
-  protected String consumeNumberical() {
+  protected String consumeNumerical() {
     int offset = 0;
     while (isValidOffset(offset)) {
       char c = getCode().charAt(getPosition() + offset);
@@ -165,6 +166,17 @@ public abstract class AbstractScanner implements IScanner {
     return s;
   }
 
+  public static String getTokenOutputString(@NotNull IToken token) {
+    return String.format(
+            "%d\t%d\t%s\n",
+            token.getLineNumber(),
+            token.getCharacterNumber(),
+            token.getValue() == null
+                    ? token.getType()
+                    : token.getType().name() + '\t' + token.getValue()
+    );
+  }
+
   public static void tokenize(
     BufferedReader reader,
     BufferedWriter writer,
@@ -174,22 +186,19 @@ public abstract class AbstractScanner implements IScanner {
     int lineNumber = 1;
     while (lineIterator.hasNext()) {
       String line = lineIterator.next() + '\n';
-      scanner.load(line, lineNumber);
+      scanner.load(line, lineNumber); // TODO: I don't like how current line is setup
       lineNumber++;
       IToken token;
       while (true) {
         token = scanner.scan();
-        String output = String.format(
-          "%d\t%d\t%s\n",
-          token.getLineNumber(),
-          token.getCharacterNumber(),
-          token.getValue() == null
-            ? token.getType()
-            : token.getType().name() + '\t' + token.getValue()
-        );
-        writer.write(output);
-        if (token.getType() == TokenType.TERMINAL) break;
+        if (token == null) {
+          break;
+        }
+        writer.write(getTokenOutputString(token));
       }
     }
+    writer.write(getTokenOutputString(
+            new Token(TokenType.TERMINAL).withPosition(lineNumber, 1)
+    ));
   }
 }
