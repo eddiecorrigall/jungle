@@ -9,12 +9,15 @@ import com.jungle.ast.NodeType;
 import com.jungle.scanner.IScanner;
 import com.jungle.token.TokenType;
 
-public class Parser extends AbstractParser {
-  public static final String KEYWORD_PRINT = "print";
-  public static final String KEYWORD_AND = "and";
-  public static final String KEYWORD_OR = "or";
-  public static final String KEYWORD_NOT = "not";
+import static com.jungle.scanner.Scanner.KEYWORD_ASSERT;
+import static com.jungle.scanner.Scanner.KEYWORD_IF;
+import static com.jungle.scanner.Scanner.KEYWORD_LOOP;
+import static com.jungle.scanner.Scanner.KEYWORD_PRINT;
+import static com.jungle.scanner.Scanner.KEYWORD_AND;
+import static com.jungle.scanner.Scanner.KEYWORD_OR;
+import static com.jungle.scanner.Scanner.KEYWORD_NOT;
 
+public class Parser extends AbstractParser {
   public Parser(@NotNull IScanner scanner) {
     super(scanner);
   }
@@ -145,10 +148,11 @@ public class Parser extends AbstractParser {
       case SLASH_RIGHT: return parseNumericBinaryOperation(NodeType.OPERATOR_DIVIDE);
       case PERCENT: return parseNumericBinaryOperation(NodeType.OPERATOR_MODULO);
       case KEYWORD: {
-        if (getCurrentToken().getValue() == null) {
+        String keywordValue = getCurrentToken().getValue();
+        if (keywordValue == null) {
           throw new Error("keyword token missing value");
         }
-        switch (getCurrentToken().getValue()) {
+        switch (keywordValue) {
           case KEYWORD_AND:
           case KEYWORD_OR:
           case KEYWORD_NOT: return parseBooleanExpression();
@@ -171,14 +175,21 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
+  protected INode parseAssert() {
+    /*
+     * statement_assert = "assert" expression
+     */
+    expectKeyword(KEYWORD_ASSERT);
+    return new Node(NodeType.ASSERT).withLeft(parseExpression());
+  }
+
+  @Nullable
   protected INode parsePrint() {
     /*
      * statement_print = "print" expression
      */
     expectKeyword(KEYWORD_PRINT);
-    INode expressionParenthesis = parseExpression();
-    return new Node(NodeType.PRINT)
-      .withLeft(expressionParenthesis);
+    return new Node(NodeType.PRINT).withLeft(parseExpression());
   }
 
   @Nullable
@@ -193,6 +204,7 @@ public class Parser extends AbstractParser {
       throw new Error("keyword token missing value");
     }
     switch (keywordValue) {
+      case KEYWORD_ASSERT: return parseAssert();
       case KEYWORD_PRINT: return parsePrint();
       case KEYWORD_AND:
       case KEYWORD_OR:
