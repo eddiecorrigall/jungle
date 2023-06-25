@@ -22,7 +22,10 @@ public class Scanner extends AbstractScanner {
           "assert",
           "if",
           "loop",
-          "print"
+          "print",
+          "not",
+          "and",
+          "or"
   );
 
   @NotNull

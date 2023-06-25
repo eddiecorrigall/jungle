@@ -8,8 +8,13 @@ import com.jungle.scanner.IScanner;
 import com.jungle.token.IToken;
 import com.jungle.token.TokenType;
 
+import java.util.Objects;
+
 public abstract class AbstractParser implements IParser {
+  @Nullable
   private IToken token;
+
+  @NotNull
   private final IScanner scanner;
 
   public AbstractParser(@NotNull IScanner scanner) {
@@ -28,10 +33,24 @@ public abstract class AbstractParser implements IParser {
     token = scanner.scan();
   }
 
-  protected boolean accept(@NotNull TokenType tokenType) {
-    return getCurrentToken().getType() == tokenType;
+  protected void consumeWhitespace() {
+    while (true) {
+      if (getCurrentToken() == null) break;
+      switch (getCurrentToken().getType()) {
+        case SPACE: case TAB: case NEWLINE: {
+          nextToken();
+          continue;
+        }
+      }
+      break;
+    }
   }
 
+  protected boolean accept(@NotNull TokenType tokenType) {
+    return getCurrentToken() != null && getCurrentToken().getType() == tokenType;
+  }
+
+  @Nullable
   protected String expect(@NotNull TokenType tokenType) {
     if (accept(tokenType)) {
       String value = getCurrentToken().getValue();
@@ -41,9 +60,10 @@ public abstract class AbstractParser implements IParser {
     throw new Error("expected token type " + tokenType.name() + " but got token " + getCurrentToken());
   }
 
-  protected void expectKeyword(@NotNull String keywordValue) {
-    if (!keywordValue.equals(expect(TokenType.KEYWORD))) {
-      throw new Error("expected keyword token with value " + keywordValue);
+  protected void expectKeyword(@NotNull String expectedTokenValue) {
+    String observedTokenValue = expect(TokenType.KEYWORD);
+    if (!Objects.equals(expectedTokenValue, observedTokenValue)) {
+      throw new Error("expected keyword token with value " + expectedTokenValue);
     }
   }
 }

@@ -11,6 +11,9 @@ import com.jungle.token.TokenType;
 
 public class Parser extends AbstractParser {
   public static final String KEYWORD_PRINT = "print";
+  public static final String KEYWORD_AND = "and";
+  public static final String KEYWORD_OR = "or";
+  public static final String KEYWORD_NOT = "not";
 
   public Parser(@NotNull IScanner scanner) {
     super(scanner);
@@ -29,21 +32,23 @@ public class Parser extends AbstractParser {
      * sequence = { statement } | "\n" ;
      */
     INode sequence = null;
-    while (!accept(TokenType.TERMINAL)) {
+    while (true) {
+      if (getCurrentToken() == null) break;
+      if (accept(TokenType.TERMINAL)) break;
       if (accept(TokenType.NEWLINE)) {
         nextToken();
         sequence = new Node(NodeType.SEQUENCE)
           .withLeft(sequence);
-      } else {
-        sequence = new Node(NodeType.SEQUENCE)
+        continue;
+      }
+      sequence = new Node(NodeType.SEQUENCE)
           .withLeft(sequence)
           .withRight(parseStatement());
-      }
     }
     return sequence;
   }
 
-  @NotNull
+  @Nullable
   protected INode parseNumber() {
     /* Leaf
      * integer = { "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" } ;
@@ -51,18 +56,22 @@ public class Parser extends AbstractParser {
      */
     String integerPart = expect(TokenType.NUMBER);
     if (accept(TokenType.DOT)) {
+      // Decimal
       nextToken();
-      String floatPart = expect(TokenType.NUMBER);
+      String fractionalPart = expect(TokenType.NUMBER);
+      // TODO: handle double
       return new Node(NodeType.LITERAL_FLOAT)
-        .withValue(integerPart + '.' + floatPart);
+              .withValue(integerPart + '.' + fractionalPart);
     } else {
+      // Integer
       return new Node(NodeType.LITERAL_INTEGER)
-        .withValue(integerPart);
+              .withValue(integerPart);
     }
   }
 
-  public INode parseBinaryOperationAs(NodeType type) {
-    // Helper
+  @Nullable
+  public INode parseNumericBinaryOperation(NodeType type) {
+    // TODO: be explicit about mapping the operator, this should not be a helper
     nextToken(); // skip operator
     INode leftExpression = parseExpression();
     INode rightExpression = parseExpression();
@@ -71,8 +80,12 @@ public class Parser extends AbstractParser {
             .withRight(rightExpression);
   }
 
+  @Nullable
   public INode parseText() {
     String textValue = expect(TokenType.TEXT);
+    if (textValue == null) {
+      throw new Error("text token missing value");
+    }
     boolean isSingleCharacter = textValue.length() == 1;
     NodeType type = isSingleCharacter
             ? NodeType.LITERAL_CHARACTER
@@ -80,43 +93,73 @@ public class Parser extends AbstractParser {
     return new Node(type).withValue(textValue);
   }
 
-  protected void consumeWhitespace() {
-    while (true) {
-      switch (getCurrentToken().getType()) {
-        case SPACE: case TAB: case NEWLINE: {
-          nextToken();
-          continue;
-        }
+  @Nullable
+  protected INode parseBooleanExpression() {
+    if (getCurrentToken() == null) return null;
+    String keywordValue = expect(TokenType.KEYWORD);
+    if (keywordValue == null) {
+      throw new Error("keyword token missing value");
+    }
+    switch (keywordValue) {
+      case KEYWORD_AND: {
+        return new Node(NodeType.OPERATOR_AND)
+                .withLeft(parseExpression())
+                .withRight(parseExpression());
       }
-      break;
+      case KEYWORD_OR: {
+        return new Node(NodeType.OPERATOR_OR)
+                .withLeft(parseExpression())
+                .withRight(parseExpression());
+      }
+      case KEYWORD_NOT: {
+        return new Node(NodeType.OPERATOR_NOT)
+                .withLeft(parseExpression());
+      }
+      default: throw new Error("not a binary expression " + getCurrentToken());
     }
   }
 
-  @NotNull
+  @Nullable
   protected INode parseExpression() {
     /*
-     * expression = expression_parenthesis
+     * expression = whitespace expression
+     *            | expression_parenthesis
      *            | number
+     *            | text
      *            | ( "+" | "-" | "*" | "/" | "%" ) expression expression
-     *            | ( " " | "\t" | "\n" ) expression
+     *            | ( "add" | "or" ) expression expression
+     *            | "not" expression
      *            ;
      */
     consumeWhitespace();
+    if (getCurrentToken() == null) {
+      return null;
+    }
     switch (getCurrentToken().getType()) {
       case BRACKET_ROUND_OPEN: return parseExpressionParenthesis();
       case NUMBER: return parseNumber();
       case TEXT: return parseText();
-      case PLUS: return parseBinaryOperationAs(NodeType.OPERATOR_ADD);
-      case MINUS: return parseBinaryOperationAs(NodeType.OPERATOR_SUBTRACT);
-      case ASTERISK: return parseBinaryOperationAs(NodeType.OPERATOR_MULTIPLY);
-      case SLASH_RIGHT: return parseBinaryOperationAs(NodeType.OPERATOR_DIVIDE);
-      case PERCENT: return parseBinaryOperationAs(NodeType.OPERATOR_MODULO);
-      default: break;
+      case PLUS: return parseNumericBinaryOperation(NodeType.OPERATOR_ADD);
+      case MINUS: return parseNumericBinaryOperation(NodeType.OPERATOR_SUBTRACT);
+      case ASTERISK: return parseNumericBinaryOperation(NodeType.OPERATOR_MULTIPLY);
+      case SLASH_RIGHT: return parseNumericBinaryOperation(NodeType.OPERATOR_DIVIDE);
+      case PERCENT: return parseNumericBinaryOperation(NodeType.OPERATOR_MODULO);
+      case KEYWORD: {
+        if (getCurrentToken().getValue() == null) {
+          throw new Error("keyword token missing value");
+        }
+        switch (getCurrentToken().getValue()) {
+          case KEYWORD_AND:
+          case KEYWORD_OR:
+          case KEYWORD_NOT: return parseBooleanExpression();
+          default: break;
+        }
+      }
     }
     throw new Error("token does not correspond with any expression " + getCurrentToken());
   }
 
-  @NotNull
+  @Nullable
   protected INode parseExpressionParenthesis() {
     /*
      * expression_parenthesis = "(" expression ")"
@@ -127,30 +170,38 @@ public class Parser extends AbstractParser {
     return expression;
   }
 
-  @NotNull
+  @Nullable
   protected INode parsePrint() {
     /*
-     * statement_print = "print" expression "\n"
+     * statement_print = "print" expression
      */
     expectKeyword(KEYWORD_PRINT);
     INode expressionParenthesis = parseExpression();
-    expect(TokenType.NEWLINE);
     return new Node(NodeType.PRINT)
       .withLeft(expressionParenthesis);
   }
 
-  @NotNull
+  @Nullable
   protected INode parseStatementKeyword() {
     /*
-     * statement_keyword = statement_print | ...
+     * statement_keyword = statement_print
+     *                   | ( "and" | "or" | "not" ) expression
      */
+    if (getCurrentToken() == null) return null;
     String keywordValue = getCurrentToken().getValue();
-    if (KEYWORD_PRINT.equals(keywordValue)) {
-      return parsePrint();
+    if (keywordValue == null) {
+      throw new Error("keyword token missing value");
+    }
+    switch (keywordValue) {
+      case KEYWORD_PRINT: return parsePrint();
+      case KEYWORD_AND:
+      case KEYWORD_OR:
+      case KEYWORD_NOT: return parseBooleanExpression();
     }
     throw new Error("unknown keyword " + keywordValue);
   }
 
+  @Nullable
   protected INode parseStatement() {
     /*
      * statement = statement_keyword | ...
