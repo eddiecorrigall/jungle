@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.jungle.token.Token;
 import org.jetbrains.annotations.NotNull;
@@ -166,22 +168,12 @@ public abstract class AbstractScanner implements IScanner {
     return s;
   }
 
-  public static String getTokenOutputString(@NotNull IToken token) {
-    return String.format(
-            "%d\t%d\t%s\n",
-            token.getLineNumber(),
-            token.getCharacterNumber(),
-            token.getValue() == null
-                    ? token.getType()
-                    : token.getType().name() + '\t' + token.getValue()
-    );
-  }
-
   public static void tokenize(
     BufferedReader reader,
     BufferedWriter writer,
     IScanner scanner
   ) throws IOException {
+    List<IToken> tokenList = new LinkedList<>();
     Iterator<String> lineIterator = reader.lines().iterator();
     int lineNumber = 1;
     while (lineIterator.hasNext()) {
@@ -194,11 +186,10 @@ public abstract class AbstractScanner implements IScanner {
         if (token == null) {
           break;
         }
-        writer.write(getTokenOutputString(token));
+        tokenList.add(token);
       }
     }
-    writer.write(getTokenOutputString(
-            new Token(TokenType.TERMINAL).withPosition(lineNumber, 1)
-    ));
+    tokenList.add(new Token(TokenType.TERMINAL).withPosition(lineNumber, 1));
+    Token.save(writer, tokenList);
   }
 }

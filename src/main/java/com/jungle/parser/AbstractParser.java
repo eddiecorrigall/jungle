@@ -36,6 +36,7 @@ public abstract class AbstractParser implements IParser {
   protected void consumeWhitespace() {
     while (true) {
       if (getCurrentToken() == null) break;
+      if (getCurrentToken().getType() == TokenType.TERMINAL) break;
       switch (getCurrentToken().getType()) {
         case SPACE: case TAB: case NEWLINE: {
           nextToken();
