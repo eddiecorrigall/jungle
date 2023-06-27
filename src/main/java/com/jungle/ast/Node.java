@@ -145,7 +145,7 @@ public class Node implements INode {
       System.out.println("terminated");
       return null;
     }
-    int splitIndex = line.indexOf(DELIMITER_LINE);
+    int splitIndex = line.indexOf(DELIMITER_FIELD);
     String type;
     String value;
     if (splitIndex < 0) {
