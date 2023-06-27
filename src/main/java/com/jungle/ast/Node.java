@@ -1,15 +1,15 @@
 package com.jungle.ast;
 
+import com.jungle.token.IToken;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Stack;
 
 public class Node implements INode {
   @NotNull
@@ -68,6 +68,11 @@ public class Node implements INode {
   }
 
   @Override
+  public boolean isLeaf() {
+    return getValue() != null;
+  }
+
+  @Override
   public boolean equals(@Nullable Object other) {
     if (other == this) return true;
     if (!(other instanceof Node)) return false;
@@ -90,32 +95,57 @@ public class Node implements INode {
     return String.format("<Node type='%s' value='%s' />", getType(), getValue());
   }
 
+  // region String Serialization
+
+  protected static char TERMINAL = ';';
+  protected static char DELIMITER_FIELD = '\t';
+  protected static char DELIMITER_LINE = '\n';
+
+  public static void save(@NotNull BufferedWriter writer, @Nullable INode node) throws IOException {
+    // Non-recursive traversal
+    Stack<INode> nodeStack = new Stack<>();
+    nodeStack.push(node);
+    while (nodeStack.size() > 0) {
+      INode nextNode = nodeStack.pop();
+      if (nextNode == null) {
+        writer.write(TERMINAL);
+      } else {
+        writer.write(nextNode.getType().name());
+        if (nextNode.isLeaf()) {
+          writer.write(DELIMITER_FIELD);
+          writer.write(nextNode.getValue());
+        } else {
+          nodeStack.push(nextNode.getLeft());
+          nodeStack.push(nextNode.getRight());
+        }
+      }
+      writer.write(DELIMITER_LINE);
+    }
+  }
+
   @Nullable
-  public static INode load(@NotNull BufferedReader reader) {
+  public static INode load(@NotNull BufferedReader reader) throws IOException {
     // https://rosettacode.org/wiki/Compiler/code_generator#Java
     // Each line as an item in a binary array/tree
     // A line always has a node type with optional value
     // The node type and value are delimited by a tab character (\t)
-    String line;
-    try {
-      line = reader.readLine();
-    } catch (IOException e) {
-      throw new Error("load ast - failed to read line");
-    }
-    if (line == null) {
-      System.out.println("WARN: load ast - read line returned null");
+    String line = reader.readLine();
+    boolean hasStreamEnded = line == null;
+    if (hasStreamEnded) {
+      System.out.println("WARN: load ast - end of stream reached");
       return null;
     }
-    if (line.length() == 0) {
-      System.out.println("load ast - end of input");
+    boolean hasEmptyLine = line.length() == 0;
+    if (hasEmptyLine) {
+      System.out.println("load ast - line is empty");
       return null;
     }
-    if (line.trim().startsWith(";")) {
+    if (line.trim().startsWith(Character.toString(TERMINAL))) {
       System.out.println("---");
       System.out.println("terminated");
       return null;
     }
-    int splitIndex = line.indexOf('\t');
+    int splitIndex = line.indexOf(DELIMITER_LINE);
     String type;
     String value;
     if (splitIndex < 0) {
@@ -148,8 +178,10 @@ public class Node implements INode {
   }
 
   @Nullable
-  public static INode load(@NotNull String fileName) throws FileNotFoundException {
+  public static INode load(@NotNull String fileName) throws IOException {
     BufferedReader reader = new BufferedReader(new FileReader(fileName));
     return load(reader);
   }
+
+  // endregion
 }

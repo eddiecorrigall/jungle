@@ -207,7 +207,14 @@ public class JungleCLI implements IVisitor {
         }
         System.out.println("compiling to main class name " + mainClassName);
         BufferedReader standardInputReader = new BufferedReader(new InputStreamReader(System.in));
-        INode ast = Node.load(standardInputReader);
+        INode ast;
+        try {
+            ast = Node.load(standardInputReader);
+        } catch (IOException e) {
+            System.err.println("failed to load AST - " + e.getMessage());
+            System.exit(1);
+            return;
+        }
         Compiler compiler = new Compiler();
         compiler.compile(mainClassName, new JungleCLI(), ast);
     }

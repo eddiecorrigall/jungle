@@ -8,4 +8,6 @@ public interface INode {
   @Nullable String getValue();
   @Nullable INode getLeft();
   @Nullable INode getRight();
+
+  boolean isLeaf();
 }

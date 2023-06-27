@@ -102,9 +102,7 @@ public class Token implements IToken {
     // convert the IToken to a line of text, and
     // write to the BufferedWriter.
 
-    Iterator<IToken> tokenIterator = tokenList.iterator();
-    while (tokenIterator.hasNext()) {
-      IToken token = tokenIterator.next();
+    for (IToken token : tokenList) {
       if (token == null) {
         break;
       }
