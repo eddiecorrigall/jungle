@@ -34,21 +34,21 @@ public class Parser extends AbstractParser {
     /*
      * sequence = { statement } | "\n" ;
      */
-    INode sequence = null;
+    INode sequenceNode = null;
     while (true) {
       if (getCurrentToken() == null) break;
       if (accept(TokenType.TERMINAL)) break;
       if (accept(TokenType.NEWLINE)) {
         nextToken();
-        sequence = new Node(NodeType.SEQUENCE)
-          .withLeft(sequence);
+        sequenceNode = new Node(NodeType.SEQUENCE)
+          .withLeft(sequenceNode);
         continue;
       }
-      sequence = new Node(NodeType.SEQUENCE)
-          .withLeft(sequence)
-          .withRight(parseStatement());
+      sequenceNode = new Node(NodeType.SEQUENCE)
+              .withLeft(parseStatement())
+              .withRight(sequenceNode);
     }
-    return sequence;
+    return sequenceNode;
   }
 
   @Nullable
@@ -97,7 +97,12 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
-  protected INode parseBooleanExpression() {
+  protected INode parseExpressionBoolean() {
+    /*
+     * expression_boolean = ( "and" | "or" ) expression expression
+     *                    | "not" expression
+     *                    ;
+     */
     if (getCurrentToken() == null) return null;
     String keywordValue = expect(TokenType.KEYWORD);
     if (keywordValue == null) {
@@ -130,7 +135,7 @@ public class Parser extends AbstractParser {
      *            | number
      *            | text
      *            | ( "+" | "-" | "*" | "/" | "%" ) expression expression
-     *            | ( "add" | "or" ) expression expression
+     *            | ( "and" | "or" ) expression expression
      *            | "not" expression
      *            ;
      */
@@ -155,7 +160,7 @@ public class Parser extends AbstractParser {
         switch (keywordValue) {
           case KEYWORD_AND:
           case KEYWORD_OR:
-          case KEYWORD_NOT: return parseBooleanExpression();
+          case KEYWORD_NOT: return parseExpressionBoolean();
           default: break;
         }
       }
@@ -166,7 +171,7 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseExpressionParenthesis() {
     /*
-     * expression_parenthesis = "(" expression ")"
+     * expression_parenthesis = "(" expression ")" ;
      */
     expect(TokenType.BRACKET_ROUND_OPEN);
     INode expression = parseExpression();
@@ -175,28 +180,61 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
-  protected INode parseAssert() {
+  protected INode parseStatementAssert() {
     /*
-     * statement_assert = "assert" expression
+     * statement_assert = "assert" expression ;
      */
     expectKeyword(KEYWORD_ASSERT);
     return new Node(NodeType.ASSERT).withLeft(parseExpression());
   }
 
   @Nullable
-  protected INode parsePrint() {
+  protected INode parseStatementLoop() {
     /*
-     * statement_print = "print" expression
+     * statement_loop = "loop" expression statement_block ;
+     */
+    expectKeyword(KEYWORD_LOOP);
+    return new Node(NodeType.LOOP)
+            .withLeft(parseExpression())
+            .withRight(parseStatementBlock());
+  }
+
+  @Nullable
+  protected INode parseStatementPrint() {
+    /*
+     * statement_print = "print" expression ;
      */
     expectKeyword(KEYWORD_PRINT);
     return new Node(NodeType.PRINT).withLeft(parseExpression());
   }
 
   @Nullable
+  protected INode parseStatementBlock() {
+    /*
+     * statement_block = whitespace "{" whitespace sequence whitespace "}" ;
+     */
+    consumeWhitespace();
+    expect(TokenType.BRACKET_CURLY_OPEN);
+    INode sequenceNode = null;
+    while (true) {
+      consumeWhitespace();
+      if (getCurrentToken() == null) break;
+      if (accept(TokenType.TERMINAL)) break;
+      if (accept(TokenType.BRACKET_CURLY_CLOSE)) break;
+      sequenceNode = new Node(NodeType.SEQUENCE).withLeft(parseStatement()).withRight(sequenceNode);
+    }
+    expect(TokenType.BRACKET_CURLY_CLOSE);
+    return new Node(NodeType.BLOCK).withLeft(sequenceNode);
+  }
+
+  @Nullable
   protected INode parseStatementKeyword() {
     /*
-     * statement_keyword = statement_print
+     * statement_keyword = statement_assert
+     *                   | statement_loop
+     *                   | statement_print
      *                   | ( "and" | "or" | "not" ) expression
+     *                   ;
      */
     if (getCurrentToken() == null) return null;
     String keywordValue = getCurrentToken().getValue();
@@ -204,11 +242,12 @@ public class Parser extends AbstractParser {
       throw new Error("keyword token missing value");
     }
     switch (keywordValue) {
-      case KEYWORD_ASSERT: return parseAssert();
-      case KEYWORD_PRINT: return parsePrint();
+      case KEYWORD_ASSERT: return parseStatementAssert();
+      case KEYWORD_LOOP: return parseStatementLoop();
+      case KEYWORD_PRINT: return parseStatementPrint();
       case KEYWORD_AND:
       case KEYWORD_OR:
-      case KEYWORD_NOT: return parseBooleanExpression();
+      case KEYWORD_NOT: return parseExpressionBoolean();
     }
     throw new Error("unknown keyword " + keywordValue);
   }
@@ -216,8 +255,13 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatement() {
     /*
-     * statement = statement_keyword | ...
+     * statement = statement_block
+     *           | statement_keyword
+     *           ;
      */
+    if (accept(TokenType.BRACKET_CURLY_OPEN)) {
+      return parseStatementBlock();
+    }
     if (accept(TokenType.KEYWORD)) {
       return parseStatementKeyword();
     }

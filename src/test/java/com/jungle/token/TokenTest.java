@@ -150,7 +150,7 @@ public class TokenTest {
   }
 
   @Test
-  public void testLoadAndSave() throws IOException {
+  public void testSaveAndLoad() throws IOException {
     List<IToken> inputTokenList = new LinkedList<>();
     inputTokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
     inputTokenList.add(new Token(TokenType.BRACKET_ROUND_OPEN));

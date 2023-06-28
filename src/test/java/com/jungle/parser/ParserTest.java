@@ -85,10 +85,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParsePrint_character() {
+  public void testParseStatementPrint_character() {
     scanner.load("print \"0\"\n", 1);
     parser.nextToken();
-    INode ast = parser.parsePrint();
+    INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.PRINT);
     assertNotNull(ast.getLeft());
@@ -98,10 +98,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParsePrint_string() {
+  public void testParseStatementPrint_string() {
     scanner.load("print \"Hello world!\"\n", 1);
     parser.nextToken();
-    INode ast = parser.parsePrint();
+    INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.PRINT);
     assertNotNull(ast.getLeft());
@@ -111,10 +111,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParsePrint_stringWithParenthesis() {
+  public void testParseStatementPrint_stringWithParenthesis() {
     scanner.load("print(\"Hello world!\")\n", 1);
     parser.nextToken();
-    INode ast = parser.parsePrint();
+    INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.PRINT);
     assertNotNull(ast.getLeft());
@@ -124,10 +124,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParsePrint_float() {
+  public void testParseStatementPrint_float() {
     scanner.load("print 123.456\n", 1);
     parser.nextToken();
-    INode ast = parser.parsePrint();
+    INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.PRINT);
     assertNotNull(ast.getLeft());
@@ -137,10 +137,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParseBooleanExpression_andOperation() {
+  public void testParseExpressionBoolean_andOperation() {
     scanner.load("and 0 1\n", 1);
     parser.nextToken();
-    INode ast = parser.parseBooleanExpression();
+    INode ast = parser.parseExpressionBoolean();
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.OPERATOR_AND);
 
@@ -154,10 +154,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParseBooleanExpression_nestedBoolean() {
+  public void testParseExpressionBoolean_nestedBoolean() {
     scanner.load("not and or 0 1 1\n", 1);
     parser.nextToken();
-    INode ast = parser.parseBooleanExpression();
+    INode ast = parser.parseExpressionBoolean();
 
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.OPERATOR_NOT);
@@ -187,10 +187,10 @@ public class ParserTest {
   }
 
   @Test
-  public void testParseBooleanExpression_booleanAndNumeric() {
+  public void testParseExpressionBoolean_booleanAndNumeric() {
     scanner.load("not + 1 0\n", 1);
     parser.nextToken();
-    INode ast = parser.parseBooleanExpression();
+    INode ast = parser.parseExpressionBoolean();
 
     assertNotNull(ast);
     assertEquals(ast.getType(), NodeType.OPERATOR_NOT);
@@ -214,5 +214,68 @@ public class ParserTest {
     assertNull(ast.getLeft().getRight().getRight());
 
     assertNull(ast.getRight());
+  }
+
+  @Test
+  public void testParseStatementBlock() {
+    scanner.load("{ print 1 }\n", 1);
+    parser.nextToken();
+    INode ast = parser.parseStatementBlock();
+
+    assertNotNull(ast);
+    assertEquals(ast.getType(), NodeType.BLOCK);
+    assertNull(ast.getValue());
+
+    assertNotNull(ast.getLeft());
+    assertEquals(ast.getLeft().getType(), NodeType.SEQUENCE);
+    assertNull(ast.getLeft().getValue());
+
+    assertNotNull(ast.getLeft().getLeft());
+    assertEquals(ast.getLeft().getLeft().getType(), NodeType.PRINT);
+    assertNull(ast.getLeft().getLeft().getValue());
+
+    assertEquals(ast.getLeft().getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
+    assertEquals(ast.getLeft().getLeft().getLeft().getValue(), "1");
+
+    assertNull(ast.getLeft().getLeft().getRight());
+
+    assertNull(ast.getLeft().getRight());
+
+    assertNull(ast.getRight());
+  }
+
+  @Test
+  public void testParseStatementLoop() {
+    scanner.load("loop (1) { assert 1 }\n", 1);
+    parser.nextToken();
+    INode ast = parser.parseStatementLoop();
+
+    assertNotNull(ast);
+    assertEquals(ast.getType(), NodeType.LOOP);
+    assertNull(ast.getValue());
+
+    assertNotNull(ast.getLeft());
+    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_INTEGER);
+    assertEquals(ast.getLeft().getValue(), "1");
+
+    assertNotNull(ast.getRight());
+    assertEquals(ast.getRight().getType(), NodeType.BLOCK);
+    assertNull(ast.getRight().getValue());
+
+    assertNotNull(ast.getRight().getLeft());
+    assertEquals(ast.getRight().getLeft().getType(), NodeType.SEQUENCE);
+    assertNull(ast.getRight().getLeft().getValue());
+
+    assertNotNull(ast.getRight().getLeft().getLeft());
+    assertEquals(ast.getRight().getLeft().getLeft().getType(), NodeType.ASSERT);
+    assertNull(ast.getRight().getLeft().getLeft().getValue());
+
+    assertNotNull(ast.getRight().getLeft().getLeft().getLeft());
+    assertEquals(ast.getRight().getLeft().getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
+    assertEquals(ast.getRight().getLeft().getLeft().getLeft().getValue(), "1");
+
+    assertNull(ast.getRight().getLeft().getLeft().getRight());
+
+    assertNull(ast.getRight().getRight());
   }
 }
