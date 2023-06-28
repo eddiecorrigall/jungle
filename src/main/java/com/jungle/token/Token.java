@@ -70,7 +70,13 @@ public class Token implements IToken {
 
   @Override
   public String toString() {
-    return String.format("<Token type=%s value=%s />", getType(), getValue());
+    return String.format(
+            "<%s type=\"%s\" value=\"%s\" line=%d character=%d />",
+            getClass().getName(),
+            getType(),
+            getValue(),
+            getLineNumber(),
+            getCharacterNumber());
   }
 
   @NotNull

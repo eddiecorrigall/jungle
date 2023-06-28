@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.jungle.token.IToken;
+import com.jungle.token.Token;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,23 +15,33 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jungle.ast.INode;
-import com.jungle.scanner.IScanner;
-import com.jungle.scanner.Scanner;
 import com.jungle.token.TokenType;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class AbstractParserTest {
-  @NotNull IScanner scanner = new Scanner(); // TODO: Use mock IScanner
-  @NotNull AbstractParser parser = new AbstractParser(scanner) {
-    @Override
-    @Nullable
-    public INode parse() {
-      throw new NotImplementedException();
-    }
-  };
+  @NotNull AbstractParser parser;
 
   @Before
   public void setup() {
-    scanner.load("print + 3 4", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.PLUS));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("3"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("4"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+
+    parser = new AbstractParser(tokenList.iterator()) {
+      @Override
+      @Nullable
+      public INode parse() {
+        throw new NotImplementedException();
+      }
+    };
   }
 
   @Test

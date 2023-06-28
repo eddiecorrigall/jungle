@@ -115,8 +115,8 @@ public class Node implements INode {
           writer.write(DELIMITER_FIELD);
           writer.write(nextNode.getValue());
         } else {
-          nodeStack.push(nextNode.getLeft());
           nodeStack.push(nextNode.getRight());
+          nodeStack.push(nextNode.getLeft());
         }
       }
       writer.write(DELIMITER_LINE);

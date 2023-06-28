@@ -1,13 +1,15 @@
 package com.jungle.parser;
 
+import com.jungle.token.IToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
-import com.jungle.scanner.IScanner;
 import com.jungle.token.TokenType;
+
+import java.util.Iterator;
 
 import static com.jungle.scanner.Scanner.KEYWORD_ASSERT;
 import static com.jungle.scanner.Scanner.KEYWORD_IF;
@@ -18,8 +20,9 @@ import static com.jungle.scanner.Scanner.KEYWORD_OR;
 import static com.jungle.scanner.Scanner.KEYWORD_NOT;
 
 public class Parser extends AbstractParser {
-  public Parser(@NotNull IScanner scanner) {
-    super(scanner);
+
+  public Parser(@NotNull Iterator<IToken> tokenIterator) {
+    super(tokenIterator);
   }
 
   @Override
@@ -40,13 +43,16 @@ public class Parser extends AbstractParser {
       if (accept(TokenType.TERMINAL)) break;
       if (accept(TokenType.NEWLINE)) {
         nextToken();
-        sequenceNode = new Node(NodeType.SEQUENCE)
-          .withLeft(sequenceNode);
         continue;
       }
-      sequenceNode = new Node(NodeType.SEQUENCE)
-              .withLeft(parseStatement())
-              .withRight(sequenceNode);
+      if (sequenceNode == null) {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(parseStatement());
+      } else {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(sequenceNode)
+                .withRight(parseStatement());
+      }
     }
     return sequenceNode;
   }
@@ -136,6 +142,7 @@ public class Parser extends AbstractParser {
      *            | text
      *            | ( "+" | "-" | "*" | "/" | "%" ) expression expression
      *            | ( "and" | "or" ) expression expression
+     *            | ( "<" | ">" ) expression expression
      *            | "not" expression
      *            ;
      */
@@ -145,6 +152,22 @@ public class Parser extends AbstractParser {
     }
     switch (getCurrentToken().getType()) {
       case BRACKET_ROUND_OPEN: return parseExpressionParenthesis();
+      case BRACKET_ANGLE_OPEN: {
+        expect(TokenType.BRACKET_ANGLE_OPEN);
+        return new Node(NodeType.OPERATOR_LESS_THAN)
+                .withLeft(parseExpression())
+                .withRight(parseExpression());
+      }
+      case BRACKET_ANGLE_CLOSE: {
+        expect(TokenType.BRACKET_ANGLE_CLOSE);
+        return new Node(NodeType.OPERATOR_GREATER_THAN)
+                .withLeft(parseExpression())
+                .withRight(parseExpression());
+      }
+      case SYMBOL: {
+        String identifierName = expect(TokenType.SYMBOL);
+        return new Node(NodeType.IDENTIFIER).withValue(identifierName);
+      }
       case NUMBER: return parseNumber();
       case TEXT: return parseText();
       case PLUS: return parseNumericBinaryOperation(NodeType.OPERATOR_ADD);
@@ -163,7 +186,7 @@ public class Parser extends AbstractParser {
           case KEYWORD_NOT: return parseExpressionBoolean();
           default: break;
         }
-      }
+      } break;
     }
     throw new Error("token does not correspond with any expression " + getCurrentToken());
   }
@@ -191,12 +214,16 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementLoop() {
     /*
-     * statement_loop = "loop" expression statement_block ;
+     * statement_loop = "loop" whitespace expression_parenthesis whitespace statement_block ;
      */
     expectKeyword(KEYWORD_LOOP);
+    consumeWhitespace();
+    INode expressionNode = parseExpressionParenthesis();
+    consumeWhitespace();
+    INode blockNode = parseStatementBlock();
     return new Node(NodeType.LOOP)
-            .withLeft(parseExpression())
-            .withRight(parseStatementBlock());
+            .withLeft(expressionNode)
+            .withRight(blockNode);
   }
 
   @Nullable
@@ -221,7 +248,14 @@ public class Parser extends AbstractParser {
       if (getCurrentToken() == null) break;
       if (accept(TokenType.TERMINAL)) break;
       if (accept(TokenType.BRACKET_CURLY_CLOSE)) break;
-      sequenceNode = new Node(NodeType.SEQUENCE).withLeft(parseStatement()).withRight(sequenceNode);
+      if (sequenceNode == null) {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(parseStatement());
+      } else {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(sequenceNode)
+                .withRight(parseStatement());
+      }
     }
     expect(TokenType.BRACKET_CURLY_CLOSE);
     return new Node(NodeType.BLOCK).withLeft(sequenceNode);
@@ -236,20 +270,45 @@ public class Parser extends AbstractParser {
      *                   | ( "and" | "or" | "not" ) expression
      *                   ;
      */
-    if (getCurrentToken() == null) return null;
+    if (!accept(TokenType.KEYWORD)) {
+      throw new Error("expected keyword");
+    }
     String keywordValue = getCurrentToken().getValue();
     if (keywordValue == null) {
       throw new Error("keyword token missing value");
     }
     switch (keywordValue) {
-      case KEYWORD_ASSERT: return parseStatementAssert();
-      case KEYWORD_LOOP: return parseStatementLoop();
-      case KEYWORD_PRINT: return parseStatementPrint();
+      case KEYWORD_ASSERT:
+        return parseStatementAssert();
+      case KEYWORD_LOOP:
+        return parseStatementLoop();
+      case KEYWORD_PRINT:
+        return parseStatementPrint();
       case KEYWORD_AND:
       case KEYWORD_OR:
-      case KEYWORD_NOT: return parseExpressionBoolean();
+      case KEYWORD_NOT:
+        return parseExpressionBoolean();
     }
     throw new Error("unknown keyword " + keywordValue);
+  }
+
+  @Nullable
+  protected INode parseStatementSymbol() {
+    /*
+     * statement_symbol = symbol "=" expression ;
+     */
+    String symbolValue = expect(TokenType.SYMBOL);
+    if (symbolValue == null) {
+      throw new Error("symbol token missing value");
+    }
+    consumeWhitespace();
+    if (accept(TokenType.EQUALS)) {
+      expect(TokenType.EQUALS);
+      return new Node(NodeType.ASSIGN)
+              .withLeft(new Node(NodeType.IDENTIFIER).withValue(symbolValue))
+              .withRight(parseExpression());
+    }
+    throw new Error("symbol statement unrecognized " + getCurrentToken());
   }
 
   @Nullable
@@ -257,6 +316,7 @@ public class Parser extends AbstractParser {
     /*
      * statement = statement_block
      *           | statement_keyword
+     *           | statement_symbol
      *           ;
      */
     if (accept(TokenType.BRACKET_CURLY_OPEN)) {
@@ -264,6 +324,9 @@ public class Parser extends AbstractParser {
     }
     if (accept(TokenType.KEYWORD)) {
       return parseStatementKeyword();
+    }
+    if (accept(TokenType.SYMBOL)) {
+      return parseStatementSymbol();
     }
     throw new Error("unrecognized statement with token " + getCurrentToken());
   }

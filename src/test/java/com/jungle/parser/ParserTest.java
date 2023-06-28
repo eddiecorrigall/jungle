@@ -4,211 +4,315 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
+import com.jungle.token.IToken;
+import com.jungle.token.Token;
+import com.jungle.token.TokenType;
 import org.junit.Test;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.scanner.IScanner;
-import com.jungle.scanner.Scanner;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class ParserTest {
-  @NotNull IScanner scanner = new Scanner();
-  @NotNull Parser parser;
-
-  @Before
-  public void setup() {
-    parser = new Parser(scanner);
-  }
-
   @Test
   public void testParseSequence_singleNewline() {
-    scanner.load("\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.NEWLINE));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseSequence();
-    assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.SEQUENCE);
+    assertNull(ast);
   }
 
   @Test
   public void testParseSequence_doubleNewline() {
-    scanner.load("\n\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.NEWLINE));
+    tokenList.add(new Token(TokenType.NEWLINE));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseSequence();
+
+    assertNull(ast);
+  }
+
+  @Test
+  public void testParseSequence_doubleNewLineThenStatement() {
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.NEWLINE));
+    tokenList.add(new Token(TokenType.NEWLINE));
+    tokenList.add(new Token(TokenType.SYMBOL).withValue("i"));
+    tokenList.add(new Token(TokenType.EQUALS));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("10"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
+    parser.nextToken();
+
+    INode ast = parser.parseSequence();
+
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.SEQUENCE);
-    assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.SEQUENCE);
-    assertNull(ast.getLeft().getLeft());
-    assertNull(ast.getLeft().getRight());
-    assertNull(ast.getRight());
+    assertEquals(NodeType.SEQUENCE, ast.getType());
   }
 
   @Test
   public void testParseNumber_positiveInteger() {
-    scanner.load("123", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseNumber();
+
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getValue(), "123");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getType());
+    assertEquals("123", ast.getValue());
+
     assertNull(ast.getLeft());
+
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseNumber_positiveFloat() {
-    scanner.load("123.456", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
+    tokenList.add(new Token(TokenType.DOT));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("456"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseNumber();
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.LITERAL_FLOAT);
-    assertEquals(ast.getValue(), "123.456");
+    assertEquals(NodeType.LITERAL_FLOAT, ast.getType());
+    assertEquals("123.456", ast.getValue());
     assertNull(ast.getLeft());
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseExpression_negativeInteger() {
-    scanner.load("-0 123", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.MINUS));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseExpression();
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.OPERATOR_SUBTRACT);
+    assertEquals(NodeType.OPERATOR_SUBTRACT, ast.getType());
+
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getValue(), "0");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
+    assertEquals("0", ast.getLeft().getValue());
+
     assertNotNull(ast.getRight());
-    assertEquals(ast.getRight().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getRight().getValue(), "123");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getType());
+    assertEquals("123", ast.getRight().getValue());
   }
 
   @Test
   public void testParseStatementPrint_character() {
-    scanner.load("print \"0\"\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.TEXT).withValue("0"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.PRINT);
+    assertEquals(NodeType.PRINT, ast.getType());
+
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_CHARACTER);
-    assertEquals(ast.getLeft().getValue(), "0");
+    assertEquals(NodeType.LITERAL_CHARACTER, ast.getLeft().getType());
+    assertEquals("0", ast.getLeft().getValue());
+
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseStatementPrint_string() {
-    scanner.load("print \"Hello world!\"\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.TEXT).withValue("Hello world!"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementPrint();
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.PRINT);
+    assertEquals(NodeType.PRINT, ast.getType());
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_STRING);
-    assertEquals(ast.getLeft().getValue(), "Hello world!");
+    assertEquals(NodeType.LITERAL_STRING, ast.getLeft().getType());
+    assertEquals("Hello world!", ast.getLeft().getValue());
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseStatementPrint_stringWithParenthesis() {
-    scanner.load("print(\"Hello world!\")\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.BRACKET_ROUND_OPEN));
+    tokenList.add(new Token(TokenType.TEXT).withValue("Hello world!"));
+    tokenList.add(new Token(TokenType.BRACKET_ROUND_CLOSE));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementPrint();
+
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.PRINT);
+    assertEquals(NodeType.PRINT, ast.getType());
+
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_STRING);
-    assertEquals(ast.getLeft().getValue(), "Hello world!");
+    assertEquals(NodeType.LITERAL_STRING, ast.getLeft().getType());
+    assertEquals("Hello world!", ast.getLeft().getValue());
+
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseStatementPrint_float() {
-    scanner.load("print 123.456\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
+    tokenList.add(new Token(TokenType.DOT));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("456"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementPrint();
+
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.PRINT);
+    assertEquals(NodeType.PRINT, ast.getType());
+
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_FLOAT);
-    assertEquals(ast.getLeft().getValue(), "123.456");
+    assertEquals(NodeType.LITERAL_FLOAT, ast.getLeft().getType());
+    assertEquals("123.456", ast.getLeft().getValue());
+
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseExpressionBoolean_andOperation() {
-    scanner.load("and 0 1\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("and"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseExpressionBoolean();
+
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.OPERATOR_AND);
+    assertEquals(NodeType.OPERATOR_AND, ast.getType());
 
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getValue(), "0");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
+    assertEquals("0", ast.getLeft().getValue());
 
     assertNotNull(ast.getRight());
-    assertEquals(ast.getRight().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getRight().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getType());
+    assertEquals("1", ast.getRight().getValue());
   }
 
   @Test
   public void testParseExpressionBoolean_nestedBoolean() {
-    scanner.load("not and or 0 1 1\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("not"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("and"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("or"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
-    INode ast = parser.parseExpressionBoolean();
 
+    INode ast = parser.parseExpressionBoolean();
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.OPERATOR_NOT);
+    assertEquals(NodeType.OPERATOR_NOT, ast.getType());
     assertNull(ast.getValue());
 
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.OPERATOR_AND);
+    assertEquals(NodeType.OPERATOR_AND, ast.getLeft().getType());
     assertNull(ast.getLeft().getValue());
 
     assertNotNull(ast.getLeft().getLeft());
-    assertEquals(ast.getLeft().getLeft().getType(), NodeType.OPERATOR_OR);
+    assertEquals(NodeType.OPERATOR_OR, ast.getLeft().getLeft().getType());
     assertNull(ast.getLeft().getLeft().getValue());
 
     assertNotNull(ast.getLeft().getLeft().getLeft());
-    assertEquals(ast.getLeft().getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getLeft().getLeft().getValue(), "0");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
+    assertEquals("0", ast.getLeft().getLeft().getLeft().getValue());
 
     assertNotNull(ast.getLeft().getLeft().getRight());
-    assertEquals(ast.getLeft().getLeft().getRight().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getLeft().getRight().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getRight().getType());
+    assertEquals("1", ast.getLeft().getLeft().getRight().getValue());
 
     assertNotNull(ast.getLeft().getRight());
-    assertEquals(ast.getLeft().getRight().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getRight().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getRight().getType());
+    assertEquals("1", ast.getLeft().getRight().getValue());
 
     assertNull(ast.getRight());
   }
 
   @Test
   public void testParseExpressionBoolean_booleanAndNumeric() {
-    scanner.load("not + 1 0\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("not"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.PLUS));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseExpressionBoolean();
 
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.OPERATOR_NOT);
+    assertEquals(NodeType.OPERATOR_NOT, ast.getType());
 
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.OPERATOR_ADD);
+    assertEquals(NodeType.OPERATOR_ADD, ast.getLeft().getType());
     assertNull(ast.getLeft().getValue());
 
     assertNotNull(ast.getLeft().getLeft());
-    assertEquals(ast.getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getLeft().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getType());
+    assertEquals("1", ast.getLeft().getLeft().getValue());
 
     assertNull(ast.getLeft().getLeft().getLeft());
     assertNull(ast.getLeft().getLeft().getRight());
 
     assertNotNull(ast.getLeft().getRight());
-    assertEquals(ast.getLeft().getRight().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getRight().getValue(), "0");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getRight().getType());
+    assertEquals("0", ast.getLeft().getRight().getValue());
 
     assertNull(ast.getLeft().getRight().getLeft());
     assertNull(ast.getLeft().getRight().getRight());
@@ -218,24 +322,34 @@ public class ParserTest {
 
   @Test
   public void testParseStatementBlock() {
-    scanner.load("{ print 1 }\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.BRACKET_CURLY_OPEN));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("print"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.BRACKET_CURLY_CLOSE));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementBlock();
 
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.BLOCK);
+    assertEquals(NodeType.BLOCK, ast.getType());
     assertNull(ast.getValue());
 
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.SEQUENCE);
+    assertEquals(NodeType.SEQUENCE, ast.getLeft().getType());
     assertNull(ast.getLeft().getValue());
 
     assertNotNull(ast.getLeft().getLeft());
-    assertEquals(ast.getLeft().getLeft().getType(), NodeType.PRINT);
+    assertEquals(NodeType.PRINT, ast.getLeft().getLeft().getType());
     assertNull(ast.getLeft().getLeft().getValue());
 
-    assertEquals(ast.getLeft().getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getLeft().getLeft().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
+    assertEquals("1", ast.getLeft().getLeft().getLeft().getValue());
 
     assertNull(ast.getLeft().getLeft().getRight());
 
@@ -246,33 +360,49 @@ public class ParserTest {
 
   @Test
   public void testParseStatementLoop() {
-    scanner.load("loop (1) { assert 1 }\n", 1);
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("loop"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.BRACKET_ROUND_OPEN));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.BRACKET_ROUND_CLOSE));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.BRACKET_CURLY_OPEN));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("assert"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.BRACKET_CURLY_CLOSE));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
+
     INode ast = parser.parseStatementLoop();
 
     assertNotNull(ast);
-    assertEquals(ast.getType(), NodeType.LOOP);
+    assertEquals(NodeType.LOOP, ast.getType());
     assertNull(ast.getValue());
 
     assertNotNull(ast.getLeft());
-    assertEquals(ast.getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getLeft().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
+    assertEquals("0", ast.getLeft().getValue());
 
     assertNotNull(ast.getRight());
-    assertEquals(ast.getRight().getType(), NodeType.BLOCK);
+    assertEquals(NodeType.BLOCK, ast.getRight().getType());
     assertNull(ast.getRight().getValue());
 
     assertNotNull(ast.getRight().getLeft());
-    assertEquals(ast.getRight().getLeft().getType(), NodeType.SEQUENCE);
+    assertEquals(NodeType.SEQUENCE, ast.getRight().getLeft().getType());
     assertNull(ast.getRight().getLeft().getValue());
 
     assertNotNull(ast.getRight().getLeft().getLeft());
-    assertEquals(ast.getRight().getLeft().getLeft().getType(), NodeType.ASSERT);
+    assertEquals(NodeType.ASSERT, ast.getRight().getLeft().getLeft().getType());
     assertNull(ast.getRight().getLeft().getLeft().getValue());
 
     assertNotNull(ast.getRight().getLeft().getLeft().getLeft());
-    assertEquals(ast.getRight().getLeft().getLeft().getLeft().getType(), NodeType.LITERAL_INTEGER);
-    assertEquals(ast.getRight().getLeft().getLeft().getLeft().getValue(), "1");
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getLeft().getLeft().getLeft().getType());
+    assertEquals("1", ast.getRight().getLeft().getLeft().getLeft().getValue());
 
     assertNull(ast.getRight().getLeft().getLeft().getRight());
 

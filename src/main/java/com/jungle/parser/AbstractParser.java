@@ -8,29 +8,37 @@ import com.jungle.scanner.IScanner;
 import com.jungle.token.IToken;
 import com.jungle.token.TokenType;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractParser implements IParser {
+  @NotNull
+  private final Iterator<IToken> tokenIterator;
+
   @Nullable
   private IToken token;
 
-  @NotNull
-  private final IScanner scanner;
-
-  public AbstractParser(@NotNull IScanner scanner) {
-    this.scanner = scanner;
+  public AbstractParser(@NotNull Iterator<IToken> tokenIterator) {
+    super();
+    this.tokenIterator = tokenIterator;
   }
 
   @Override
   @Nullable
   public abstract INode parse();
 
+  @Nullable
   public IToken getCurrentToken() {
     return token;
   }
 
   public void nextToken() {
-    token = scanner.scan();
+    if (tokenIterator.hasNext()) {
+      token = tokenIterator.next();
+    } else {
+      token = null;
+    }
   }
 
   protected void consumeWhitespace() {

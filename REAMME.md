@@ -3,6 +3,38 @@ Jungle
 
 A toy programming language built for the Java Virtual Machine.
 
+```bash
+# Scan from Source
+cat program.source | jungle scan --output program
+
+# Parse from Tokens
+cat program.tokens | jungle parse --output program
+
+# Compile from AST
+cat program.ast | jungle compile --output Entrypoint
+
+# Run program
+java Entrypoint
+```
+
+```bash
+# Example program to count down
+
+echo '
+i = 3
+loop (not i) {
+  i = - i 1
+  print(+ 1 i)
+  print("...\n")
+}
+print("Blast off!\n")
+'  | ./run.bash scan --output - \
+   | ./run.bash parse --output - \
+   | ./run.bash compile --output Entrypoint
+
+java Entrypoint
+```
+
 ## Useful Commands
 
 - Decompile a `*.class` file: `javap -c MyClass.class`
@@ -46,4 +78,5 @@ void addMainMethod() {
 
 ## Ideas
 
-- Should I store the symbol table in the in the entrypoint class?
+- Should I store the symbol table in the entrypoint class?
+    - Would it be ok if the user could interact with the symbol table?

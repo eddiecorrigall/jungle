@@ -32,7 +32,7 @@ public class Compiler {
 
     // endregion
 
-    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
+    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) throws IOException {
         if (ast == null) {
             System.out.println("Warning: ast is null");
         }
@@ -44,13 +44,7 @@ public class Compiler {
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         ClassVisitor entrypoint = new MainClassVisitor(classWriter, mainVisitor, ast);
         classReader.accept(entrypoint, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-        // ...
-        try {
-            writeClassFile(mainClassName, classWriter.toByteArray());
-        } catch (IOException e) {
-            System.err.println("failed to compile");
-            System.err.println(e);
-        }
+        writeClassFile(mainClassName, classWriter.toByteArray());
     }
 
     // region Emit Classes - ClassWriter factories
