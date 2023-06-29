@@ -4,12 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
-import com.jungle.scanner.IScanner;
 import com.jungle.token.IToken;
 import com.jungle.token.TokenType;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 public abstract class AbstractParser implements IParser {
@@ -59,9 +57,15 @@ public abstract class AbstractParser implements IParser {
     return getCurrentToken() != null && getCurrentToken().getType() == tokenType;
   }
 
+  protected boolean acceptKeyword(@NotNull String keywordValue) {
+    return accept(TokenType.KEYWORD)
+            && getCurrentToken() != null
+            && keywordValue.equals(getCurrentToken().getValue());
+  }
+
   @Nullable
   protected String expect(@NotNull TokenType tokenType) {
-    if (accept(tokenType)) {
+    if (accept(tokenType) && getCurrentToken() != null) {
       String value = getCurrentToken().getValue();
       nextToken();
       return value;

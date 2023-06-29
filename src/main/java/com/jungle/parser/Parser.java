@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import static com.jungle.scanner.Scanner.KEYWORD_ASSERT;
 import static com.jungle.scanner.Scanner.KEYWORD_IF;
+import static com.jungle.scanner.Scanner.KEYWORD_ELSE;
 import static com.jungle.scanner.Scanner.KEYWORD_LOOP;
 import static com.jungle.scanner.Scanner.KEYWORD_PRINT;
 import static com.jungle.scanner.Scanner.KEYWORD_AND;
@@ -236,6 +237,34 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
+  protected INode parseStatementIf() {
+    /*
+     * statement_if = "if" expression statement_block
+     *              | "if" expression statement_block "else" statement_block
+     *              ;
+     */
+    expectKeyword(KEYWORD_IF);
+    Node ifNode = new Node(NodeType.IF).withLeft(parseExpression());
+    consumeWhitespace();
+    if (!accept(TokenType.BRACKET_CURLY_OPEN)) {
+      throw new Error("expected if-block but got " + getCurrentToken());
+    }
+    INode ifBlockNode = parseStatementBlock();
+    consumeWhitespace();
+    if (acceptKeyword(KEYWORD_ELSE)) {
+      expectKeyword(KEYWORD_ELSE);
+      INode elseBlockNode = parseStatementBlock();
+      return ifNode.withRight(
+              new Node(NodeType.IF_ELSE)
+                      .withLeft(ifBlockNode)
+                      .withRight(elseBlockNode)
+      );
+    } else {
+      return ifNode.withRight(ifBlockNode);
+    }
+  }
+
+  @Nullable
   protected INode parseStatementBlock() {
     /*
      * statement_block = whitespace "{" whitespace sequence whitespace "}" ;
@@ -267,6 +296,7 @@ public class Parser extends AbstractParser {
      * statement_keyword = statement_assert
      *                   | statement_loop
      *                   | statement_print
+     *                   | statement_if
      *                   | ( "and" | "or" | "not" ) expression
      *                   ;
      */
@@ -284,6 +314,8 @@ public class Parser extends AbstractParser {
         return parseStatementLoop();
       case KEYWORD_PRINT:
         return parseStatementPrint();
+      case KEYWORD_IF:
+        return parseStatementIf();
       case KEYWORD_AND:
       case KEYWORD_OR:
       case KEYWORD_NOT:

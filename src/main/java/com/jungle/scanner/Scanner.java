@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 public class Scanner extends AbstractScanner {
   public static final String KEYWORD_ASSERT = "assert";
   public static final String KEYWORD_IF = "if";
+
+  public static final String KEYWORD_ELSE = "else";
   public static final String KEYWORD_LOOP = "loop";
   public static final String KEYWORD_PRINT = "print";
   public static final String KEYWORD_AND = "and";
@@ -29,6 +31,7 @@ public class Scanner extends AbstractScanner {
   public static final List<String> KEYWORDS = Arrays.asList(
           KEYWORD_ASSERT,
           KEYWORD_IF,
+          KEYWORD_ELSE,
           KEYWORD_LOOP,
           KEYWORD_PRINT,
           KEYWORD_AND,
