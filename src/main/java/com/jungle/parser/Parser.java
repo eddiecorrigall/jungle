@@ -11,14 +11,7 @@ import com.jungle.token.TokenType;
 
 import java.util.Iterator;
 
-import static com.jungle.scanner.Scanner.KEYWORD_ASSERT;
-import static com.jungle.scanner.Scanner.KEYWORD_IF;
-import static com.jungle.scanner.Scanner.KEYWORD_ELSE;
-import static com.jungle.scanner.Scanner.KEYWORD_LOOP;
-import static com.jungle.scanner.Scanner.KEYWORD_PRINT;
-import static com.jungle.scanner.Scanner.KEYWORD_AND;
-import static com.jungle.scanner.Scanner.KEYWORD_OR;
-import static com.jungle.scanner.Scanner.KEYWORD_NOT;
+import static com.jungle.scanner.Scanner.*;
 
 public class Parser extends AbstractParser {
 
@@ -143,7 +136,7 @@ public class Parser extends AbstractParser {
      *            | text
      *            | ( "+" | "-" | "*" | "/" | "%" ) expression expression
      *            | ( "and" | "or" ) expression expression
-     *            | ( "<" | ">" ) expression expression
+     *            | ( "equals" | "greaterThan" | "lessThan" ) expression expression
      *            | "not" expression
      *            ;
      */
@@ -185,6 +178,24 @@ public class Parser extends AbstractParser {
           case KEYWORD_AND:
           case KEYWORD_OR:
           case KEYWORD_NOT: return parseExpressionBoolean();
+          case KEYWORD_EQUALS: {
+            expectKeyword(KEYWORD_EQUALS);
+            return new Node(NodeType.OPERATOR_EQUAL)
+                    .withLeft(parseExpression())
+                    .withRight(parseExpression());
+          }
+          case KEYWORD_GREATER_THAN: {
+            expectKeyword(KEYWORD_GREATER_THAN);
+            return new Node(NodeType.OPERATOR_GREATER_THAN)
+                    .withLeft(parseExpression())
+                    .withRight(parseExpression());
+          }
+          case KEYWORD_LESS_THAN: {
+            expectKeyword(KEYWORD_LESS_THAN);
+            return new Node(NodeType.OPERATOR_LESS_THAN)
+                    .withLeft(parseExpression())
+                    .withRight(parseExpression());
+          }
           default: break;
         }
       } break;

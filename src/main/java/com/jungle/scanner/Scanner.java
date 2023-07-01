@@ -20,13 +20,18 @@ import org.jetbrains.annotations.Nullable;
 public class Scanner extends AbstractScanner {
   public static final String KEYWORD_ASSERT = "assert";
   public static final String KEYWORD_IF = "if";
-
   public static final String KEYWORD_ELSE = "else";
   public static final String KEYWORD_LOOP = "loop";
   public static final String KEYWORD_PRINT = "print";
   public static final String KEYWORD_AND = "and";
   public static final String KEYWORD_OR = "or";
   public static final String KEYWORD_NOT = "not";
+
+  public static final String KEYWORD_EQUALS = "equals";
+  public static final String KEYWORD_GREATER_THAN = "greaterThan";
+  public static final String KEYWORD_LESS_THAN = "lessThan";
+
+  // TODO: keyword "in" - if x in 1...3 { }
 
   public static final List<String> KEYWORDS = Arrays.asList(
           KEYWORD_ASSERT,
@@ -36,7 +41,10 @@ public class Scanner extends AbstractScanner {
           KEYWORD_PRINT,
           KEYWORD_AND,
           KEYWORD_OR,
-          KEYWORD_NOT
+          KEYWORD_NOT,
+          KEYWORD_EQUALS,
+          KEYWORD_GREATER_THAN,
+          KEYWORD_LESS_THAN
   );
 
   @NotNull

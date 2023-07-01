@@ -44,10 +44,10 @@ public class IfVisitor extends BaseVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        visit(mv, ast, CompareTo.ZERO);
+        visit(mv, CompareTo.ZERO, ast);
     }
 
-    protected void visit(@NotNull MethodVisitor mv, @NotNull INode ast, @NotNull CompareTo compareTo) {
+    protected void visit(@NotNull MethodVisitor mv, @NotNull CompareTo compareTo, @NotNull INode ast) {
         System.out.println("visit if " + ast);
 
         if (!canVisit(ast)) {
@@ -57,12 +57,12 @@ public class IfVisitor extends BaseVisitor {
         /* Transform to inverse for efficient jump operation
          *
          * EXAMPLE:
-         *          IFNE #end
+         *          IFEQ #end
          * ifBlock: "block"
          * end:     ...
          *
          * EXAMPLE:
-         *            IFNE #elseBlock
+         *            IFEQ #elseBlock
          * ifBlock:   "block"
          *            GOTO #end
          * elseBlock: "block"
@@ -70,12 +70,12 @@ public class IfVisitor extends BaseVisitor {
          */
         int jumpCode;
         switch (compareTo) {
-            case ZERO: jumpCode = Opcodes.IFNE; break;
-            case NOT_ZERO: jumpCode = Opcodes.IFEQ; break;
-            case LESS_THAN_ZERO: jumpCode = Opcodes.IFGE; break;
-            case LESS_OR_EQUAL_THAN_ZERO: jumpCode = Opcodes.IFGT; break;
-            case GREATER_THAN_ZERO: jumpCode = Opcodes.IFLE; break;
-            case GREATER_OR_EQUAL_THAN_ZERO: jumpCode = Opcodes.IFLT; break;
+            case ZERO: jumpCode = Opcodes.IFEQ; break;
+            case NONZERO: jumpCode = Opcodes.IFNE; break;
+            case LESS_THAN_ZERO: jumpCode = Opcodes.IFLT; break;
+            case LESS_OR_EQUAL_THAN_ZERO: jumpCode = Opcodes.IFLE; break;
+            case GREATER_THAN_ZERO: jumpCode = Opcodes.IFGT; break;
+            case GREATER_OR_EQUAL_THAN_ZERO: jumpCode = Opcodes.IFGE; break;
             default: throw new Error("unhandled if comparison");
         }
 
@@ -146,21 +146,21 @@ public class IfVisitor extends BaseVisitor {
         if (elseBlockNode == null) {
             visit(
                     mv,
+                    compareTo,
                     new Node(NodeType.IF)
                         .withLeft(conditionNode)
-                        .withRight(new Node(NodeType.BLOCK).withLeft(ifBlockNode)),
-                    compareTo
+                        .withRight(new Node(NodeType.BLOCK).withLeft(ifBlockNode))
             );
         } else {
             visit(
                     mv,
+                    compareTo,
                     new Node(NodeType.IF)
                         .withLeft(conditionNode)
                         .withRight(new Node(NodeType.IF_ELSE)
                                 .withLeft(new Node(NodeType.BLOCK).withLeft(ifBlockNode))
                                 .withRight(new Node(NodeType.BLOCK).withLeft(elseBlockNode))
-                        ),
-                    compareTo
+                        )
             );
         }
     }
@@ -171,13 +171,13 @@ public class IfVisitor extends BaseVisitor {
             @NotNull INode ifBlockNode,
             @Nullable INode elseBlockNode
     ) {
-        visit(mv, CompareTo.ZERO, conditionNode, ifBlockNode, elseBlockNode);
+        visit(mv, CompareTo.NONZERO, conditionNode, ifBlockNode, elseBlockNode);
     }
 }
 
 enum CompareTo {
     ZERO,
-    NOT_ZERO,
+    NONZERO,
     LESS_THAN_ZERO,
     LESS_OR_EQUAL_THAN_ZERO,
     GREATER_THAN_ZERO,

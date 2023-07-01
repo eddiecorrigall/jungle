@@ -45,12 +45,10 @@ public class AssertVisitor extends BaseVisitor {
             throw new Error("assert missing expression");
         }
 
+        // push expression/condition onto operand stack
         expressionVisitor.visit(mv, ast.getLeft());
-        visitAssert(mv);
-    }
 
-    protected void visitAssert(@NotNull MethodVisitor mv) {
-        // if (![int expression]) throw new AssertionError();
+        // if (![int expression]) throw new AssertionError("Detailed Message");
 
         if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
@@ -58,13 +56,17 @@ public class AssertVisitor extends BaseVisitor {
 
         // if int value on operand stack is not-equal to zero then throw error
         Label endLabel = new Label();
-        mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
+        mv.visitJumpInsn(Opcodes.IFNE, endLabel);
 
         // throw new AssertionError();
         mv.visitTypeInsn(Opcodes.NEW, "java/lang/AssertionError"); // create on operand stack
         mv.visitInsn(Opcodes.DUP); // duplicate reference on operand stack
+
+        // push detailed message onto operand stack
+        mv.visitLdcInsn("assertion condition evaluated to 0 (false)");
+
         mv.visitMethodInsn( // initialize reference on operand stack
-                Opcodes.INVOKESPECIAL, "java/lang/AssertionError", "<init>", "()V", false);
+                Opcodes.INVOKESPECIAL, "java/lang/AssertionError", "<init>", "(Ljava/lang/Object;)V", false);
         mv.visitInsn(Opcodes.ATHROW); // throw reference
 
         // continue with program...

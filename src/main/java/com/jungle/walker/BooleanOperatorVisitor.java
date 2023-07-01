@@ -15,10 +15,10 @@ import java.util.Stack;
 
 public class BooleanOperatorVisitor extends BaseVisitor {
     @NotNull
-    public static INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("0");
+    public static INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("1");
 
     @NotNull
-    public static INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("1");
+    public static INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("0");
 
     public BooleanOperatorVisitor(
             @NotNull Stack<OperandStackType> operandStackTypeStack,
@@ -88,9 +88,10 @@ public class BooleanOperatorVisitor extends BaseVisitor {
                 }
                 ifVisitor.visit(
                         mv,
-                        ast.getLeft(),  // if-condition
-                        ast.getRight(), // if-block: compute other half of AND operation
-                        PUSH_FALSE_NODE // else-block: short circuit
+                        CompareTo.ZERO,     // when 0 (false), jump to else
+                        ast.getLeft(),      // if-condition
+                        ast.getRight(),     // if-block: compute other half of AND operation
+                        PUSH_FALSE_NODE     // else-block: short circuit
                 );
             } break;
             case OPERATOR_OR: {
@@ -100,10 +101,10 @@ public class BooleanOperatorVisitor extends BaseVisitor {
                 }
                 ifVisitor.visit(
                         mv,
-                        CompareTo.ZERO,
-                        ast.getLeft(),  // if-condition
-                        PUSH_TRUE_NODE, // if-block: short circuit
-                        ast.getRight()  // else-block: compute other half of OR operation
+                        CompareTo.NONZERO, // when non-0 (true), jump to else
+                        ast.getLeft(),     // if-condition
+                        ast.getRight(),    // if-block: compute other half of OR operation
+                        PUSH_TRUE_NODE     // else-block: short circuit
                 );
             } break;
             case OPERATOR_NOT: {
@@ -115,6 +116,7 @@ public class BooleanOperatorVisitor extends BaseVisitor {
                 }
                 ifVisitor.visit(
                         mv,
+                        CompareTo.ZERO,  // when 0 (false), jump to else
                         ast.getLeft(),   // if-condition
                         PUSH_FALSE_NODE, // if-block: when condition is true then return false
                         PUSH_TRUE_NODE   // else-block: when condition is false then return true
@@ -131,6 +133,7 @@ public class BooleanOperatorVisitor extends BaseVisitor {
                 }
                 ifVisitor.visit(
                         mv,
+                        CompareTo.NONZERO, // when non-0 (true), jump to else
                         new Node(NodeType.OPERATOR_SUBTRACT)
                                 .withLeft(ast.getLeft())
                                 .withRight(ast.getRight()),
@@ -149,7 +152,26 @@ public class BooleanOperatorVisitor extends BaseVisitor {
                 }
                 ifVisitor.visit(
                         mv,
-                        CompareTo.LESS_THAN_ZERO,
+                        CompareTo.GREATER_OR_EQUAL_THAN_ZERO, // when >= 0, jump to else
+                        new Node(NodeType.OPERATOR_SUBTRACT)
+                                .withLeft(ast.getLeft())
+                                .withRight(ast.getRight()),
+                        PUSH_TRUE_NODE,
+                        PUSH_FALSE_NODE
+                );
+            } break;
+            case OPERATOR_GREATER_THAN: {
+                /*
+                 * result = left - right
+                 * if (result > 0) return true
+                 * else return false
+                 */
+                if (ast.getRight() == null) {
+                    throw new Error("boolean operator missing right expression");
+                }
+                ifVisitor.visit(
+                        mv,
+                        CompareTo.LESS_OR_EQUAL_THAN_ZERO, // when <= 0, jump to else
                         new Node(NodeType.OPERATOR_SUBTRACT)
                                 .withLeft(ast.getLeft())
                                 .withRight(ast.getRight()),
