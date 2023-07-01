@@ -22,7 +22,7 @@ java Entrypoint
 
 echo '
 i = 3
-loop (not i) {
+loop (i) {
   i = - i 1
   print(+ 1 i)
   print("...\n")

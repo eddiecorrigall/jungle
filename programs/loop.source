@@ -1,7 +1,7 @@
 i = 3
-loop (i < 3) {
+loop (greaterThan i 0) {
   print(i)
   print('\n')
-  i = i - 1
+  i = - i 1
 }
 print("Blast off!\n")
