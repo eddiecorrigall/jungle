@@ -28,9 +28,9 @@ loop (i) {
   print("...\n")
 }
 print("Blast off!\n")
-'  | ./run.bash scan --output - \
-   | ./run.bash parse --output - \
-   | ./run.bash compile --output Entrypoint
+'  | jungle scan --output - \
+   | jungle parse --output - \
+   | jungle compile --output Entrypoint
 
 java Entrypoint
 ```
