@@ -10,17 +10,42 @@ import com.jungle.token.Token;
 import com.jungle.walker.*;
 import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JungleCLI {
 
+    @Nullable
+    private static Logger logger = null;
+
+    @NotNull
+    public static Logger getLogger() {
+        if (logger == null) {
+            logger = Logger.getLogger(JungleCLI.class.getSimpleName());
+            logger.setLevel(Level.INFO);
+            logger.setUseParentHandlers(false); // disable parent console logging
+            try {
+                logger.addHandler(new FileHandler("jungle.log"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        return logger;
+    }
+
+    @NotNull
     protected static BufferedReader getStandardInputBufferedReader() {
         // Read from standard input
         return new BufferedReader(new InputStreamReader(System.in));
     }
 
+    @NotNull
     protected static BufferedWriter getBufferedWriter(@NotNull CommandLine cli) throws IOException {
         String outputFileName = cli.getOptionValue("output");
         if (outputFileName == null || outputFileName.equals("-")) {
@@ -44,21 +69,21 @@ public class JungleCLI {
             writer = getBufferedWriter(cli);
             Scanner.tokenize(reader, writer, new Scanner());
         } catch (IOException e) {
-            System.err.println("failed to scan - " + e.getMessage());
+            getLogger().log(Level.SEVERE, "failed to scan", e);
             System.exit(1);
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    System.err.println("failed to close writer - " + e.getMessage());
+                    getLogger().log(Level.SEVERE, "failed to close token writer", e);
                     System.exit(1);
                 }
             }
             try {
                 reader.close();
             } catch (IOException e) {
-                System.err.println("failed to close reader - " + e.getMessage());
+                getLogger().log(Level.SEVERE, "failed to close source reader", e);
                 System.exit(1);
             }
         }
@@ -74,14 +99,14 @@ public class JungleCLI {
             writer = getBufferedWriter(cli);
             Node.save(writer, ast);
         } catch (IOException e) {
-            System.err.println("failed to save ast - " + e.getMessage());
+            getLogger().log(Level.SEVERE, "failed to save ast", e);
             System.exit(1);
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    System.err.println("failed to close writer - " + e.getMessage());
+                    getLogger().log(Level.SEVERE, "failed to close ast writer", e);
                     System.exit(1);
                 }
             }
@@ -94,13 +119,13 @@ public class JungleCLI {
         try {
             ast = Node.load(reader);
         } catch (IOException e) {
-            System.err.println("failed to load ast - " + e.getMessage());
+            getLogger().log(Level.SEVERE, "failed to load ast", e);
             System.exit(1);
         } finally {
             try {
                 reader.close();
             } catch (IOException e) {
-                System.err.println("failed to close reader - " + e.getMessage());
+                getLogger().log(Level.SEVERE, "failed to close ast reader", e);
                 System.exit(1);
             }
         }
@@ -109,7 +134,7 @@ public class JungleCLI {
         try {
             compiler.compile(outputFileName, new MainVisitor(), ast);
         } catch (IOException e) {
-            System.err.println("failed to compile - " + e.getMessage());
+            getLogger().log(Level.SEVERE, "failed to compile", e);
             System.exit(1);
         }
     }
@@ -117,27 +142,45 @@ public class JungleCLI {
     public static void main(String[] args) throws FileNotFoundException {
         Options options = new Options();
         options.addOption("h", "help", false, "Show help options.");
-        options.addRequiredOption("o", "output", true, "Output file name.");
+        options.addOption("o", "output", true, "Output file name.");
 
         CommandLineParser cliParser = new DefaultParser();
         CommandLine cli = null;
         try {
             cli = cliParser.parse(options, args);
         } catch (ParseException e) {
-            System.err.println("cli parsing failed - " + e.getMessage());
+            System.err.println("Failed to parse command-line arguments - " + e.getMessage());
+            helpCommand(options);
             System.exit(1);
         }
         if (cli.hasOption("help")) {
             helpCommand(options);
-            return;
+            System.exit(0);
+        }
+        if (args.length == 0) {
+            System.err.println("Missing command-line argument");
+            helpCommand(options);
+            System.exit(1);
         }
         String command = args[0];
         switch (command) {
             case "scan": scanCommand(cli); break;
             case "parse": parseCommand(cli); break;
-            case "compile": compileCommand(cli); break;
+            case "compile": {
+                String output = cli.getOptionValue("output");
+                boolean isEmpty = output == null || output.equals("");
+                if (isEmpty) {
+                    // Note: output is only required for compile
+                    System.err.println("Missing required option - output");
+                    helpCommand(options);
+                    System.exit(1);
+                } else {
+                    compileCommand(cli);
+                }
+            } break;
             default: {
-                System.err.println("unknown command");
+                System.err.println("Unknown command-line argument - " + command);
+                helpCommand(options);
                 System.exit(1);
             } break;
         }
