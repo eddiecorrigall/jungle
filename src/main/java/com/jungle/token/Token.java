@@ -2,6 +2,7 @@ package com.jungle.token;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,7 @@ public class Token implements IToken {
   }
 
   @Override
+  @Nullable
   public String getValue() {
     return value;
   }
@@ -50,14 +52,13 @@ public class Token implements IToken {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other == this) return true;
-    Token otherToken = (Token) other;
-    if (otherToken == null) return false;
-    if (!getType().equals(otherToken.getType())) return false;
-    if (getValue() == null) {
-      return otherToken.getValue() == null;
-    }
-    return getValue().equals(otherToken.getValue());
+    if (other == null) return false;
+    if (!(other instanceof IToken)) return false;
+    IToken otherToken = (IToken) other;
+    return new EqualsBuilder()
+            .append(getType(), otherToken.getType())
+            .append(getValue(), otherToken.getValue())
+            .isEquals();
   }
 
   @Override

@@ -8,9 +8,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 
 public class FileLogger extends AbstractLogger {
-
     private static final String LOG_FILE = "jungle.log";
-
 
     @Nullable
     private static FileHandler fileHandler = null;

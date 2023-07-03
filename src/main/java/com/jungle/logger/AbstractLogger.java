@@ -7,14 +7,11 @@ import java.util.logging.Logger;
 
 public abstract class AbstractLogger implements ILogger {
     @NotNull
-    public static final String LOG_LEVEL_ENVIRONMENT_VARIABLE = "LOG_LEVEL";
-
-    @NotNull
     public static final LogLevel DEFAULT_LOG_LEVEL = LogLevel.INFO;
 
     @NotNull
     public static LogLevel getLogLevel() {
-        String logLevelString = System.getenv(LOG_LEVEL_ENVIRONMENT_VARIABLE);
+        String logLevelString = System.getenv("LOG_LEVEL");
         if (logLevelString == null || logLevelString.length() == 0) {
             return DEFAULT_LOG_LEVEL;
         }

@@ -3,7 +3,6 @@ package com.jungle.compiler;
 import com.jungle.ast.INode;
 import com.jungle.walker.IVisitor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

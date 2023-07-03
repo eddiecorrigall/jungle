@@ -4,7 +4,6 @@ import com.jungle.ast.INode;
 import com.jungle.error.CompilerError;
 import com.jungle.logger.FileLogger;
 import com.jungle.walker.*;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.CompilerException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;

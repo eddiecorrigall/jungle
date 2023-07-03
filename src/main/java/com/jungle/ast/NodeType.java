@@ -2,10 +2,6 @@ package com.jungle.ast;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public enum NodeType {
   SEQUENCE,
   BLOCK,

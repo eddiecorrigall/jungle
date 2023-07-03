@@ -2,6 +2,7 @@ package com.jungle.symbol;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jetbrains.annotations.Nullable;
 
 public class SymbolEntry {
     // identifier type
@@ -25,12 +26,13 @@ public class SymbolEntry {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         if (other == null) return false;
-        if (other instanceof SymbolEntry == false) return false;
+        if (!(other instanceof SymbolEntry)) return false;
+        SymbolEntry otherSymbolEntry = (SymbolEntry) other;
         return new EqualsBuilder()
-                .append(getIndex(), ((SymbolEntry) other).getIndex())
-                .append(getType(), ((SymbolEntry) other).getType())
+                .append(getIndex(), otherSymbolEntry.getIndex())
+                .append(getType(), otherSymbolEntry.getType())
                 .isEquals();
     }
 

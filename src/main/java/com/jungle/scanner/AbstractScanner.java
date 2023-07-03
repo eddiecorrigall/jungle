@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.jungle.token.IToken;
 import com.jungle.token.TokenType;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractScanner implements IScanner {
   protected static boolean isLowercaseAlphabetic(char c) {
@@ -39,7 +40,7 @@ public abstract class AbstractScanner implements IScanner {
 
   public AbstractScanner() {
     super();
-    this.code = new String();
+    this.code = "";
   }
 
   @NotNull
@@ -93,7 +94,7 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public abstract IToken scan();
 
   @Override
@@ -125,12 +126,12 @@ public abstract class AbstractScanner implements IScanner {
         "offset cannot be negative"
       );
     }
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     while (!isDone() && offset > 0) {
-      buffer.append(consume());
+      builder.append(consume());
       offset--;
     }
-    return buffer.toString();
+    return builder.toString();
   }
 
   @NotNull
