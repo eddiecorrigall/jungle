@@ -1,7 +1,10 @@
 package com.jungle.compiler;
 
 import com.jungle.ast.INode;
+import com.jungle.error.CompilerError;
+import com.jungle.logger.FileLogger;
 import com.jungle.walker.*;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.CompilerException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
@@ -18,32 +21,38 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class Compiler {
 
+    public static final FileLogger log = new FileLogger(Compiler.class.getSimpleName());
+
     // region Helpers
 
-    public static void writeClassFile(@NotNull String className, byte[] classData) throws IOException {
+    public static void writeClassFile(@NotNull String className, byte[] classData) {
         Path classPath = Paths.get(className + ".class");
         try {
             Files.write(classPath, classData);
         } catch (IOException e) {
-            System.err.println("failed to write to class file");
-            throw e;
+            String message = "failed to write to class file";
+            log.error(message, e);
+            throw new CompilerError(message);
         }
     }
 
     // endregion
 
-    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) throws IOException {
-        if (ast == null) {
-            System.out.println("Warning: ast is null");
-        }
-        // Create bytes for entrypoint class
-        ClassWriter initialClassWriter = visitMainClass(mainClassName);
+    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
         // TODO: handle multi-class
-        // mutate main class and method...
+        if (ast == null) {
+            String message = "AST is null";
+            log.error(message);
+            throw new CompilerError(message);
+        }
+        log.debug("generating entrypoint class from template");
+        ClassWriter initialClassWriter = visitMainClass(mainClassName); // template
         ClassReader classReader = new ClassReader(initialClassWriter.toByteArray());
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         ClassVisitor entrypoint = new MainClassVisitor(classWriter, mainVisitor, ast);
+        log.debug("traversing AST");
         classReader.accept(entrypoint, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+        log.debug("writing class file");
         writeClassFile(mainClassName, classWriter.toByteArray());
     }
 
@@ -52,6 +61,7 @@ public class Compiler {
     @NotNull
     protected ClassWriter visitMainClass(@NotNull String className) {
         // class Entrypoint extends Object {}
+        log.debug("visit main class");
         int flags = ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES;
         ClassWriter cw = new ClassWriter(flags);
         cw.visit(
@@ -73,6 +83,7 @@ public class Compiler {
     @NotNull
     public static MethodVisitor visitDefaultConstructor(@NotNull ClassWriter cw) {
         // public ClassConstructor() { Object::super(); return; }
+        log.debug("visit default constructor");
         MethodVisitor mv = cw.visitMethod(
                 ACC_PUBLIC,
                 "<init>",
@@ -96,6 +107,7 @@ public class Compiler {
     @NotNull
     public static MethodVisitor visitMainMethod(@NotNull ClassWriter cw) {
         // public static void main(String[]) { return; }
+        log.debug("visit main method");
         MethodVisitor mv = cw.visitMethod(
                 ACC_PUBLIC + ACC_STATIC,
                 MainMethodVisitor.MAIN_METHOD_NAME,

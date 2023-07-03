@@ -3,6 +3,7 @@ package com.jungle;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.compiler.Compiler;
+import com.jungle.logger.ConsoleLogger;
 import com.jungle.parser.Parser;
 import com.jungle.scanner.Scanner;
 import com.jungle.token.IToken;
@@ -10,34 +11,14 @@ import com.jungle.token.Token;
 import com.jungle.walker.*;
 import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class JungleCLI {
-
-    @Nullable
-    private static Logger logger = null;
-
-    @NotNull
-    public static Logger getLogger() {
-        if (logger == null) {
-            logger = Logger.getLogger(JungleCLI.class.getSimpleName());
-            logger.setLevel(Level.INFO);
-            logger.setUseParentHandlers(false); // disable parent console logging
-            try {
-                logger.addHandler(new FileHandler("jungle.log"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
-        return logger;
-    }
+    // NOTE:
+    // Standard out (stdout) is used to print a string file format if and only if the command runs successfully
+    // For this reason, no stdout is used for debug, info, warn, etc.
 
     @NotNull
     protected static BufferedReader getStandardInputBufferedReader() {
@@ -69,21 +50,21 @@ public class JungleCLI {
             writer = getBufferedWriter(cli);
             Scanner.tokenize(reader, writer, new Scanner());
         } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "failed to scan", e);
+            System.err.println("failed to scan - " + e.getMessage());
             System.exit(1);
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    getLogger().log(Level.SEVERE, "failed to close token writer", e);
+                    System.err.println("failed to close token writer - " + e.getMessage());
                     System.exit(1);
                 }
             }
             try {
                 reader.close();
             } catch (IOException e) {
-                getLogger().log(Level.SEVERE, "failed to close source reader", e);
+                System.err.println("failed to close source reader - " + e.getMessage());
                 System.exit(1);
             }
         }
@@ -99,14 +80,14 @@ public class JungleCLI {
             writer = getBufferedWriter(cli);
             Node.save(writer, ast);
         } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "failed to save ast", e);
+            System.err.println("failed to save ast - " + e.getMessage());
             System.exit(1);
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    getLogger().log(Level.SEVERE, "failed to close ast writer", e);
+                    System.err.println("failed to close ast writer - " + e.getMessage());
                     System.exit(1);
                 }
             }
@@ -115,31 +96,19 @@ public class JungleCLI {
 
     protected static void compileCommand(@NotNull CommandLine cli) {
         BufferedReader reader = getStandardInputBufferedReader();
-        INode ast = null;
+        INode ast = Node.load(reader);
         try {
-            ast = Node.load(reader);
+            reader.close();
         } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "failed to load ast", e);
+            System.err.println("failed to close ast reader - " + e.getMessage());
             System.exit(1);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                getLogger().log(Level.SEVERE, "failed to close ast reader", e);
-                System.exit(1);
-            }
         }
         String outputFileName = cli.getOptionValue("output");
         Compiler compiler = new Compiler();
-        try {
-            compiler.compile(outputFileName, new MainVisitor(), ast);
-        } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "failed to compile", e);
-            System.exit(1);
-        }
+        compiler.compile(outputFileName, new MainVisitor(), ast);
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         Options options = new Options();
         options.addOption("h", "help", false, "Show help options.");
         options.addOption("o", "output", true, "Output file name.");
@@ -168,8 +137,8 @@ public class JungleCLI {
             case "parse": parseCommand(cli); break;
             case "compile": {
                 String output = cli.getOptionValue("output");
-                boolean isEmpty = output == null || output.equals("");
-                if (isEmpty) {
+                boolean isNullOrEmpty = output == null || output.length() == 0;
+                if (isNullOrEmpty) {
                     // Note: output is only required for compile
                     System.err.println("Missing required option - output");
                     helpCommand(options);

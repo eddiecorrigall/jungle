@@ -12,10 +12,10 @@ public class MainClassVisitor extends ClassVisitor {
     @NotNull
     private final IVisitor mainVisitor;
 
-    @Nullable
+    @NotNull
     private final INode ast;
 
-    public MainClassVisitor(ClassVisitor classVisitor, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
+    public MainClassVisitor(ClassVisitor classVisitor, @NotNull IVisitor mainVisitor, @NotNull INode ast) {
         super(Opcodes.ASM5, classVisitor);
         this.mainVisitor = mainVisitor;
         this.ast = ast;
@@ -26,7 +26,7 @@ public class MainClassVisitor extends ClassVisitor {
         MethodVisitor mv = super.visitMethod(flags, name, desc, signature, exceptions);
         boolean isMainMethod = MainMethodVisitor.MAIN_METHOD_NAME.equals(name);
         if (isMainMethod) {
-            // Emit custom instructions
+            Compiler.log.debug("emit custom instructions in main class");
             return new MainMethodVisitor(mv, mainVisitor, ast);
         }
         return mv;

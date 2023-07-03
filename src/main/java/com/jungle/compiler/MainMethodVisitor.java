@@ -3,7 +3,6 @@ package com.jungle.compiler;
 import com.jungle.ast.INode;
 import com.jungle.walker.IVisitor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -13,10 +12,10 @@ public class MainMethodVisitor extends MethodVisitor {
     @NotNull
     private final IVisitor mainVisitor;
 
-    @Nullable
+    @NotNull
     private final INode ast;
 
-    public MainMethodVisitor(MethodVisitor mv, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
+    public MainMethodVisitor(MethodVisitor mv, @NotNull IVisitor mainVisitor, @NotNull INode ast) {
         super(Opcodes.ASM5, mv);
         this.mainVisitor = mainVisitor;
         this.ast = ast;
@@ -25,8 +24,8 @@ public class MainMethodVisitor extends MethodVisitor {
     @Override
     public void visitInsn(final int opcode) {
         if (opcode == Opcodes.RETURN) {
-            // Insert instructions just before existing return
-            mainVisitor.visit(this, ast); // TODO: Should first argument be `this` or `mv`?
+            Compiler.log.debug("emit instructions just before existing RETURN operation");
+            mainVisitor.visit(this, ast);
         }
         super.visitInsn(opcode);
     }

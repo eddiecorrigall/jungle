@@ -1,5 +1,8 @@
 package com.jungle.ast;
 
+import com.jungle.error.LoadError;
+import com.jungle.error.SaveError;
+import com.jungle.logger.FileLogger;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -93,54 +96,98 @@ public class Node implements INode {
     return String.format("<Node type='%s' value='%s' />", getType(), getValue());
   }
 
-  // region String Serialization
+  // region Serialization
 
   protected static char TERMINAL = ';';
   protected static char DELIMITER_FIELD = '\t';
   protected static char DELIMITER_LINE = '\n';
 
-  public static void save(@NotNull BufferedWriter writer, @Nullable INode node) throws IOException {
+  // region Save AST
+  @NotNull
+  private static final FileLogger saveLog = new FileLogger("SaveAst");
+
+  public static void save(@NotNull BufferedWriter writer, @Nullable INode node) {
     // Non-recursive traversal
     Stack<INode> nodeStack = new Stack<>();
     nodeStack.push(node);
     while (nodeStack.size() > 0) {
       INode nextNode = nodeStack.pop();
+      saveLog.debug("---");
       if (nextNode == null) {
-        writer.write(TERMINAL);
+        saveLog.debug("node is terminal");
+        try {
+          writer.write(TERMINAL);
+        } catch (IOException e) {
+          throw new SaveError("failed to write terminal", e);
+        }
       } else {
-        writer.write(nextNode.getType().name());
+        saveLog.debug("type: " + nextNode.getType());
+        saveLog.debug("value: " + nextNode.getValue());
+        try {
+          writer.write(nextNode.getType().name());
+        } catch (IOException e) {
+          String message = "failed to write node type";
+          saveLog.error(message, e);
+          throw new SaveError(message);
+        }
         if (nextNode.isLeaf()) {
-          writer.write(DELIMITER_FIELD);
-          writer.write(nextNode.getValue());
+          saveLog.debug("node is leaf");
+          try {
+            writer.write(DELIMITER_FIELD);
+            writer.write(nextNode.getValue());
+          } catch (IOException e) {
+            String message = "failed to write node value";
+            saveLog.error(message, e);
+            throw new SaveError(message);
+          }
         } else {
+          saveLog.debug("node is parent");
           nodeStack.push(nextNode.getRight());
           nodeStack.push(nextNode.getLeft());
         }
       }
-      writer.write(DELIMITER_LINE);
+      try {
+        writer.write(DELIMITER_LINE);
+      } catch (IOException e) {
+        String message = "failed to write line delimiter";
+        saveLog.error(message, e);
+        throw new SaveError(message);
+      }
     }
   }
 
+  // endregion
+
+  // region Load AST
+
+  private static final FileLogger loadLog = new FileLogger("LoadAst");
+
   @Nullable
-  public static INode load(@NotNull BufferedReader reader) throws IOException {
+  public static INode load(@NotNull BufferedReader reader) {
     // https://rosettacode.org/wiki/Compiler/code_generator#Java
     // Each line as an item in a binary array/tree
     // A line always has a node type with optional value
     // The node type and value are delimited by a tab character (\t)
-    String line = reader.readLine();
+    String line;
+    try {
+      line = reader.readLine();
+    } catch (IOException e) {
+      String message = "failed to read file";
+      loadLog.error(message, e);
+      throw new LoadError(message);
+    }
     boolean hasStreamEnded = line == null;
     if (hasStreamEnded) {
-      System.out.println("WARN: load ast - end of stream reached");
+      loadLog.warn("end of stream reached");
       return null;
     }
     boolean hasEmptyLine = line.length() == 0;
     if (hasEmptyLine) {
-      System.out.println("load ast - line is empty");
+      loadLog.debug("line is empty");
       return null;
     }
     if (line.trim().startsWith(Character.toString(TERMINAL))) {
-      System.out.println("---");
-      System.out.println("terminated");
+      loadLog.debug("line is terminal");
       return null;
     }
     int splitIndex = line.indexOf(DELIMITER_FIELD);
@@ -150,20 +197,24 @@ public class Node implements INode {
       type = line;
       value = null;
     } else if (splitIndex == 0) {
-      throw new Error("load ast - line missing type");
+      String message = "line missing type";
+      loadLog.error(message);
+      throw new LoadError(message);
     } else {
       type = line.substring(0, splitIndex);
       value = line.substring(splitIndex + 1);
     }
     type = type.trim();
-    System.out.println("---");
-    System.out.println("type: " + type);
-    System.out.println("value: " + value);
+    loadLog.debug("---");
+    loadLog.debug("type: " + type);
+    loadLog.debug("value: " + value);
     Node node;
     try {
        node = new Node(NodeType.valueOf(type));
     } catch (IllegalArgumentException e) {
-      throw new Error("load ast - line type invalid");
+      String message = "line type invalid";
+      loadLog.error(message, e);
+      throw new LoadError(message);
     }
     boolean isLeafNode = value != null;
     if (isLeafNode) {
@@ -180,6 +231,8 @@ public class Node implements INode {
     BufferedReader reader = new BufferedReader(new FileReader(fileName));
     return load(reader);
   }
+
+  // endregion
 
   // endregion
 }
