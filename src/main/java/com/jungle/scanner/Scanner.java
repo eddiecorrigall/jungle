@@ -26,10 +26,12 @@ public class Scanner extends AbstractScanner {
   public static final String KEYWORD_AND = "and";
   public static final String KEYWORD_OR = "or";
   public static final String KEYWORD_NOT = "not";
-
   public static final String KEYWORD_EQUALS = "equals";
   public static final String KEYWORD_GREATER_THAN = "greaterThan";
   public static final String KEYWORD_LESS_THAN = "lessThan";
+
+  public static final String KEYWORD_TRUE = "true";
+  public static final String KEYWORD_FALSE = "false";
 
   // TODO: keyword "in" - if x in 1...3 { }
 
@@ -44,7 +46,9 @@ public class Scanner extends AbstractScanner {
           KEYWORD_NOT,
           KEYWORD_EQUALS,
           KEYWORD_GREATER_THAN,
-          KEYWORD_LESS_THAN
+          KEYWORD_LESS_THAN,
+          KEYWORD_TRUE,
+          KEYWORD_FALSE
   );
 
   @NotNull

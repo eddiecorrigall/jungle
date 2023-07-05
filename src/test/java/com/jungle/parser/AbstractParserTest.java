@@ -59,31 +59,31 @@ public class AbstractParserTest {
   @Test
   public void testAccept() {
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.KEYWORD));
+    assertTrue(parser.accepts(TokenType.KEYWORD));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.SPACE));
+    assertTrue(parser.accepts(TokenType.SPACE));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.PLUS));
+    assertTrue(parser.accepts(TokenType.PLUS));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.SPACE));
+    assertTrue(parser.accepts(TokenType.SPACE));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.NUMBER));
+    assertTrue(parser.accepts(TokenType.NUMBER));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.SPACE));
+    assertTrue(parser.accepts(TokenType.SPACE));
 
     parser.nextToken();
-    assertTrue(parser.accept(TokenType.NUMBER));
+    assertTrue(parser.accepts(TokenType.NUMBER));
   }
 
   @Test
   public void testNotAccept() {
     parser.nextToken();
-    assertFalse(parser.accept(TokenType.PLUS));
+    assertFalse(parser.accepts(TokenType.PLUS));
   }
 
   @Test

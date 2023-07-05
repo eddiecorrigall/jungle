@@ -53,14 +53,32 @@ public abstract class AbstractParser implements IParser {
     }
   }
 
-  protected boolean accept(@NotNull TokenType tokenType) {
+  private boolean accept(@NotNull TokenType tokenType) {
     return getCurrentToken() != null && getCurrentToken().getType() == tokenType;
+  }
+
+  protected boolean accepts(@NotNull TokenType... tokenTypes) {
+    for (TokenType tokenType : tokenTypes) {
+      if (accept(tokenType)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   protected boolean acceptKeyword(@NotNull String keywordValue) {
     return accept(TokenType.KEYWORD)
             && getCurrentToken() != null
             && keywordValue.equals(getCurrentToken().getValue());
+  }
+
+  protected boolean acceptKeywords(@NotNull String... keywordValues) {
+    for (String keywordValue : keywordValues) {
+      if (acceptKeyword(keywordValue)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Nullable
@@ -78,5 +96,9 @@ public abstract class AbstractParser implements IParser {
     if (!Objects.equals(expectedTokenValue, observedTokenValue)) {
       throw new Error("expected keyword token with value " + expectedTokenValue);
     }
+  }
+
+  protected Error newError(@NotNull String message) {
+    return new Error(message + " " + getCurrentToken());
   }
 }

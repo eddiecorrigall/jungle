@@ -58,7 +58,10 @@ public enum NodeType {
   LOOP,
 
   ASSERT,
-  PRINT;
+  PRINT,
+
+  TRUE,
+  FALSE;
 
   public boolean equals(@Nullable INode ast) {
     throw new UnsupportedOperationException("cannot compare node to node type");

@@ -11,7 +11,7 @@ SEQUENCE
         IDENTIFIER	x
         LITERAL_INTEGER	3
       ASSERT
-        OPERATOR_SUBTRACT
+        OPERATOR_EQUAL
           IDENTIFIER	x
           LITERAL_INTEGER	3
         ;

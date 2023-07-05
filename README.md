@@ -22,15 +22,15 @@ java Entrypoint
 
 echo '
 i = 3
-loop (i) {
+loop (greaterThan i 0) {
+  print i
+  print "...\n"
   i = - i 1
-  print(+ 1 i)
-  print("...\n")
 }
 print("Blast off!\n")
-'  | jungle scan --output - \
-   | jungle parse --output - \
-   | jungle compile --output Entrypoint
+'  | ./jungle scan \
+   | ./jungle parse \
+   | ./jungle compile --output Entrypoint
 
 java Entrypoint
 ```

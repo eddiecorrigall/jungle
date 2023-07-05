@@ -213,14 +213,14 @@ public class ParserTest {
     List<IToken> tokenList = new LinkedList<>();
     tokenList.add(new Token(TokenType.KEYWORD).withValue("and"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("false"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.TERMINAL));
     Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
 
-    INode ast = parser.parseExpressionBoolean();
+    INode ast = parser.parseBooleanExpression();
 
     assertNotNull(ast);
     assertEquals(NodeType.OPERATOR_AND, ast.getType());
@@ -243,16 +243,16 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.KEYWORD).withValue("or"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("false"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.TERMINAL));
     Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
 
-    INode ast = parser.parseExpressionBoolean();
+    INode ast = parser.parseBooleanExpression();
     assertNotNull(ast);
     assertEquals(NodeType.OPERATOR_NOT, ast.getType());
     assertNull(ast.getValue());
@@ -280,8 +280,9 @@ public class ParserTest {
     assertNull(ast.getRight());
   }
 
-  @Test
+  @Test(expected = Error.class)
   public void testParseExpressionBoolean_booleanAndNumeric() {
+    // Note: mixing boolean and integer not allowed
     List<IToken> tokenList = new LinkedList<>();
     tokenList.add(new Token(TokenType.KEYWORD).withValue("not"));
     tokenList.add(new Token(TokenType.SPACE));
@@ -294,30 +295,7 @@ public class ParserTest {
     Parser parser = new Parser(tokenList.iterator());
     parser.nextToken();
 
-    INode ast = parser.parseExpressionBoolean();
-
-    assertNotNull(ast);
-    assertEquals(NodeType.OPERATOR_NOT, ast.getType());
-
-    assertNotNull(ast.getLeft());
-    assertEquals(NodeType.OPERATOR_ADD, ast.getLeft().getType());
-    assertNull(ast.getLeft().getValue());
-
-    assertNotNull(ast.getLeft().getLeft());
-    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getType());
-    assertEquals("1", ast.getLeft().getLeft().getValue());
-
-    assertNull(ast.getLeft().getLeft().getLeft());
-    assertNull(ast.getLeft().getLeft().getRight());
-
-    assertNotNull(ast.getLeft().getRight());
-    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getRight().getType());
-    assertEquals("0", ast.getLeft().getRight().getValue());
-
-    assertNull(ast.getLeft().getRight().getLeft());
-    assertNull(ast.getLeft().getRight().getRight());
-
-    assertNull(ast.getRight());
+    parser.parseBooleanExpression();
   }
 
   @Test
@@ -364,14 +342,14 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.KEYWORD).withValue("loop"));
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.BRACKET_ROUND_OPEN));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("false"));
     tokenList.add(new Token(TokenType.BRACKET_ROUND_CLOSE));
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.BRACKET_CURLY_OPEN));
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.KEYWORD).withValue("assert"));
     tokenList.add(new Token(TokenType.SPACE));
-    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.BRACKET_CURLY_CLOSE));
     tokenList.add(new Token(TokenType.TERMINAL));
@@ -407,5 +385,85 @@ public class ParserTest {
     assertNull(ast.getRight().getLeft().getLeft().getRight());
 
     assertNull(ast.getRight().getRight());
+  }
+
+  @Test
+  public void testStatement_decrement() {
+    // i = - i 1
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.SYMBOL).withValue("i"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.EQUALS));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.MINUS));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.SYMBOL).withValue("i"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
+    parser.nextToken();
+
+    INode ast = parser.parseStatementSymbol();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.ASSIGN, ast.getType());
+    assertNull(ast.getValue());
+
+    assertNotNull(ast.getLeft());
+    assertEquals(NodeType.IDENTIFIER, ast.getLeft().getType());
+    assertEquals("i", ast.getLeft().getValue());
+
+    assertNotNull(ast.getRight());
+    assertEquals(NodeType.OPERATOR_SUBTRACT, ast.getRight().getType());
+    assertNull(ast.getRight().getValue());
+
+    assertNotNull(ast.getRight().getLeft());
+    assertEquals(NodeType.IDENTIFIER, ast.getRight().getLeft().getType());
+    assertEquals("i", ast.getRight().getLeft().getValue());
+
+    assertNotNull(ast.getRight().getRight());
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getRight().getType());
+    assertEquals("1", ast.getRight().getRight().getValue());
+  }
+
+  @Test
+  public void testParseStatementAssert_mixedExpression() {
+    // assert not equals true false
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("assert"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("not"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("equals"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.KEYWORD).withValue("false"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList.iterator());
+    parser.nextToken();
+
+    INode ast = parser.parseStatementAssert();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.ASSERT, ast.getType());
+    assertNull(ast.getValue());
+
+    assertNotNull(ast.getLeft());
+    assertEquals(NodeType.OPERATOR_NOT, ast.getLeft().getType());
+    assertNull(ast.getValue());
+
+    assertNotNull(ast.getLeft().getLeft());
+    assertEquals(NodeType.OPERATOR_EQUAL, ast.getLeft().getLeft().getType());
+    assertNull(ast.getLeft().getLeft().getValue());
+
+    assertNotNull(ast.getLeft().getLeft().getLeft());
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
+    assertEquals("1", ast.getLeft().getLeft().getLeft().getValue());
+
+    assertNotNull(ast.getLeft().getLeft().getRight());
+    assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getRight().getType());
+    assertEquals("0", ast.getLeft().getLeft().getRight().getValue());
   }
 }

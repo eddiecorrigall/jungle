@@ -3,7 +3,6 @@ package com.jungle;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.compiler.Compiler;
-import com.jungle.logger.ConsoleLogger;
 import com.jungle.parser.Parser;
 import com.jungle.scanner.Scanner;
 import com.jungle.token.IToken;

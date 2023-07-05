@@ -10,6 +10,7 @@ import com.jungle.ast.NodeType;
 import com.jungle.token.TokenType;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 import static com.jungle.scanner.Scanner.*;
 
@@ -26,39 +27,43 @@ public class Parser extends AbstractParser {
     return parseSequence();
   }
 
+  // region helpers
+
   @Nullable
-  protected INode parseSequence() {
+  protected INode parseParenthesis(@NotNull Supplier<INode> parseCallback) {
     /*
-     * sequence = { statement } | "\n" ;
+     * parenthesis := "(" <parse-callback-node> ")" ;
      */
-    INode sequenceNode = null;
-    while (true) {
-      if (getCurrentToken() == null) break;
-      if (accept(TokenType.TERMINAL)) break;
-      if (accept(TokenType.NEWLINE)) {
-        nextToken();
-        continue;
-      }
-      if (sequenceNode == null) {
-        sequenceNode = new Node(NodeType.SEQUENCE)
-                .withLeft(parseStatement());
-      } else {
-        sequenceNode = new Node(NodeType.SEQUENCE)
-                .withLeft(sequenceNode)
-                .withRight(parseStatement());
-      }
-    }
-    return sequenceNode;
+    consumeWhitespace();
+    expect(TokenType.BRACKET_ROUND_OPEN);
+    INode expressionNode = parseCallback.get();
+    expect(TokenType.BRACKET_ROUND_CLOSE);
+    return expressionNode;
   }
+
+  // endregion
+
+  // region identifier
+
+  protected INode parseIdentifier() {
+    consumeWhitespace();
+    String identifierName = expect(TokenType.SYMBOL);
+    return new Node(NodeType.IDENTIFIER).withValue(identifierName);
+  }
+
+  // endregion
+
+  // region numeric
 
   @Nullable
   protected INode parseNumber() {
     /* Leaf
-     * integer = { "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" } ;
-     * number = integer [ "." integer ] ;
+     * integer := { "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" } ;
+     * decimal := integer "." integer ;
+     * number := integer | decimal ;
      */
     String integerPart = expect(TokenType.NUMBER);
-    if (accept(TokenType.DOT)) {
+    if (accepts(TokenType.DOT)) {
       // Decimal
       nextToken();
       String fractionalPart = expect(TokenType.NUMBER);
@@ -73,22 +78,63 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
-  public INode parseNumericBinaryOperation(NodeType type) {
-    // TODO: be explicit about mapping the operator, this should not be a helper
-    nextToken(); // skip operator
-    INode leftExpression = parseExpression();
-    INode rightExpression = parseExpression();
-    return new Node(type)
-            .withLeft(leftExpression)
-            .withRight(rightExpression);
+  public INode parseNumberExpression() {
+    consumeWhitespace();
+    if (accepts(TokenType.NUMBER)) {
+      return parseNumber();
+    }
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
+    }
+    if (accepts(TokenType.PLUS)) {
+      expect(TokenType.PLUS);
+      return new Node(NodeType.OPERATOR_ADD)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (accepts(TokenType.MINUS)) {
+      expect(TokenType.MINUS);
+      return new Node(NodeType.OPERATOR_SUBTRACT)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (accepts(TokenType.ASTERISK)) {
+      expect(TokenType.ASTERISK);
+      return new Node(NodeType.OPERATOR_MULTIPLY)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (accepts(TokenType.SLASH_RIGHT)) {
+      expect(TokenType.SLASH_RIGHT);
+      return new Node(NodeType.OPERATOR_DIVIDE)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (accepts(TokenType.PERCENT)) {
+      expect(TokenType.PERCENT);
+      return new Node(NodeType.OPERATOR_MODULO)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    throw newError("not a number expression");
   }
 
+  // endregion
+
+  // region text
+
   @Nullable
-  public INode parseText() {
+  public INode parseTextLiteral() {
+    /*
+     * character := <single-character> ;
+     * string := { character } ;
+     * text_literal = character | string ;
+     */
     String textValue = expect(TokenType.TEXT);
     if (textValue == null) {
-      throw new Error("text token missing value");
+      newError("text token missing value");
     }
+    assert textValue != null;
     boolean isSingleCharacter = textValue.length() == 1;
     NodeType type = isSingleCharacter
             ? NodeType.LITERAL_CHARACTER
@@ -97,141 +143,172 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
-  protected INode parseExpressionBoolean() {
+  protected INode parseTextExpression() {
     /*
-     * expression_boolean = ( "and" | "or" ) expression expression
-     *                    | "not" expression
-     *                    ;
+     * text_expression := identifier
+     *                  | text_literal
      */
-    if (getCurrentToken() == null) return null;
-    String keywordValue = expect(TokenType.KEYWORD);
-    if (keywordValue == null) {
-      throw new Error("keyword token missing value");
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
     }
-    switch (keywordValue) {
-      case KEYWORD_AND: {
-        return new Node(NodeType.OPERATOR_AND)
-                .withLeft(parseExpression())
-                .withRight(parseExpression());
-      }
-      case KEYWORD_OR: {
-        return new Node(NodeType.OPERATOR_OR)
-                .withLeft(parseExpression())
-                .withRight(parseExpression());
-      }
-      case KEYWORD_NOT: {
-        return new Node(NodeType.OPERATOR_NOT)
-                .withLeft(parseExpression());
-      }
-      default: throw new Error("not a binary expression " + getCurrentToken());
+    if (accepts(TokenType.TEXT)) {
+      return parseTextLiteral();
     }
+    throw newError("not a text expression");
   }
+
+  // endregion
+
+  // region boolean
+
+  @Nullable
+  protected INode parseBooleanExpression() {
+    /*
+     * boolean_expression := boolean_identifier
+     *                     | "(" boolean_expression ")"
+     *                     | ( "true" | "false" )
+     *                     | ( "and" | "or" ) boolean_expression boolean_expression
+     *                     | ( "greaterThan" | "lessThan" ) numeric_expression numeric_expression
+     *                     | "equals" expression expression
+     *                     | "not" boolean_expression
+     *                     ;
+     */
+    consumeWhitespace();
+    // region identifier
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
+    }
+    // endregion
+    // region literal
+    if (acceptKeyword(KEYWORD_TRUE)) {
+      expectKeyword(KEYWORD_TRUE);
+      return new Node(NodeType.LITERAL_INTEGER).withValue("1");
+    }
+    if (acceptKeyword(KEYWORD_FALSE)) {
+      expectKeyword(KEYWORD_FALSE);
+      return new Node(NodeType.LITERAL_INTEGER).withValue("0");
+    }
+    // endregion
+    // region parenthesis
+    if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
+      return parseParenthesis(this::parseBooleanExpression);
+    }
+    // endregion
+    // region predicate
+    if (acceptKeyword(KEYWORD_AND)) {
+      expectKeyword(KEYWORD_AND);
+      return new Node(NodeType.OPERATOR_AND)
+              .withLeft(parseBooleanExpression())
+              .withRight(parseBooleanExpression());
+    }
+    if (acceptKeyword(KEYWORD_OR)) {
+      expectKeyword(KEYWORD_OR);
+      return new Node(NodeType.OPERATOR_OR)
+              .withLeft(parseBooleanExpression())
+              .withRight(parseBooleanExpression());
+    }
+    if (acceptKeyword(KEYWORD_EQUALS)) {
+      expectKeyword(KEYWORD_EQUALS);
+      return new Node(NodeType.OPERATOR_EQUAL)
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
+    }
+    if (acceptKeyword(KEYWORD_GREATER_THAN)) {
+      expectKeyword(KEYWORD_GREATER_THAN);
+      return new Node(NodeType.OPERATOR_GREATER_THAN)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (acceptKeyword(KEYWORD_LESS_THAN)) {
+      expectKeyword(KEYWORD_LESS_THAN);
+      return new Node(NodeType.OPERATOR_LESS_THAN)
+              .withLeft(parseNumberExpression())
+              .withRight(parseNumberExpression());
+    }
+    if (acceptKeyword(KEYWORD_NOT)) {
+      expectKeyword(KEYWORD_NOT);
+      return new Node(NodeType.OPERATOR_NOT)
+              .withLeft(parseBooleanExpression());
+    }
+    // endregion
+    throw newError("not a boolean expression");
+  }
+
+  // endregion
+
+  // region expression
 
   @Nullable
   protected INode parseExpression() {
     /*
-     * expression = whitespace expression
-     *            | expression_parenthesis
-     *            | number
-     *            | text
-     *            | ( "+" | "-" | "*" | "/" | "%" ) expression expression
-     *            | ( "and" | "or" ) expression expression
-     *            | ( "equals" | "greaterThan" | "lessThan" ) expression expression
-     *            | "not" expression
-     *            ;
+     * expression := identifier
+     *             | "(" expression ")"
+     *             | boolean_expression
+     *             | numeric_expression
+     *             | text_expression
+     *             ;
      */
     consumeWhitespace();
-    if (getCurrentToken() == null) {
-      return null;
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
     }
-    switch (getCurrentToken().getType()) {
-      case BRACKET_ROUND_OPEN: return parseExpressionParenthesis();
-      case BRACKET_ANGLE_OPEN: {
-        expect(TokenType.BRACKET_ANGLE_OPEN);
-        return new Node(NodeType.OPERATOR_LESS_THAN)
-                .withLeft(parseExpression())
-                .withRight(parseExpression());
-      }
-      case BRACKET_ANGLE_CLOSE: {
-        expect(TokenType.BRACKET_ANGLE_CLOSE);
-        return new Node(NodeType.OPERATOR_GREATER_THAN)
-                .withLeft(parseExpression())
-                .withRight(parseExpression());
-      }
-      case SYMBOL: {
-        String identifierName = expect(TokenType.SYMBOL);
-        return new Node(NodeType.IDENTIFIER).withValue(identifierName);
-      }
-      case NUMBER: return parseNumber();
-      case TEXT: return parseText();
-      case PLUS: return parseNumericBinaryOperation(NodeType.OPERATOR_ADD);
-      case MINUS: return parseNumericBinaryOperation(NodeType.OPERATOR_SUBTRACT);
-      case ASTERISK: return parseNumericBinaryOperation(NodeType.OPERATOR_MULTIPLY);
-      case SLASH_RIGHT: return parseNumericBinaryOperation(NodeType.OPERATOR_DIVIDE);
-      case PERCENT: return parseNumericBinaryOperation(NodeType.OPERATOR_MODULO);
-      case KEYWORD: {
-        String keywordValue = getCurrentToken().getValue();
-        if (keywordValue == null) {
-          throw new Error("keyword token missing value");
-        }
-        switch (keywordValue) {
-          case KEYWORD_AND:
-          case KEYWORD_OR:
-          case KEYWORD_NOT: return parseExpressionBoolean();
-          case KEYWORD_EQUALS: {
-            expectKeyword(KEYWORD_EQUALS);
-            return new Node(NodeType.OPERATOR_EQUAL)
-                    .withLeft(parseExpression())
-                    .withRight(parseExpression());
-          }
-          case KEYWORD_GREATER_THAN: {
-            expectKeyword(KEYWORD_GREATER_THAN);
-            return new Node(NodeType.OPERATOR_GREATER_THAN)
-                    .withLeft(parseExpression())
-                    .withRight(parseExpression());
-          }
-          case KEYWORD_LESS_THAN: {
-            expectKeyword(KEYWORD_LESS_THAN);
-            return new Node(NodeType.OPERATOR_LESS_THAN)
-                    .withLeft(parseExpression())
-                    .withRight(parseExpression());
-          }
-          default: break;
-        }
-      } break;
+    if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
+      return parseParenthesis(this::parseExpression);
     }
-    throw new Error("token does not correspond with any expression " + getCurrentToken());
+    boolean isBooleanExpression = accepts(TokenType.SYMBOL) || acceptKeywords(
+            KEYWORD_AND,
+            KEYWORD_OR,
+            KEYWORD_NOT,
+            KEYWORD_EQUALS,
+            KEYWORD_GREATER_THAN,
+            KEYWORD_LESS_THAN,
+            KEYWORD_TRUE,
+            KEYWORD_FALSE
+    );
+    if (isBooleanExpression) {
+      return parseBooleanExpression();
+    }
+    boolean isTextExpression = accepts(TokenType.SYMBOL, TokenType.TEXT); // TODO
+    if (isTextExpression) {
+      return parseTextExpression();
+    }
+    boolean isNumberExpression = accepts(
+            TokenType.SYMBOL,
+            TokenType.NUMBER,
+            TokenType.PLUS,
+            TokenType.MINUS,
+            TokenType.ASTERISK,
+            TokenType.SLASH_RIGHT,
+            TokenType.PERCENT
+    );
+    if (isNumberExpression) {
+      return parseNumberExpression();
+    }
+    throw newError("not an expression");
   }
 
-  @Nullable
-  protected INode parseExpressionParenthesis() {
-    /*
-     * expression_parenthesis = "(" expression ")" ;
-     */
-    expect(TokenType.BRACKET_ROUND_OPEN);
-    INode expression = parseExpression();
-    expect(TokenType.BRACKET_ROUND_CLOSE);
-    return expression;
-  }
+  // endregion
+
+  // region statement
 
   @Nullable
   protected INode parseStatementAssert() {
     /*
-     * statement_assert = "assert" expression ;
+     * statement_assert := "assert" boolean_expression ;
      */
+    consumeWhitespace();
     expectKeyword(KEYWORD_ASSERT);
-    return new Node(NodeType.ASSERT).withLeft(parseExpression());
+    return new Node(NodeType.ASSERT).withLeft(parseBooleanExpression());
   }
 
   @Nullable
   protected INode parseStatementLoop() {
     /*
-     * statement_loop = "loop" whitespace expression_parenthesis whitespace statement_block ;
+     * statement_loop := "loop" whitespace expression_parenthesis whitespace statement_block ;
      */
+    consumeWhitespace();
     expectKeyword(KEYWORD_LOOP);
-    consumeWhitespace();
-    INode expressionNode = parseExpressionParenthesis();
-    consumeWhitespace();
+    INode expressionNode = parseBooleanExpression();
     INode blockNode = parseStatementBlock();
     return new Node(NodeType.LOOP)
             .withLeft(expressionNode)
@@ -241,8 +318,9 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementPrint() {
     /*
-     * statement_print = "print" expression ;
+     * statement_print := "print" expression ;
      */
+    consumeWhitespace();
     expectKeyword(KEYWORD_PRINT);
     return new Node(NodeType.PRINT).withLeft(parseExpression());
   }
@@ -250,16 +328,13 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementIf() {
     /*
-     * statement_if = "if" expression statement_block
-     *              | "if" expression statement_block "else" statement_block
+     * statement_if := "if" expression_boolean statement_block
+     *              | "if" expression_boolean statement_block "else" statement_block
      *              ;
      */
-    expectKeyword(KEYWORD_IF);
-    Node ifNode = new Node(NodeType.IF).withLeft(parseExpression());
     consumeWhitespace();
-    if (!accept(TokenType.BRACKET_CURLY_OPEN)) {
-      throw new Error("expected if-block but got " + getCurrentToken());
-    }
+    expectKeyword(KEYWORD_IF);
+    Node ifNode = new Node(NodeType.IF).withLeft(parseBooleanExpression());
     INode ifBlockNode = parseStatementBlock();
     consumeWhitespace();
     if (acceptKeyword(KEYWORD_ELSE)) {
@@ -278,7 +353,7 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementBlock() {
     /*
-     * statement_block = whitespace "{" whitespace sequence whitespace "}" ;
+     * statement_block := "{" sequence "}" ;
      */
     consumeWhitespace();
     expect(TokenType.BRACKET_CURLY_OPEN);
@@ -286,8 +361,8 @@ public class Parser extends AbstractParser {
     while (true) {
       consumeWhitespace();
       if (getCurrentToken() == null) break;
-      if (accept(TokenType.TERMINAL)) break;
-      if (accept(TokenType.BRACKET_CURLY_CLOSE)) break;
+      if (accepts(TokenType.TERMINAL)) break;
+      if (accepts(TokenType.BRACKET_CURLY_CLOSE)) break;
       if (sequenceNode == null) {
         sequenceNode = new Node(NodeType.SEQUENCE)
                 .withLeft(parseStatement());
@@ -304,73 +379,97 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementKeyword() {
     /*
-     * statement_keyword = statement_assert
+     * statement_keyword := statement_assert
      *                   | statement_loop
      *                   | statement_print
      *                   | statement_if
-     *                   | ( "and" | "or" | "not" ) expression
      *                   ;
      */
-    if (!accept(TokenType.KEYWORD)) {
-      throw new Error("expected keyword");
+    consumeWhitespace();
+    if (acceptKeyword(KEYWORD_ASSERT)) {
+      return parseStatementAssert();
     }
-    String keywordValue = getCurrentToken().getValue();
-    if (keywordValue == null) {
-      throw new Error("keyword token missing value");
+    if (acceptKeyword(KEYWORD_LOOP)) {
+      return parseStatementLoop();
     }
-    switch (keywordValue) {
-      case KEYWORD_ASSERT:
-        return parseStatementAssert();
-      case KEYWORD_LOOP:
-        return parseStatementLoop();
-      case KEYWORD_PRINT:
-        return parseStatementPrint();
-      case KEYWORD_IF:
-        return parseStatementIf();
-      case KEYWORD_AND:
-      case KEYWORD_OR:
-      case KEYWORD_NOT:
-        return parseExpressionBoolean();
+    if (acceptKeyword(KEYWORD_PRINT)) {
+      return parseStatementPrint();
     }
-    throw new Error("unknown keyword " + keywordValue);
+    if (acceptKeyword(KEYWORD_IF)) {
+      return parseStatementIf();
+    }
+    throw newError("not a keyword statement");
   }
 
   @Nullable
   protected INode parseStatementSymbol() {
     /*
-     * statement_symbol = symbol "=" expression ;
+     * statement_symbol := symbol "=" expression ;
      */
+    consumeWhitespace();
     String symbolValue = expect(TokenType.SYMBOL);
     if (symbolValue == null) {
       throw new Error("symbol token missing value");
     }
     consumeWhitespace();
-    if (accept(TokenType.EQUALS)) {
+    if (accepts(TokenType.EQUALS)) {
       expect(TokenType.EQUALS);
       return new Node(NodeType.ASSIGN)
               .withLeft(new Node(NodeType.IDENTIFIER).withValue(symbolValue))
               .withRight(parseExpression());
     }
-    throw new Error("symbol statement unrecognized " + getCurrentToken());
+    throw newError("not a symbol statement");
   }
 
   @Nullable
   protected INode parseStatement() {
     /*
-     * statement = statement_block
+     * statement := statement_block
      *           | statement_keyword
      *           | statement_symbol
      *           ;
      */
-    if (accept(TokenType.BRACKET_CURLY_OPEN)) {
+    consumeWhitespace();
+    if (accepts(TokenType.BRACKET_CURLY_OPEN)) {
       return parseStatementBlock();
     }
-    if (accept(TokenType.KEYWORD)) {
+    if (accepts(TokenType.KEYWORD)) {
       return parseStatementKeyword();
     }
-    if (accept(TokenType.SYMBOL)) {
+    if (accepts(TokenType.SYMBOL)) {
       return parseStatementSymbol();
     }
-    throw new Error("unrecognized statement with token " + getCurrentToken());
+    throw newError("not a statement");
   }
+
+  // endregion
+
+  // region sequence
+
+  @Nullable
+  protected INode parseSequence() {
+    /*
+     * sequence := { statement } | "\n" ;
+     */
+    INode sequenceNode = null;
+    while (true) {
+      if (getCurrentToken() == null) break;
+      if (accepts(TokenType.TERMINAL)) break;
+      if (accepts(TokenType.NEWLINE)) {
+        nextToken();
+        continue;
+      }
+      if (sequenceNode == null) {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(parseStatement());
+      } else {
+        sequenceNode = new Node(NodeType.SEQUENCE)
+                .withLeft(sequenceNode)
+                .withRight(parseStatement());
+      }
+    }
+    return sequenceNode;
+  }
+
+  // endregion
 }
