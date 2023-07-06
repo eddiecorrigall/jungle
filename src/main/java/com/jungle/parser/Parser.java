@@ -131,9 +131,9 @@ public class Parser extends AbstractParser {
      */
     String textValue = expect(TokenType.TEXT);
     if (textValue == null) {
-      newError("text token missing value");
+      throw newError("text token missing value");
     }
-    assert textValue != null;
+    // Note: a character literal cannot be empty, but a string literal can be empty
     boolean isSingleCharacter = textValue.length() == 1;
     NodeType type = isSingleCharacter
             ? NodeType.LITERAL_CHARACTER
@@ -254,7 +254,7 @@ public class Parser extends AbstractParser {
     if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
       return parseParenthesis(this::parseExpression);
     }
-    boolean isBooleanExpression = accepts(TokenType.SYMBOL) || acceptKeywords(
+    boolean isBooleanExpression = acceptKeywords(
             KEYWORD_AND,
             KEYWORD_OR,
             KEYWORD_NOT,
@@ -267,12 +267,11 @@ public class Parser extends AbstractParser {
     if (isBooleanExpression) {
       return parseBooleanExpression();
     }
-    boolean isTextExpression = accepts(TokenType.SYMBOL, TokenType.TEXT); // TODO
+    boolean isTextExpression = accepts(TokenType.TEXT); // TODO
     if (isTextExpression) {
       return parseTextExpression();
     }
     boolean isNumberExpression = accepts(
-            TokenType.SYMBOL,
             TokenType.NUMBER,
             TokenType.PLUS,
             TokenType.MINUS,
@@ -295,7 +294,6 @@ public class Parser extends AbstractParser {
     /*
      * statement_assert := "assert" boolean_expression ;
      */
-    consumeWhitespace();
     expectKeyword(KEYWORD_ASSERT);
     return new Node(NodeType.ASSERT).withLeft(parseBooleanExpression());
   }
@@ -305,7 +303,6 @@ public class Parser extends AbstractParser {
     /*
      * statement_loop := "loop" whitespace expression_parenthesis whitespace statement_block ;
      */
-    consumeWhitespace();
     expectKeyword(KEYWORD_LOOP);
     INode expressionNode = parseBooleanExpression();
     INode blockNode = parseStatementBlock();
@@ -319,7 +316,6 @@ public class Parser extends AbstractParser {
     /*
      * statement_print := "print" expression ;
      */
-    consumeWhitespace();
     expectKeyword(KEYWORD_PRINT);
     return new Node(NodeType.PRINT).withLeft(parseExpression());
   }
@@ -331,7 +327,6 @@ public class Parser extends AbstractParser {
      *              | "if" expression_boolean statement_block "else" statement_block
      *              ;
      */
-    consumeWhitespace();
     expectKeyword(KEYWORD_IF);
     Node ifNode = new Node(NodeType.IF).withLeft(parseBooleanExpression());
     INode ifBlockNode = parseStatementBlock();

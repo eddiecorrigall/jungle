@@ -466,4 +466,60 @@ public class ParserTest {
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getRight().getType());
     assertEquals("0", ast.getLeft().getLeft().getRight().getValue());
   }
+
+  @Test
+  public void testParseTextLiteral_emptyString() {
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.TEXT).withValue(""));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    INode ast = parser.parseTextLiteral();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.LITERAL_STRING, ast.getType());
+    assertEquals("", ast.getValue());
+  }
+
+  @Test
+  public void testParseTextLiteral_singleCharacter() {
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.TEXT).withValue("X"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    INode ast = parser.parseTextLiteral();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.LITERAL_CHARACTER, ast.getType());
+    assertEquals("X", ast.getValue());
+  }
+
+  @Test
+  public void testParseTextLiteral_string() {
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.TEXT).withValue("0xDEADBEEF"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    INode ast = parser.parseTextLiteral();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.LITERAL_STRING, ast.getType());
+    assertEquals("0xDEADBEEF", ast.getValue());
+  }
+
+  @Test(expected = Error.class)
+  public void testParseTextLiteral_error() {
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.TEXT));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    parser.parseTextLiteral();
+  }
 }
