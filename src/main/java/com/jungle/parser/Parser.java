@@ -9,15 +9,14 @@ import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import com.jungle.token.TokenType;
 
-import java.util.Iterator;
 import java.util.function.Supplier;
 
 import static com.jungle.scanner.Scanner.*;
 
 public class Parser extends AbstractParser {
 
-  public Parser(@NotNull Iterator<IToken> tokenIterator) {
-    super(tokenIterator);
+  public Parser(@NotNull Iterable<IToken> tokenIterable) {
+    super(tokenIterable);
   }
 
   @Override

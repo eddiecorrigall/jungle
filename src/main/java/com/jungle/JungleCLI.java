@@ -72,7 +72,7 @@ public class JungleCLI {
     protected static void parseCommand(@NotNull CommandLine cli) {
         BufferedReader reader = getStandardInputBufferedReader();
         List<IToken> tokenList = Token.load(reader);
-        Parser parser = new Parser(tokenList.iterator());
+        Parser parser = new Parser(tokenList);
         INode ast = parser.parse();
         BufferedWriter writer = null;
         try {

@@ -22,16 +22,20 @@ public abstract class AbstractParser implements IParser {
     this.tokenIterator = tokenIterator;
   }
 
+  public AbstractParser(@NotNull Iterable<IToken> tokenIterable) {
+    this(tokenIterable.iterator());
+  }
+
   @Override
   @Nullable
   public abstract INode parse();
 
   @Nullable
-  public IToken getCurrentToken() {
+  protected IToken getCurrentToken() {
     return token;
   }
 
-  public void nextToken() {
+  protected void nextToken() {
     if (tokenIterator.hasNext()) {
       token = tokenIterator.next();
     } else {
@@ -42,19 +46,17 @@ public abstract class AbstractParser implements IParser {
   protected void consumeWhitespace() {
     while (true) {
       if (getCurrentToken() == null) break;
-      if (getCurrentToken().getType() == TokenType.TERMINAL) break;
-      switch (getCurrentToken().getType()) {
-        case SPACE: case TAB: case NEWLINE: {
-          nextToken();
-          continue;
-        }
+      if (accepts(TokenType.TERMINAL)) break;
+      if (accepts(TokenType.SPACE, TokenType.TAB, TokenType.NEWLINE)) {
+        nextToken();
+        continue;
       }
       break;
     }
   }
 
   private boolean accept(@NotNull TokenType tokenType) {
-    return getCurrentToken() != null && getCurrentToken().getType() == tokenType;
+    return getCurrentToken() != null && tokenType.equals(getCurrentToken().getType());
   }
 
   protected boolean accepts(@NotNull TokenType... tokenTypes) {
@@ -82,19 +84,20 @@ public abstract class AbstractParser implements IParser {
   }
 
   @Nullable
-  protected String expect(@NotNull TokenType tokenType) {
-    if (accept(tokenType) && getCurrentToken() != null) {
+  protected String expect(@NotNull TokenType expectedTokenType) {
+    if (accept(expectedTokenType)) {
+      assert getCurrentToken() != null;
       String value = getCurrentToken().getValue();
       nextToken();
       return value;
     }
-    throw new Error("expected token type " + tokenType.name() + " but got token " + getCurrentToken());
+    throw newError("expected token type " + expectedTokenType.name() + " but got token " + getCurrentToken());
   }
 
   protected void expectKeyword(@NotNull String expectedTokenValue) {
     String observedTokenValue = expect(TokenType.KEYWORD);
     if (!Objects.equals(expectedTokenValue, observedTokenValue)) {
-      throw new Error("expected keyword token with value " + expectedTokenValue);
+      throw newError("expected keyword token with value " + expectedTokenValue);
     }
   }
 

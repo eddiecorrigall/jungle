@@ -21,7 +21,7 @@ public class ParserTest {
     List<IToken> tokenList = new LinkedList<>();
     tokenList.add(new Token(TokenType.NEWLINE));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseSequence();
@@ -34,7 +34,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.NEWLINE));
     tokenList.add(new Token(TokenType.NEWLINE));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseSequence();
@@ -51,7 +51,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.EQUALS));
     tokenList.add(new Token(TokenType.NUMBER).withValue("10"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseSequence();
@@ -65,7 +65,7 @@ public class ParserTest {
     List<IToken> tokenList = new LinkedList<>();
     tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseNumber();
@@ -86,7 +86,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.DOT));
     tokenList.add(new Token(TokenType.NUMBER).withValue("456"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseNumber();
@@ -105,7 +105,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.NUMBER).withValue("123"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseExpression();
@@ -128,7 +128,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.TEXT).withValue("0"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementPrint();
@@ -149,7 +149,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.TEXT).withValue("Hello world!"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementPrint();
@@ -169,7 +169,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.TEXT).withValue("Hello world!"));
     tokenList.add(new Token(TokenType.BRACKET_ROUND_CLOSE));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementPrint();
@@ -193,7 +193,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.DOT));
     tokenList.add(new Token(TokenType.NUMBER).withValue("456"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementPrint();
@@ -217,7 +217,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseBooleanExpression();
@@ -249,7 +249,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.KEYWORD).withValue("true"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseBooleanExpression();
@@ -292,7 +292,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.NUMBER).withValue("0"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     parser.parseBooleanExpression();
@@ -309,7 +309,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.BRACKET_CURLY_CLOSE));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementBlock();
@@ -353,7 +353,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.BRACKET_CURLY_CLOSE));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementLoop();
@@ -401,7 +401,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.NUMBER).withValue("1"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementSymbol();
@@ -441,7 +441,7 @@ public class ParserTest {
     tokenList.add(new Token(TokenType.SPACE));
     tokenList.add(new Token(TokenType.KEYWORD).withValue("false"));
     tokenList.add(new Token(TokenType.TERMINAL));
-    Parser parser = new Parser(tokenList.iterator());
+    Parser parser = new Parser(tokenList);
     parser.nextToken();
 
     INode ast = parser.parseStatementAssert();
