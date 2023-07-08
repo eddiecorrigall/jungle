@@ -83,7 +83,7 @@ public class JungleCLI {
             writer = getBufferedWriter(cli);
             Node.save(writer, ast);
         } catch (IOException e) {
-            System.err.println("failed to save ast - " + e.getMessage());
+            System.err.println("failed to parse - " + e.getMessage());
             System.exit(1);
         } finally {
             if (writer != null) {
