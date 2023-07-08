@@ -1,11 +1,8 @@
 package com.jungle.scanner;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.Iterator;
+import java.util.function.Function;
 
-import com.jungle.token.Token;
 import org.jetbrains.annotations.NotNull;
 
 import com.jungle.token.IToken;
@@ -141,36 +138,29 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @NotNull
-  protected String consumeNumeric() {
+  protected String consumeUntil(Function<Character, Boolean> condition) {
     int offset = 0;
     while (isValidCharacterIndexOffset(offset)) {
       char c = getLine().charAt(getCharacterIndex() + offset);
-      if (!isNumeric(c)) break;
+      if (condition.apply(c)) break;
       offset++;
     }
     return consume(offset);
+  }
+
+  @NotNull
+  protected String consumeNumeric() {
+    return consumeUntil((c) -> !isNumeric(c));
   }
 
   @NotNull
   protected String consumeAlphabetic() {
-    int offset = 0;
-    while (isValidCharacterIndexOffset(offset)) {
-      char c = getLine().charAt(getCharacterIndex() + offset);
-      if (!isAlphabetic(c)) break;
-      offset++;
-    }
-    return consume(offset);
+    return consumeUntil((c) -> !isAlphabetic(c));
   }
 
   @NotNull
   protected  String consumeUntilAndSkip(char terminal) {
-    int offset = 0;
-    while (isValidCharacterIndexOffset(offset)) {
-      char c = getLine().charAt(getCharacterIndex() + offset);
-      if (c == terminal) break;
-      offset++;
-    }
-    String s = consume(offset);
+    String s = consumeUntil((c) -> c == terminal);
     consume(); // skip terminal
     return s;
   }
