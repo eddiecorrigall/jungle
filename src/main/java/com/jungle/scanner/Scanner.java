@@ -7,6 +7,9 @@ import com.jungle.token.Token;
 import com.jungle.token.TokenType;
 import org.jetbrains.annotations.NotNull;
 
+import static java.lang.Character.isAlphabetic;
+import static java.lang.Character.isDigit;
+
 public class Scanner extends AbstractScanner {
   public static final String KEYWORD_ASSERT = "assert";
   public static final String KEYWORD_IF = "if";
@@ -59,6 +62,23 @@ public class Scanner extends AbstractScanner {
 
   public Scanner(@NotNull Iterable<String> lineIterable) {
     this(lineIterable.iterator(), KEYWORDS);
+  }
+
+  @NotNull
+  protected String consumeNumeric() {
+    return consumeUntil((c) -> !isDigit(c));
+  }
+
+  @NotNull
+  protected String consumeAlphabetic() {
+    return consumeUntil((c) -> !isAlphabetic(c));
+  }
+
+  @NotNull
+  protected  String consumeUntilAndSkip(char terminal) {
+    String s = consumeUntil((c) -> c == terminal);
+    consume(); // skip terminal
+    return s;
   }
 
   @NotNull
@@ -155,7 +175,7 @@ public class Scanner extends AbstractScanner {
         token = new Token(TokenType.TERMINAL);
         break;
       default: {
-        if (isNumeric(c)) {
+        if (isDigit(c)) {
           String s = c + consumeNumeric();
           token = new Token(TokenType.NUMBER).withValue(s);
         } else if (isAlphabetic(c)) {

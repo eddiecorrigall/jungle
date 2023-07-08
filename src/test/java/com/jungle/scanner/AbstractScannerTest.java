@@ -1,8 +1,6 @@
 package com.jungle.scanner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,42 +10,6 @@ import org.junit.Test;
 // TODO: Test abstract class only
 
 public class AbstractScannerTest {
-  @Test
-  public void testIsAlphabetic() {
-    // TODO convert to parameterized test
-    for (char c : Arrays.asList('0', ' ', '$', '&')) {
-      assertFalse(Scanner.isAlphabetic(c));
-    }
-    for (char c : Arrays.asList('a', 'h', 'I', 'Z')) {
-      assertTrue(Scanner.isAlphabetic(c));
-    }
-  }
-
-  @Test
-  public void testIsNumeric() {
-    // TODO convert to parameterized test
-    for (char c : Arrays.asList('\0', ' ', '.', '-', 'f')) {
-      assertFalse(Scanner.isNumeric(c));
-    }
-    for (char c : Arrays.asList('4', '0', '9')) {
-      assertTrue(Scanner.isNumeric(c));
-    }
-  }
-
-  @Test
-  public void testConsumeAlphabet_entireLine() {
-    Scanner scanner = new Scanner(Collections.singletonList("while"));
-    assertEquals("while", scanner.consumeAlphabetic());
-    assertEquals(6, scanner.getCharacterNumber());
-  }
-
-  @Test
-  public void testConsumeAlphabetic_firstWord() {
-    Scanner scanner = new Scanner(Collections.singletonList("var x = 123;"));
-    assertEquals("var", scanner.consumeAlphabetic());
-    assertEquals(4, scanner.getCharacterNumber());
-  }
-
   @Test(expected = IndexOutOfBoundsException.class)
   public void testSetPositionNegative() {
     Scanner scanner = new Scanner(Collections.singletonList("Hello"));
@@ -134,13 +96,13 @@ public class AbstractScannerTest {
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void testConsumeUntil_invalidNegativeCharacterNumber() {
+  public void testConsume_invalidNegativeCharacterNumber() {
     Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
     scanner.consume(-1);
   }
 
   @Test
-  public void testConsumeUntil_validCharacterNumber() {
+  public void testConsume_validCharacterNumber() {
     Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
     assertEquals("", scanner.consume(0));
     assertEquals(1, scanner.getCharacterNumber());
@@ -149,19 +111,10 @@ public class AbstractScannerTest {
   }
 
   @Test()
-  public void testConsumeUntil_invalidPositiveCharacterNumber() {
+  public void testConsume_invalidPositiveCharacterNumber() {
     Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
     String result = scanner.consume(100);
     assertEquals("var abc = 123;\n", result);
-  }
-
-  @Test
-  public void testConsumeNumeric() {
-    Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
-    scanner.consume(10);
-    assertEquals(11, scanner.getCharacterNumber());
-    assertEquals("123", scanner.consumeNumeric());
-    assertEquals(14, scanner.getCharacterNumber());
   }
 
   @Test

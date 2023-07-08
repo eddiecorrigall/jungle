@@ -9,22 +9,6 @@ import com.jungle.token.IToken;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractScanner implements IScanner {
-  protected static boolean isLowercaseAlphabetic(char c) {
-    return 'a' <= c && c <= 'z';
-  }
-
-  protected static boolean isUppercaseAlphabetic(char c) {
-    return 'A' <= c && c <= 'Z';
-  }
-
-  protected static boolean isAlphabetic(char c) {
-    return isLowercaseAlphabetic(c) || isUppercaseAlphabetic(c);
-  }
-
-  protected static boolean isNumeric(char c) {
-    return '0' <= c && c <= '9';
-  }
-
   @NotNull
   private String line;
   private int lineNumber;
@@ -146,22 +130,5 @@ public abstract class AbstractScanner implements IScanner {
       offset++;
     }
     return consume(offset);
-  }
-
-  @NotNull
-  protected String consumeNumeric() {
-    return consumeUntil((c) -> !isNumeric(c));
-  }
-
-  @NotNull
-  protected String consumeAlphabetic() {
-    return consumeUntil((c) -> !isAlphabetic(c));
-  }
-
-  @NotNull
-  protected  String consumeUntilAndSkip(char terminal) {
-    String s = consumeUntil((c) -> c == terminal);
-    consume(); // skip terminal
-    return s;
   }
 }

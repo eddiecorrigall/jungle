@@ -16,10 +16,32 @@ import com.jungle.token.Token;
 import com.jungle.token.TokenType;
 
 public class ScannerTest {
-  private final List<String> keywords = Arrays.asList("if", "else", "var", "true", "false", "return", "println");
+  @Test
+  public void testConsumeAlphabet_entireLine() {
+    Scanner scanner = new Scanner(Collections.singletonList("while"));
+    assertEquals("while", scanner.consumeAlphabetic());
+    assertEquals(6, scanner.getCharacterNumber());
+  }
+
+  @Test
+  public void testConsumeAlphabetic_firstWord() {
+    Scanner scanner = new Scanner(Collections.singletonList("var x = 123;"));
+    assertEquals("var", scanner.consumeAlphabetic());
+    assertEquals(4, scanner.getCharacterNumber());
+  }
+
+  @Test
+  public void testConsumeNumeric() {
+    Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
+    scanner.consume(10);
+    assertEquals(11, scanner.getCharacterNumber());
+    assertEquals("123", scanner.consumeNumeric());
+    assertEquals(14, scanner.getCharacterNumber());
+  }
 
   @Test
   public void testScan() {
+    List<String> keywords = Arrays.asList("if", "else", "var", "true", "false", "return", "println");
     Scanner scanner = new Scanner(Arrays.asList(
       "var inputNumber = 123;",      // line 1
       "if (inputNumber % 2 == 0) {", // line 2
