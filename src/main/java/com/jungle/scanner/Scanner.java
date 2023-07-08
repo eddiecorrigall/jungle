@@ -6,7 +6,6 @@ import com.jungle.token.IToken;
 import com.jungle.token.Token;
 import com.jungle.token.TokenType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class Scanner extends AbstractScanner {
   public static final String KEYWORD_ASSERT = "assert";

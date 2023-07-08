@@ -12,6 +12,7 @@ import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.util.Iterator;
 import java.util.List;
 
 public class JungleCLI {
@@ -44,10 +45,13 @@ public class JungleCLI {
 
     protected static void scanCommand(@NotNull CommandLine cli) {
         BufferedReader reader = getStandardInputBufferedReader();
+        Iterator<String> lineIterator = reader.lines().iterator();
+        Scanner scanner = new Scanner(lineIterator);
+        Iterable<IToken> tokenList = scanner.scan();
         BufferedWriter writer = null;
         try {
             writer = getBufferedWriter(cli);
-            Scanner.tokenize(reader, writer);
+            Token.save(writer, tokenList);
         } catch (IOException e) {
             System.err.println("failed to scan - " + e.getMessage());
             System.exit(1);

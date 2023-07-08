@@ -5,10 +5,10 @@ A toy programming language built for the Java Virtual Machine.
 
 ```bash
 # Scan from Source
-cat program.source | jungle scan --output program
+cat program.source | jungle scan --output program.tokens
 
 # Parse from Tokens
-cat program.tokens | jungle parse --output program
+cat program.tokens | jungle parse --output program.ast
 
 # Compile from AST
 cat program.ast | jungle compile --output Entrypoint

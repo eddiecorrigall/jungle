@@ -51,7 +51,7 @@ public class AbstractScannerTest {
   @Test(expected = IndexOutOfBoundsException.class)
   public void testSetPositionNegative() {
     Scanner scanner = new Scanner(Collections.singletonList("Hello"));
-    scanner.setPosition(-1);
+    scanner.setCharacterIndex(-1);
   }
 
   @Test(expected = UnsupportedOperationException.class)

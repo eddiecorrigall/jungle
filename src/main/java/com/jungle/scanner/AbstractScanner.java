@@ -29,60 +29,59 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @NotNull
-  private String code;
-
+  private String line;
+  private int lineNumber;
   @NotNull
   private final Iterator<String> lineIterator;
 
-  private int position;
-  private int lineNumber;
+  private int characterIndex;
   private int characterNumber;
 
   public AbstractScanner(@NotNull Iterator<String> lineIterator) {
     super();
-    this.code = "";
+    this.line = "";
     this.lineIterator = lineIterator;
     if (hasNextLine()) {
       nextLine();
     }
   }
 
-  protected void nextLine() {
-    setCode(lineIterator.next() + '\n');
+  private void nextLine() {
+    setLine(lineIterator.next() + '\n');
     setLineNumber(getLineNumber() + 1);
-    setPosition(0);
+    setCharacterIndex(0);
     setCharacterNumber(1);
   }
 
-  protected boolean hasNextLine() {
+  private boolean hasNextLine() {
     return lineIterator.hasNext();
   }
 
   @NotNull
-  protected String getCode() {
-    return code;
+  protected String getLine() {
+    return line;
   }
 
-  protected void setCode(@NotNull String code) {
-    this.code = code;
+  private void setLine(@NotNull String line) {
+    this.line = line;
   }
 
-  protected int getPosition() {
-    return position;
+  protected int getCharacterIndex() {
+    return characterIndex;
   }
 
-  protected void setPosition(int position) {
-    if (position < 0) {
-      throw new IndexOutOfBoundsException("position must not be negative");
+  void setCharacterIndex(int characterIndex) {
+    if (characterIndex < 0) {
+      throw new IndexOutOfBoundsException("position must be non-negative");
     }
-    this.position = position;
+    this.characterIndex = characterIndex;
   }
 
   protected int getLineNumber() {
     return lineNumber;
   }
 
-  protected void setLineNumber(int lineNumber) {
+  void setLineNumber(int lineNumber) {
     if (lineNumber <= 0) {
       throw new UnsupportedOperationException("line number must be positive");
     }
@@ -93,20 +92,20 @@ public abstract class AbstractScanner implements IScanner {
     return characterNumber;
   }
 
-  protected void setCharacterNumber(int characterNumber) {
+  void setCharacterNumber(int characterNumber) {
     if (characterNumber <= 0) {
       throw new UnsupportedOperationException("character number must be positive");
     }
     this.characterNumber = characterNumber;
   }
 
-  protected boolean isValidOffset(int offset) {
-    return (getPosition() + offset) < getCode().length();
+  private boolean isValidCharacterIndexOffset(int offset) {
+    return (getCharacterIndex() + offset) < getLine().length();
   }
 
-  public boolean isDone() {
+  private boolean hasNextCharacter() {
     if (hasNextLine()) return false;
-    return !isValidOffset(0);
+    return !isValidCharacterIndexOffset(0);
   }
 
   @Override
@@ -114,9 +113,9 @@ public abstract class AbstractScanner implements IScanner {
   public abstract Iterable<IToken> scan();
 
   protected char consume() {
-    if (!isDone()) {
-      char c = getCode().charAt(getPosition());
-      setPosition(getPosition() + 1);
+    if (!hasNextCharacter()) {
+      char c = getLine().charAt(getCharacterIndex());
+      setCharacterIndex(getCharacterIndex() + 1);
       setCharacterNumber(getCharacterNumber() + 1);
       if (c == '\n') {
         if (hasNextLine()) {
@@ -131,12 +130,10 @@ public abstract class AbstractScanner implements IScanner {
   @NotNull
   protected String consume(int offset) {
     if (offset < 0) {
-      throw new UnsupportedOperationException(
-        "offset cannot be negative"
-      );
+      throw new UnsupportedOperationException("offset must be non-negative");
     }
     StringBuilder builder = new StringBuilder();
-    while (!isDone() && offset > 0) {
+    while (!hasNextCharacter() && offset > 0) {
       builder.append(consume());
       offset--;
     }
@@ -146,8 +143,8 @@ public abstract class AbstractScanner implements IScanner {
   @NotNull
   protected String consumeNumeric() {
     int offset = 0;
-    while (isValidOffset(offset)) {
-      char c = getCode().charAt(getPosition() + offset);
+    while (isValidCharacterIndexOffset(offset)) {
+      char c = getLine().charAt(getCharacterIndex() + offset);
       if (!isNumeric(c)) break;
       offset++;
     }
@@ -157,8 +154,8 @@ public abstract class AbstractScanner implements IScanner {
   @NotNull
   protected String consumeAlphabetic() {
     int offset = 0;
-    while (isValidOffset(offset)) {
-      char c = getCode().charAt(getPosition() + offset);
+    while (isValidCharacterIndexOffset(offset)) {
+      char c = getLine().charAt(getCharacterIndex() + offset);
       if (!isAlphabetic(c)) break;
       offset++;
     }
@@ -168,23 +165,13 @@ public abstract class AbstractScanner implements IScanner {
   @NotNull
   protected  String consumeUntilAndSkip(char terminal) {
     int offset = 0;
-    while (isValidOffset(offset)) {
-      char c = getCode().charAt(getPosition() + offset);
+    while (isValidCharacterIndexOffset(offset)) {
+      char c = getLine().charAt(getCharacterIndex() + offset);
       if (c == terminal) break;
       offset++;
     }
     String s = consume(offset);
     consume(); // skip terminal
     return s;
-  }
-
-  public static void tokenize(
-    BufferedReader reader,
-    BufferedWriter writer
-  ) throws IOException {
-    Iterator<String> lineIterator = reader.lines().iterator();
-    Scanner scanner = new Scanner(lineIterator);
-    Iterable<IToken> tokenList = scanner.scan();
-    Token.save(writer, tokenList);
   }
 }
