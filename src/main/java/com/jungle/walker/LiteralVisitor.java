@@ -30,7 +30,7 @@ public class LiteralVisitor implements IVisitor {
         if (value.length() != 1) {
             throw new Error("failed to parse character as integer");
         }
-        return new Character(value.charAt(0));
+        return value.charAt(0);
     }
 
     protected static Integer stringToInteger(@NotNull String value) {
