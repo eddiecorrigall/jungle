@@ -1,6 +1,8 @@
 Jungle
 ======
 
+[![Build Status](https://github.com/eddiecorrigall/jungle/actions/workflows/main.yaml/badge.svg)](https://github.com/eddiecorrigall/jungle/actions/workflows/main.yaml)
+
 A toy programming language built for the Java Virtual Machine.
 
 ```bash
