@@ -3,6 +3,7 @@ package com.jungle.ast;
 import com.jungle.error.LoadError;
 import com.jungle.error.SaveError;
 import com.jungle.logger.FileLogger;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -17,7 +18,7 @@ public class Node implements INode {
   private final NodeType type;
 
   @Nullable
-  private String value;
+  private String rawValue;
 
   @Nullable
   private INode left;
@@ -35,16 +36,77 @@ public class Node implements INode {
     return type;
   }
 
+  // region value
+
+  @Override
   @Nullable
-  public String getValue() {
-    return value;
+  public String getRawValue() {
+    return rawValue;
   }
 
   @NotNull
-  public INode withValue(@Nullable String value) {
-    this.value = value;
+  public INode withRawValue(@Nullable String rawValue) {
+    this.rawValue = rawValue;
     return this;
   }
+
+  @Override
+  @NotNull
+  public Boolean getBooleanValue() {
+    if (getRawValue() == null) {
+      throw new Error("failed to parse value as boolean - value is null");
+    }
+    return Boolean.valueOf(getRawValue());
+  }
+
+  @Override
+  @NotNull
+  public Character getCharacterValue() {
+    if (getRawValue() == null) {
+      throw new Error("failed to parse value as character - value is null");
+    }
+    if (getRawValue().length() != 1) {
+      throw new Error("failed to parse character as integer");
+    }
+    return StringEscapeUtils.unescapeJava(getRawValue()).charAt(0);
+  }
+
+  @Override
+  @NotNull
+  public Integer getIntegerValue() {
+    if (getRawValue() == null) {
+      throw new Error("failed to parse value as integer - value is null");
+    }
+    try {
+      return Integer.parseInt(getRawValue());
+    } catch (NumberFormatException e) {
+      throw new Error("failed to parse value as integer", e);
+    }
+  }
+
+  @Override
+  @NotNull
+  public Float getFloatValue() {
+    if (getRawValue() == null) {
+      throw new Error("failed to parse value as float - value is null");
+    }
+    try {
+      return Float.parseFloat(getRawValue());
+    } catch (NumberFormatException e) {
+      throw new Error("failed to parse value as float", e);
+    }
+  }
+
+  @Override
+  @NotNull
+  public String getStringValue() {
+    if (getRawValue() == null) {
+      throw new Error("failed to parse value as string - value is null");
+    }
+    return StringEscapeUtils.unescapeJava(getRawValue());
+  }
+
+  // endregion
 
   @Nullable
   public INode getLeft() {
@@ -70,7 +132,7 @@ public class Node implements INode {
 
   @Override
   public boolean isLeaf() {
-    return getValue() != null;
+    return getRawValue() != null;
   }
 
   @Override
@@ -79,7 +141,7 @@ public class Node implements INode {
     if (!(other instanceof Node)) return false;
     Node otherNode = (Node) other;
     return new EqualsBuilder()
-            .append(getValue(), otherNode.getValue())
+            .append(getRawValue(), otherNode.getRawValue())
             .append(getType(), otherNode.getType()).isEquals();
   }
 
@@ -87,13 +149,13 @@ public class Node implements INode {
   public int hashCode() {
     return new HashCodeBuilder()
       .append(getType())
-      .append(getValue())
+      .append(getRawValue())
       .toHashCode();
   }
 
   @Override
   public String toString() {
-    return String.format("<Node type='%s' value='%s' />", getType(), getValue());
+    return String.format("<Node type='%s' value='%s' />", getType(), getRawValue());
   }
 
   // region Serialization
@@ -122,7 +184,7 @@ public class Node implements INode {
         }
       } else {
         saveLog.debug("type: " + nextNode.getType());
-        saveLog.debug("value: " + nextNode.getValue());
+        saveLog.debug("value: " + nextNode.getRawValue());
         try {
           writer.write(nextNode.getType().name());
         } catch (IOException e) {
@@ -134,7 +196,7 @@ public class Node implements INode {
           saveLog.debug("node is leaf");
           try {
             writer.write(DELIMITER_FIELD);
-            writer.write(nextNode.getValue());
+            writer.write(nextNode.getRawValue());
           } catch (IOException e) {
             String message = "failed to write node value";
             saveLog.error(message, e);
@@ -218,7 +280,7 @@ public class Node implements INode {
     }
     boolean isLeafNode = value != null;
     if (isLeafNode) {
-      return node.withValue(value);
+      return node.withRawValue(value);
     }
     // TODO: breadth-first traversal or tail-recursion?
     return node

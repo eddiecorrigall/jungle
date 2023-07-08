@@ -12,7 +12,7 @@ public class NodeTest {
         INode inputNode = new Node(NodeType.SEQUENCE)
                 .withLeft(new Node(NodeType.PRINT)
                         .withLeft(new Node(NodeType.LITERAL_STRING)
-                                .withValue("Hello\tworld!\n")));
+                                .withRawValue("Hello\tworld!\n")));
         StringWriter stringWriter = new StringWriter();
         BufferedWriter bufferedWriter = new BufferedWriter(stringWriter);
         Node.save(bufferedWriter, inputNode);

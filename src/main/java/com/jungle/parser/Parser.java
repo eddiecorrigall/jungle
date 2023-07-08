@@ -47,7 +47,7 @@ public class Parser extends AbstractParser {
   protected INode parseIdentifier() {
     consumeWhitespace();
     String identifierName = expect(TokenType.SYMBOL);
-    return new Node(NodeType.IDENTIFIER).withValue(identifierName);
+    return new Node(NodeType.IDENTIFIER).withRawValue(identifierName);
   }
 
   // endregion
@@ -68,11 +68,11 @@ public class Parser extends AbstractParser {
       String fractionalPart = expect(TokenType.NUMBER);
       // TODO: handle double
       return new Node(NodeType.LITERAL_FLOAT)
-              .withValue(integerPart + '.' + fractionalPart);
+              .withRawValue(integerPart + '.' + fractionalPart);
     } else {
       // Integer
       return new Node(NodeType.LITERAL_INTEGER)
-              .withValue(integerPart);
+              .withRawValue(integerPart);
     }
   }
 
@@ -138,7 +138,7 @@ public class Parser extends AbstractParser {
     NodeType type = isSingleCharacter
             ? NodeType.LITERAL_CHARACTER
             : NodeType.LITERAL_STRING;
-    return new Node(type).withValue(textValue);
+    return new Node(type).withRawValue(textValue);
   }
 
   @Nullable
@@ -181,11 +181,11 @@ public class Parser extends AbstractParser {
     // region literal
     if (acceptKeyword(KEYWORD_TRUE)) {
       expectKeyword(KEYWORD_TRUE);
-      return new Node(NodeType.LITERAL_INTEGER).withValue("1");
+      return new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
     }
     if (acceptKeyword(KEYWORD_FALSE)) {
       expectKeyword(KEYWORD_FALSE);
-      return new Node(NodeType.LITERAL_INTEGER).withValue("0");
+      return new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
     }
     // endregion
     // region parenthesis
@@ -409,7 +409,7 @@ public class Parser extends AbstractParser {
     if (accepts(TokenType.EQUALS)) {
       expect(TokenType.EQUALS);
       return new Node(NodeType.ASSIGN)
-              .withLeft(new Node(NodeType.IDENTIFIER).withValue(symbolValue))
+              .withLeft(new Node(NodeType.IDENTIFIER).withRawValue(symbolValue))
               .withRight(parseExpression());
     }
     throw newError("not a symbol statement");

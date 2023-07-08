@@ -22,33 +22,6 @@ public class LiteralVisitor implements IVisitor {
        this.operandStackTypeStack = operandStackTypeStack;
     }
 
-    protected static Boolean stringToBoolean(@NotNull String value) {
-        return Boolean.valueOf(value);
-    }
-
-    protected static Character stringToCharacter(@NotNull String value) {
-        if (value.length() != 1) {
-            throw new Error("failed to parse character as integer");
-        }
-        return value.charAt(0);
-    }
-
-    protected static Integer stringToInteger(@NotNull String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new Error("failed to parse string as integer", e);
-        }
-    }
-
-    protected static Float stringToFloat(@NotNull String value) {
-        try {
-            return Float.parseFloat(value);
-        } catch (NumberFormatException e) {
-            throw new Error("failed to parse string as float", e);
-        }
-    }
-
     public static final Set<NodeType> LITERALS = new HashSet<>(Arrays.asList(
             LITERAL_BOOLEAN,
             LITERAL_CHARACTER,
@@ -70,7 +43,7 @@ public class LiteralVisitor implements IVisitor {
             return;
         }
 
-        if (ast.getValue() == null) {
+        if (ast.getRawValue() == null) {
             throw new Error("literal missing value");
         }
 
@@ -79,23 +52,23 @@ public class LiteralVisitor implements IVisitor {
 
         switch (ast.getType()) {
             case LITERAL_BOOLEAN: {
-                objectValue = stringToBoolean(ast.getValue());
+                objectValue = ast.getBooleanValue();
                 type = OperandStackType.BOOLEAN;
             } break;
             case LITERAL_CHARACTER: {
-                objectValue = stringToCharacter(StringEscapeUtils.unescapeJava(ast.getValue()));
+                objectValue = ast.getCharacterValue();
                 type = OperandStackType.CHARACTER;
             } break;
             case LITERAL_INTEGER: {
-                objectValue = stringToInteger(ast.getValue());
+                objectValue = ast.getIntegerValue();
                 type = OperandStackType.INTEGER;
             } break;
             case LITERAL_FLOAT: {
-                objectValue = stringToFloat(ast.getValue());
+                objectValue = ast.getFloatValue();
                 type = OperandStackType.FLOAT;
             } break;
             case LITERAL_STRING: {
-                objectValue = StringEscapeUtils.unescapeJava(ast.getValue());
+                objectValue = ast.getStringValue();
                 type = OperandStackType.REFERENCE_OBJECT;
             } break;
             default: throw new Error("unhandled literal");

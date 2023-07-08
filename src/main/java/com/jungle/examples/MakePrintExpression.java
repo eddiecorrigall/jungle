@@ -42,15 +42,15 @@ public class MakePrintExpression {
     Node ast = new Node(NodeType.OPERATOR_MULTIPLY)
       .withLeft(
         new Node(NodeType.OPERATOR_ADD)
-          .withLeft(new Node(NodeType.LITERAL_INTEGER).withValue("1"))
-          .withRight(new Node(NodeType.LITERAL_INTEGER).withValue("2"))
+          .withLeft(new Node(NodeType.LITERAL_INTEGER).withRawValue("1"))
+          .withRight(new Node(NodeType.LITERAL_INTEGER).withRawValue("2"))
       )
       .withRight(
         new Node(NodeType.CAST_INTEGER)
           .withLeft(
             new Node(NodeType.OPERATOR_DIVIDE)
-              .withLeft(new Node(NodeType.LITERAL_FLOAT).withValue("4"))
-              .withRight(new Node(NodeType.LITERAL_FLOAT).withValue("2"))
+              .withLeft(new Node(NodeType.LITERAL_FLOAT).withRawValue("4"))
+              .withRight(new Node(NodeType.LITERAL_FLOAT).withRawValue("2"))
           )
       )
       ;

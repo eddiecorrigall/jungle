@@ -29,7 +29,7 @@ public class IdentifierVisitor extends BaseVisitor {
             return;
         }
 
-        String variableName = ast.getValue();
+        String variableName = ast.getRawValue();
         if (variableName == null) {
             throw new Error("identifier missing name");
         }

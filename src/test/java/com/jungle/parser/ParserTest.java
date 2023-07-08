@@ -72,7 +72,7 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_INTEGER, ast.getType());
-    assertEquals("123", ast.getValue());
+    assertEquals("123", ast.getRawValue());
 
     assertNull(ast.getLeft());
 
@@ -92,7 +92,7 @@ public class ParserTest {
     INode ast = parser.parseNumber();
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_FLOAT, ast.getType());
-    assertEquals("123.456", ast.getValue());
+    assertEquals("123.456", ast.getRawValue());
     assertNull(ast.getLeft());
     assertNull(ast.getRight());
   }
@@ -114,11 +114,11 @@ public class ParserTest {
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
-    assertEquals("0", ast.getLeft().getValue());
+    assertEquals("0", ast.getLeft().getRawValue());
 
     assertNotNull(ast.getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getType());
-    assertEquals("123", ast.getRight().getValue());
+    assertEquals("123", ast.getRight().getRawValue());
   }
 
   @Test
@@ -137,7 +137,7 @@ public class ParserTest {
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_CHARACTER, ast.getLeft().getType());
-    assertEquals("0", ast.getLeft().getValue());
+    assertEquals("0", ast.getLeft().getRawValue());
 
     assertNull(ast.getRight());
   }
@@ -157,7 +157,7 @@ public class ParserTest {
     assertEquals(NodeType.PRINT, ast.getType());
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_STRING, ast.getLeft().getType());
-    assertEquals("Hello world!", ast.getLeft().getValue());
+    assertEquals("Hello world!", ast.getLeft().getRawValue());
     assertNull(ast.getRight());
   }
 
@@ -179,7 +179,7 @@ public class ParserTest {
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_STRING, ast.getLeft().getType());
-    assertEquals("Hello world!", ast.getLeft().getValue());
+    assertEquals("Hello world!", ast.getLeft().getRawValue());
 
     assertNull(ast.getRight());
   }
@@ -203,7 +203,7 @@ public class ParserTest {
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_FLOAT, ast.getLeft().getType());
-    assertEquals("123.456", ast.getLeft().getValue());
+    assertEquals("123.456", ast.getLeft().getRawValue());
 
     assertNull(ast.getRight());
   }
@@ -227,11 +227,11 @@ public class ParserTest {
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
-    assertEquals("0", ast.getLeft().getValue());
+    assertEquals("0", ast.getLeft().getRawValue());
 
     assertNotNull(ast.getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getType());
-    assertEquals("1", ast.getRight().getValue());
+    assertEquals("1", ast.getRight().getRawValue());
   }
 
   @Test
@@ -255,27 +255,27 @@ public class ParserTest {
     INode ast = parser.parseBooleanExpression();
     assertNotNull(ast);
     assertEquals(NodeType.OPERATOR_NOT, ast.getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.OPERATOR_AND, ast.getLeft().getType());
-    assertNull(ast.getLeft().getValue());
+    assertNull(ast.getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft());
     assertEquals(NodeType.OPERATOR_OR, ast.getLeft().getLeft().getType());
-    assertNull(ast.getLeft().getLeft().getValue());
+    assertNull(ast.getLeft().getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft().getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
-    assertEquals("0", ast.getLeft().getLeft().getLeft().getValue());
+    assertEquals("0", ast.getLeft().getLeft().getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft().getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getRight().getType());
-    assertEquals("1", ast.getLeft().getLeft().getRight().getValue());
+    assertEquals("1", ast.getLeft().getLeft().getRight().getRawValue());
 
     assertNotNull(ast.getLeft().getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getRight().getType());
-    assertEquals("1", ast.getLeft().getRight().getValue());
+    assertEquals("1", ast.getLeft().getRight().getRawValue());
 
     assertNull(ast.getRight());
   }
@@ -316,18 +316,18 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.BLOCK, ast.getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.SEQUENCE, ast.getLeft().getType());
-    assertNull(ast.getLeft().getValue());
+    assertNull(ast.getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft());
     assertEquals(NodeType.PRINT, ast.getLeft().getLeft().getType());
-    assertNull(ast.getLeft().getLeft().getValue());
+    assertNull(ast.getLeft().getLeft().getRawValue());
 
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
-    assertEquals("1", ast.getLeft().getLeft().getLeft().getValue());
+    assertEquals("1", ast.getLeft().getLeft().getLeft().getRawValue());
 
     assertNull(ast.getLeft().getLeft().getRight());
 
@@ -360,27 +360,27 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LOOP, ast.getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getType());
-    assertEquals("0", ast.getLeft().getValue());
+    assertEquals("0", ast.getLeft().getRawValue());
 
     assertNotNull(ast.getRight());
     assertEquals(NodeType.BLOCK, ast.getRight().getType());
-    assertNull(ast.getRight().getValue());
+    assertNull(ast.getRight().getRawValue());
 
     assertNotNull(ast.getRight().getLeft());
     assertEquals(NodeType.SEQUENCE, ast.getRight().getLeft().getType());
-    assertNull(ast.getRight().getLeft().getValue());
+    assertNull(ast.getRight().getLeft().getRawValue());
 
     assertNotNull(ast.getRight().getLeft().getLeft());
     assertEquals(NodeType.ASSERT, ast.getRight().getLeft().getLeft().getType());
-    assertNull(ast.getRight().getLeft().getLeft().getValue());
+    assertNull(ast.getRight().getLeft().getLeft().getRawValue());
 
     assertNotNull(ast.getRight().getLeft().getLeft().getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getLeft().getLeft().getLeft().getType());
-    assertEquals("1", ast.getRight().getLeft().getLeft().getLeft().getValue());
+    assertEquals("1", ast.getRight().getLeft().getLeft().getLeft().getRawValue());
 
     assertNull(ast.getRight().getLeft().getLeft().getRight());
 
@@ -408,23 +408,23 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.ASSIGN, ast.getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.IDENTIFIER, ast.getLeft().getType());
-    assertEquals("i", ast.getLeft().getValue());
+    assertEquals("i", ast.getLeft().getRawValue());
 
     assertNotNull(ast.getRight());
     assertEquals(NodeType.OPERATOR_SUBTRACT, ast.getRight().getType());
-    assertNull(ast.getRight().getValue());
+    assertNull(ast.getRight().getRawValue());
 
     assertNotNull(ast.getRight().getLeft());
     assertEquals(NodeType.IDENTIFIER, ast.getRight().getLeft().getType());
-    assertEquals("i", ast.getRight().getLeft().getValue());
+    assertEquals("i", ast.getRight().getLeft().getRawValue());
 
     assertNotNull(ast.getRight().getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getRight().getRight().getType());
-    assertEquals("1", ast.getRight().getRight().getValue());
+    assertEquals("1", ast.getRight().getRight().getRawValue());
   }
 
   @Test
@@ -448,23 +448,23 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.ASSERT, ast.getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft());
     assertEquals(NodeType.OPERATOR_NOT, ast.getLeft().getType());
-    assertNull(ast.getValue());
+    assertNull(ast.getRawValue());
 
     assertNotNull(ast.getLeft().getLeft());
     assertEquals(NodeType.OPERATOR_EQUAL, ast.getLeft().getLeft().getType());
-    assertNull(ast.getLeft().getLeft().getValue());
+    assertNull(ast.getLeft().getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft().getLeft());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getLeft().getType());
-    assertEquals("1", ast.getLeft().getLeft().getLeft().getValue());
+    assertEquals("1", ast.getLeft().getLeft().getLeft().getRawValue());
 
     assertNotNull(ast.getLeft().getLeft().getRight());
     assertEquals(NodeType.LITERAL_INTEGER, ast.getLeft().getLeft().getRight().getType());
-    assertEquals("0", ast.getLeft().getLeft().getRight().getValue());
+    assertEquals("0", ast.getLeft().getLeft().getRight().getRawValue());
   }
 
   @Test
@@ -479,7 +479,7 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_STRING, ast.getType());
-    assertEquals("", ast.getValue());
+    assertEquals("", ast.getRawValue());
   }
 
   @Test
@@ -494,7 +494,7 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_CHARACTER, ast.getType());
-    assertEquals("X", ast.getValue());
+    assertEquals("X", ast.getRawValue());
   }
 
   @Test
@@ -509,7 +509,7 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_STRING, ast.getType());
-    assertEquals("0xDEADBEEF", ast.getValue());
+    assertEquals("0xDEADBEEF", ast.getRawValue());
   }
 
   @Test(expected = Error.class)

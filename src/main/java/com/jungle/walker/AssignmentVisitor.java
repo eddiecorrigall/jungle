@@ -44,7 +44,7 @@ public class AssignmentVisitor extends BaseVisitor {
             throw new Error("expected left AST to be identifier");
         }
 
-        String variableName = identifierNode.getValue();
+        String variableName = identifierNode.getRawValue();
         if (variableName == null) {
             throw new Error("identifier missing variable name");
         }

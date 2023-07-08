@@ -15,10 +15,10 @@ import java.util.Stack;
 
 public class BooleanOperatorVisitor extends BaseVisitor {
     @NotNull
-    public static INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("1");
+    public static INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
 
     @NotNull
-    public static INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withValue("0");
+    public static INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
 
     public BooleanOperatorVisitor(
             @NotNull Stack<OperandStackType> operandStackTypeStack,
