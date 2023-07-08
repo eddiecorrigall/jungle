@@ -1,15 +1,6 @@
 package com.jungle.scanner;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.jungle.token.IToken;
 import com.jungle.token.Token;
@@ -29,7 +20,6 @@ public class Scanner extends AbstractScanner {
   public static final String KEYWORD_EQUALS = "equals";
   public static final String KEYWORD_GREATER_THAN = "greaterThan";
   public static final String KEYWORD_LESS_THAN = "lessThan";
-
   public static final String KEYWORD_TRUE = "true";
   public static final String KEYWORD_FALSE = "false";
 
@@ -58,82 +48,141 @@ public class Scanner extends AbstractScanner {
     return keywords.contains(keyword);
   }
 
-  public Scanner(Collection<String> keywords) {
-    super();
+  public Scanner(@NotNull Iterator<String> lineIterator, @NotNull Collection<String> keywords) {
+    super(lineIterator);
     this.keywords = new HashSet<>();
     this.keywords.addAll(keywords);
   }
 
-  public Scanner() {
-    this(KEYWORDS);
+  public Scanner(@NotNull Iterator<String> lineIterator) {
+    this(lineIterator, KEYWORDS);
   }
 
-  @Override
-  @Nullable
-  public IToken scan() {
+  public Scanner(@NotNull Iterable<String> lineIterable) {
+    this(lineIterable.iterator(), KEYWORDS);
+  }
+
+  @NotNull
+  public IToken scanToken() {
     int lineNumber = getLineNumber();
     int characterNumber = getCharacterNumber();
     Token token;
-    if (isDone()) {
-      return null; // end of line
-    } else {
-      char c = consume();
-      switch (c) {
-        case '=': token = new Token(TokenType.EQUALS); break;
-        case '+': token = new Token(TokenType.PLUS); break;
-        case '-': token = new Token(TokenType.MINUS); break;
-        case '*': token = new Token(TokenType.ASTERISK); break;
-        case '%': token = new Token(TokenType.PERCENT); break;
-        case '/': token = new Token(TokenType.SLASH_RIGHT); break;
-        case '\\': token = new Token(TokenType.SLASH_LEFT); break;
-        case '<': token = new Token(TokenType.BRACKET_ANGLE_OPEN); break;
-        case '>': token = new Token(TokenType.BRACKET_ANGLE_CLOSE); break;
-        case '{': token = new Token(TokenType.BRACKET_CURLY_OPEN); break;
-        case '}': token = new Token(TokenType.BRACKET_CURLY_CLOSE); break;
-        case '(': token = new Token(TokenType.BRACKET_ROUND_OPEN); break;
-        case ')': token = new Token(TokenType.BRACKET_ROUND_CLOSE); break;
-        case '[': token = new Token(TokenType.BRACKET_SQUARE_OPEN); break;
-        case ']': token = new Token(TokenType.BRACKET_SQUARE_CLOSE); break;
-        case ';': token = new Token(TokenType.SEMICOLON); break;
-        case ':': token = new Token(TokenType.COLON); break;
-        case ',': token = new Token(TokenType.COMMA); break;
-        case '.': token = new Token(TokenType.DOT); break;
-        case '|': token = new Token(TokenType.PIPE); break;
-        // Text
-        case '"': token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('"')); break;
-        case '`': token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('`')); break;
-        case '\'': token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('\'')); break;
-        // Whitespace
-        case ' ': token = new Token(TokenType.SPACE); break;
-        case '\n': token = new Token(TokenType.NEWLINE); break;
-        case '\t': token = new Token(TokenType.TAB); break;
-        case '\r': token = new Token(TokenType.RETURN); break;
-        default: {
-          if (isNumeric(c)) {
-            String s = c + consumeNumerical();
-            token = new Token(TokenType.NUMBER).withValue(s);
-          } else if (isAlphabetic(c)) {
-            String s = c + consumeAlphabetical();
-            if (isKeyword(s)) {
-              token = new Token(TokenType.KEYWORD).withValue(s);
-            } else {
-              token = new Token(TokenType.SYMBOL).withValue(s);
-            }
+    char c = consume();
+    switch (c) {
+      case '=':
+        token = new Token(TokenType.EQUALS);
+        break;
+      case '+':
+        token = new Token(TokenType.PLUS);
+        break;
+      case '-':
+        token = new Token(TokenType.MINUS);
+        break;
+      case '*':
+        token = new Token(TokenType.ASTERISK);
+        break;
+      case '%':
+        token = new Token(TokenType.PERCENT);
+        break;
+      case '/':
+        token = new Token(TokenType.SLASH_RIGHT);
+        break;
+      case '\\':
+        token = new Token(TokenType.SLASH_LEFT);
+        break;
+      case '<':
+        token = new Token(TokenType.BRACKET_ANGLE_OPEN);
+        break;
+      case '>':
+        token = new Token(TokenType.BRACKET_ANGLE_CLOSE);
+        break;
+      case '{':
+        token = new Token(TokenType.BRACKET_CURLY_OPEN);
+        break;
+      case '}':
+        token = new Token(TokenType.BRACKET_CURLY_CLOSE);
+        break;
+      case '(':
+        token = new Token(TokenType.BRACKET_ROUND_OPEN);
+        break;
+      case ')':
+        token = new Token(TokenType.BRACKET_ROUND_CLOSE);
+        break;
+      case '[':
+        token = new Token(TokenType.BRACKET_SQUARE_OPEN);
+        break;
+      case ']':
+        token = new Token(TokenType.BRACKET_SQUARE_CLOSE);
+        break;
+      case ';':
+        token = new Token(TokenType.SEMICOLON);
+        break;
+      case ':':
+        token = new Token(TokenType.COLON);
+        break;
+      case ',':
+        token = new Token(TokenType.COMMA);
+        break;
+      case '.':
+        token = new Token(TokenType.DOT);
+        break;
+      case '|':
+        token = new Token(TokenType.PIPE);
+        break;
+      // Text
+      case '"':
+        token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('"'));
+        break;
+      case '`':
+        token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('`'));
+        break;
+      case '\'':
+        token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('\''));
+        break;
+      // Whitespace
+      case ' ':
+        token = new Token(TokenType.SPACE);
+        break;
+      case '\n':
+        token = new Token(TokenType.NEWLINE);
+        break;
+      case '\t':
+        token = new Token(TokenType.TAB);
+        break;
+      case '\r':
+        token = new Token(TokenType.RETURN);
+        break;
+      case '\0':
+        token = new Token(TokenType.TERMINAL);
+        break;
+      default: {
+        if (isNumeric(c)) {
+          String s = c + consumeNumeric();
+          token = new Token(TokenType.NUMBER).withValue(s);
+        } else if (isAlphabetic(c)) {
+          String s = c + consumeAlphabetic();
+          if (isKeyword(s)) {
+            token = new Token(TokenType.KEYWORD).withValue(s);
           } else {
-            token = new Token(TokenType.UNKNOWN);
+            token = new Token(TokenType.SYMBOL).withValue(s);
           }
-        } break;
+        } else {
+          token = new Token(TokenType.UNKNOWN);
+        }
       }
+      break;
     }
     return token.withPosition(lineNumber, characterNumber);
   }
 
-  public static void main(String[] args) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
-    tokenize(reader, writer, new Scanner());
-    writer.flush();
-    writer.close();
-    reader.close();
+  @NotNull
+  public Iterable<IToken> scan() {
+    List<IToken> tokenList = new LinkedList<>();
+    IToken token;
+    do {
+      token = scanToken();
+      tokenList.add(token);
+    } while (!TokenType.TERMINAL.equals(token.getType()));
+    return tokenList;
   }
 }

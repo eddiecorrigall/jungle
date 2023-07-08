@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import com.jungle.token.Token;
 import org.jetbrains.annotations.NotNull;
 
 import com.jungle.token.IToken;
-import com.jungle.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractScanner implements IScanner {
@@ -34,13 +31,31 @@ public abstract class AbstractScanner implements IScanner {
   @NotNull
   private String code;
 
+  @NotNull
+  private final Iterator<String> lineIterator;
+
   private int position;
   private int lineNumber;
   private int characterNumber;
 
-  public AbstractScanner() {
+  public AbstractScanner(@NotNull Iterator<String> lineIterator) {
     super();
     this.code = "";
+    this.lineIterator = lineIterator;
+    if (hasNextLine()) {
+      nextLine();
+    }
+  }
+
+  protected void nextLine() {
+    setCode(lineIterator.next() + '\n');
+    setLineNumber(getLineNumber() + 1);
+    setPosition(0);
+    setCharacterNumber(1);
+  }
+
+  protected boolean hasNextLine() {
+    return lineIterator.hasNext();
   }
 
   @NotNull
@@ -90,20 +105,13 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   public boolean isDone() {
+    if (hasNextLine()) return false;
     return !isValidOffset(0);
   }
 
   @Override
   @Nullable
-  public abstract IToken scan();
-
-  @Override
-  public void load(@NotNull String code, int startLineNumber) {
-    setCode(code);
-    setPosition(0);
-    setLineNumber(startLineNumber);
-    setCharacterNumber(1);
-  }
+  public abstract Iterable<IToken> scan();
 
   protected char consume() {
     if (!isDone()) {
@@ -111,8 +119,9 @@ public abstract class AbstractScanner implements IScanner {
       setPosition(getPosition() + 1);
       setCharacterNumber(getCharacterNumber() + 1);
       if (c == '\n') {
-        setLineNumber(getLineNumber() + 1);
-        setCharacterNumber(1);
+        if (hasNextLine()) {
+          nextLine();
+        }
       }
       return c;
     }
@@ -135,7 +144,7 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @NotNull
-  protected String consumeNumerical() {
+  protected String consumeNumeric() {
     int offset = 0;
     while (isValidOffset(offset)) {
       char c = getCode().charAt(getPosition() + offset);
@@ -146,7 +155,7 @@ public abstract class AbstractScanner implements IScanner {
   }
 
   @NotNull
-  protected String consumeAlphabetical() {
+  protected String consumeAlphabetic() {
     int offset = 0;
     while (isValidOffset(offset)) {
       char c = getCode().charAt(getPosition() + offset);
@@ -171,26 +180,11 @@ public abstract class AbstractScanner implements IScanner {
 
   public static void tokenize(
     BufferedReader reader,
-    BufferedWriter writer,
-    IScanner scanner
+    BufferedWriter writer
   ) throws IOException {
-    List<IToken> tokenList = new LinkedList<>();
     Iterator<String> lineIterator = reader.lines().iterator();
-    int lineNumber = 1;
-    while (lineIterator.hasNext()) {
-      String line = lineIterator.next() + '\n';
-      scanner.load(line, lineNumber); // TODO: I don't like how current line is setup
-      lineNumber++;
-      IToken token;
-      while (true) {
-        token = scanner.scan();
-        if (token == null) {
-          break;
-        }
-        tokenList.add(token);
-      }
-    }
-    tokenList.add(new Token(TokenType.TERMINAL).withPosition(lineNumber, 1));
+    Scanner scanner = new Scanner(lineIterator);
+    Iterable<IToken> tokenList = scanner.scan();
     Token.save(writer, tokenList);
   }
 }

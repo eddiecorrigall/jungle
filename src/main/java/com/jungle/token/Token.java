@@ -104,15 +104,12 @@ public class Token implements IToken {
     );
   }
 
-  public static void save(@NotNull BufferedWriter writer, @NotNull List<IToken> tokenList) throws IOException {
+  public static void save(@NotNull BufferedWriter writer, @NotNull Iterable<IToken> tokenIterable) throws IOException {
     // For each token list item,
     // convert the IToken to a line of text, and
     // write to the BufferedWriter.
 
-    for (IToken token : tokenList) {
-      if (token == null) {
-        break;
-      }
+    for (IToken token : tokenIterable) {
       writer.write(getTokenAsLine(token));
     }
   }

@@ -47,7 +47,7 @@ public class JungleCLI {
         BufferedWriter writer = null;
         try {
             writer = getBufferedWriter(cli);
-            Scanner.tokenize(reader, writer, new Scanner());
+            Scanner.tokenize(reader, writer);
         } catch (IOException e) {
             System.err.println("failed to scan - " + e.getMessage());
             System.exit(1);
