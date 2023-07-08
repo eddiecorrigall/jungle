@@ -61,6 +61,7 @@ public enum SymbolType {
 
     public int getStoreOpcode() {
         switch (this) {
+            case CHARACTER: return Opcodes.ISTORE;
             case INTEGER: return Opcodes.ISTORE;
             case FLOAT: return Opcodes.FSTORE;
             case DOUBLE: return Opcodes.DSTORE;
@@ -71,6 +72,7 @@ public enum SymbolType {
 
     public int getLoadOpcode() {
         switch (this) {
+            case CHARACTER: return Opcodes.ILOAD;
             case INTEGER: return Opcodes.ILOAD;
             case FLOAT: return Opcodes.FLOAD;
             case DOUBLE: return Opcodes.DLOAD;

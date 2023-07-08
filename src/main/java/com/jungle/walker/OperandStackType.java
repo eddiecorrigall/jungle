@@ -14,6 +14,7 @@ public enum OperandStackType {
 
     public SymbolType getSymbolType() {
         switch (this) {
+            case CHARACTER: return SymbolType.CHARACTER;
             case INTEGER: return SymbolType.INTEGER;
             case FLOAT: return SymbolType.FLOAT;
             case DOUBLE: return SymbolType.DOUBLE;
