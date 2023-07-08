@@ -17,6 +17,7 @@ public enum OperandStackType {
             case INTEGER: return SymbolType.INTEGER;
             case FLOAT: return SymbolType.FLOAT;
             case DOUBLE: return SymbolType.DOUBLE;
+            case REFERENCE_OBJECT: return SymbolType.OBJECT;
             default: throw new Error("get symbol type - cannot resolve from operand stack type " + this);
         }
     }

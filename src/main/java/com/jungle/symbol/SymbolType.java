@@ -64,6 +64,7 @@ public enum SymbolType {
             case INTEGER: return Opcodes.ISTORE;
             case FLOAT: return Opcodes.FSTORE;
             case DOUBLE: return Opcodes.DSTORE;
+            case OBJECT: return Opcodes.ASTORE;
             default: throw new Error("no store opcode for symbol type " + this);
         }
     }
@@ -73,6 +74,7 @@ public enum SymbolType {
             case INTEGER: return Opcodes.ILOAD;
             case FLOAT: return Opcodes.FLOAD;
             case DOUBLE: return Opcodes.DLOAD;
+            case OBJECT: return Opcodes.ALOAD;
             default: throw new Error("no load opcode for symbol type " + this);
         }
     }
