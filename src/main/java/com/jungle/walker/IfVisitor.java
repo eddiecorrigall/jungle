@@ -80,7 +80,7 @@ public class IfVisitor implements IVisitor {
         }
 
         expressionVisitor.visit(mv, conditionNode);
-        if (operandStackContext.peekOperandStackType() != OperandStackType.INTEGER) {
+        if (operandStackContext.peek() != OperandStackType.INTEGER) {
             throw new Error("if condition/expression expected to be type integer");
         }
 

@@ -59,10 +59,10 @@ public class NumericOperatorVisitor implements IVisitor {
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
-        OperandStackType leftExpressionType = operandStackContext.popOperandStackType();
+        OperandStackType leftExpressionType = operandStackContext.pop();
 
         expressionVisitor.visit(mv, ast.getRight());
-        OperandStackType rightExpressionType = operandStackContext.popOperandStackType();
+        OperandStackType rightExpressionType = operandStackContext.pop();
 
         if (leftExpressionType != rightExpressionType) {
             throw new Error("binary operator left or right expression requires type cast " + ast);
@@ -80,6 +80,6 @@ public class NumericOperatorVisitor implements IVisitor {
             default: throw new Error("unhandled binary operator " + ast);
         }
 
-        operandStackContext.pushOperandStackType(operandStackType);
+        operandStackContext.push(operandStackType);
     }
 }

@@ -75,6 +75,6 @@ public class LiteralVisitor implements IVisitor {
         }
 
         mv.visitLdcInsn(objectValue);
-        operandStackContext.pushOperandStackType(type);
+        operandStackContext.push(type);
     }
 }

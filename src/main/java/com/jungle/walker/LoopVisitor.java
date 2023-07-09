@@ -63,7 +63,8 @@ public class LoopVisitor implements IVisitor {
         // loop-condition
         mv.visitLabel(loopLabel);
         expressionVisitor.visit(mv, ast.getLeft());
-        if (operandStackContext.peekOperandStackType() != OperandStackType.INTEGER) {
+        if (operandStackContext.peek() != OperandStackType.INTEGER) {
+            // TODO: shouldn't this be testing for boolean?
             throw new Error("loop condition/expression expected to be type integer");
         }
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);

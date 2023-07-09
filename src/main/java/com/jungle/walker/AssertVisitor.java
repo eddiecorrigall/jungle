@@ -46,7 +46,7 @@ public class AssertVisitor implements IVisitor {
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (operandStackContext.peekOperandStackType() != OperandStackType.INTEGER) {
+        if (operandStackContext.peek() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

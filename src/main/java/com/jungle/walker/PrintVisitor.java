@@ -51,7 +51,7 @@ public class PrintVisitor implements IVisitor {
 
         // Prints what ever value is on the stack
 
-        OperandStackType operandStackType = operandStackContext.popOperandStackType();
+        OperandStackType operandStackType = operandStackContext.pop();
         String descriptor;
         switch (operandStackType) {
             case BOOLEAN: descriptor = "(B)V"; break;

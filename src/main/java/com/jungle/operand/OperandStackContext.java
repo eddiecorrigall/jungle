@@ -24,16 +24,16 @@ public class OperandStackContext {
     }
 
     @NotNull
-    public OperandStackType peekOperandStackType() {
+    public OperandStackType peek() {
         return operandStackTypeStack.peek();
     }
 
     @NotNull
-    public OperandStackType popOperandStackType() {
+    public OperandStackType pop() {
         return operandStackTypeStack.pop();
     }
 
-    public void pushOperandStackType(@NotNull OperandStackType type) {
+    public void push(@NotNull OperandStackType type) {
         operandStackTypeStack.push(type);
     }
 
@@ -57,11 +57,11 @@ public class OperandStackContext {
         mv.visitVarInsn(entry.getType().getLoadOpcode(), entry.getIndex());
 
         switch (entry.getType()) {
-            case BOOLEAN: pushOperandStackType(OperandStackType.BOOLEAN); break;
-            case CHARACTER: pushOperandStackType(OperandStackType.CHARACTER); break;
-            case INTEGER: pushOperandStackType(OperandStackType.INTEGER); break;
-            case FLOAT: pushOperandStackType(OperandStackType.FLOAT); break;
-            case OBJECT: pushOperandStackType(OperandStackType.REFERENCE_OBJECT); break;
+            case BOOLEAN: push(OperandStackType.BOOLEAN); break;
+            case CHARACTER: push(OperandStackType.CHARACTER); break;
+            case INTEGER: push(OperandStackType.INTEGER); break;
+            case FLOAT: push(OperandStackType.FLOAT); break;
+            case OBJECT: push(OperandStackType.REFERENCE_OBJECT); break;
             default: throw new Error("cannot push operand stack type - unhandled symbol type");
         }
     }
@@ -73,7 +73,7 @@ public class OperandStackContext {
         // Pop value on the operand stack and set local variable index value
         System.out.println("visit store " + variableName);
 
-        OperandStackType variableType = popOperandStackType();
+        OperandStackType variableType = pop();
         SymbolType variableSymbolType = variableType.getSymbolType();
 
         SymbolEntry entry = getSymbolTable().get(variableName);
