@@ -11,10 +11,10 @@ import java.util.Stack;
 
 public abstract class BaseVisitor implements IVisitor {
     @NotNull
-    protected final Stack<OperandStackType> operandStackTypeStack;
-
+    private final Stack<OperandStackType> operandStackTypeStack;
     @NotNull
     private final SymbolTable symbolTable;
+
     public BaseVisitor(
             @NotNull final Stack<OperandStackType> operandStackTypeStack,
             @NotNull final SymbolTable symbolTable
@@ -22,6 +22,25 @@ public abstract class BaseVisitor implements IVisitor {
         super();
         this.operandStackTypeStack = operandStackTypeStack;
         this.symbolTable = symbolTable;
+    }
+
+    @NotNull
+    protected OperandStackType peekOperandStackType() {
+        return operandStackTypeStack.peek();
+    }
+
+    @NotNull
+    protected OperandStackType popOperandStackType() {
+        return operandStackTypeStack.pop();
+    }
+
+    protected void pushOperandStackType(@NotNull OperandStackType type) {
+        operandStackTypeStack.push(type);
+    }
+
+    @NotNull
+    protected SymbolTable getSymbolTable() {
+        return symbolTable;
     }
 
     @Override
@@ -36,7 +55,7 @@ public abstract class BaseVisitor implements IVisitor {
         // Get local variable index value and push on the operand stack
         System.out.println("visit load " + variableName);
 
-        SymbolEntry entry = symbolTable.get(variableName);
+        SymbolEntry entry = getSymbolTable().get(variableName);
         if (entry == null) {
             throw new Error("unknown variable name " + variableName);
         }
@@ -44,11 +63,11 @@ public abstract class BaseVisitor implements IVisitor {
         mv.visitVarInsn(entry.getType().getLoadOpcode(), entry.getIndex());
 
         switch (entry.getType()) {
-            case BOOLEAN: operandStackTypeStack.push(OperandStackType.BOOLEAN); break;
-            case CHARACTER: operandStackTypeStack.push(OperandStackType.CHARACTER); break;
-            case INTEGER: operandStackTypeStack.push(OperandStackType.INTEGER); break;
-            case FLOAT: operandStackTypeStack.push(OperandStackType.FLOAT); break;
-            case OBJECT: operandStackTypeStack.push(OperandStackType.REFERENCE_OBJECT); break;
+            case BOOLEAN: pushOperandStackType(OperandStackType.BOOLEAN); break;
+            case CHARACTER: pushOperandStackType(OperandStackType.CHARACTER); break;
+            case INTEGER: pushOperandStackType(OperandStackType.INTEGER); break;
+            case FLOAT: pushOperandStackType(OperandStackType.FLOAT); break;
+            case OBJECT: pushOperandStackType(OperandStackType.REFERENCE_OBJECT); break;
             default: throw new Error("cannot push operand stack type - unhandled symbol type");
         }
     }
@@ -60,13 +79,13 @@ public abstract class BaseVisitor implements IVisitor {
         // Pop value on the operand stack and set local variable index value
         System.out.println("visit store " + variableName);
 
-        OperandStackType variableType = operandStackTypeStack.pop();
+        OperandStackType variableType = popOperandStackType();
         SymbolType variableSymbolType = variableType.getSymbolType();
 
-        SymbolEntry entry = symbolTable.get(variableName);
+        SymbolEntry entry = getSymbolTable().get(variableName);
         boolean isNotDefined = entry == null;
         if (isNotDefined) {
-            entry = symbolTable.set(variableName, variableSymbolType);
+            entry = getSymbolTable().set(variableName, variableSymbolType);
         } else {
             if (entry.getType() != variableSymbolType) {
                 throw new Error(

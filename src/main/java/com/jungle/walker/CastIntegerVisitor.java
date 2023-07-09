@@ -40,7 +40,7 @@ public class CastIntegerVisitor extends BaseVisitor {
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
-        OperandStackType type = operandStackTypeStack.pop();
+        OperandStackType type = popOperandStackType();
         switch (type) {
             case INTEGER: {
                 System.out.println("WARN: value is already an integer");
@@ -52,6 +52,6 @@ public class CastIntegerVisitor extends BaseVisitor {
                 throw new Error("integer cast not supported for " + ast);
             }
         }
-        operandStackTypeStack.push(OperandStackType.INTEGER);
+        pushOperandStackType(OperandStackType.INTEGER);
     }
 }

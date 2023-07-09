@@ -45,7 +45,7 @@ public class AssertVisitor extends BaseVisitor {
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
+        if (peekOperandStackType() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

@@ -62,7 +62,7 @@ public class LoopVisitor extends BaseVisitor {
         // loop-condition
         mv.visitLabel(loopLabel);
         expressionVisitor.visit(mv, ast.getLeft());
-        if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
+        if (peekOperandStackType() != OperandStackType.INTEGER) {
             throw new Error("loop condition/expression expected to be type integer");
         }
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);

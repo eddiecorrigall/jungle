@@ -78,7 +78,7 @@ public class IfVisitor extends BaseVisitor {
         }
 
         expressionVisitor.visit(mv, conditionNode);
-        if (operandStackTypeStack.peek() != OperandStackType.INTEGER) {
+        if (peekOperandStackType() != OperandStackType.INTEGER) {
             throw new Error("if condition/expression expected to be type integer");
         }
 
