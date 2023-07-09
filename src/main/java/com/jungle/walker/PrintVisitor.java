@@ -14,11 +14,11 @@ public class PrintVisitor implements IVisitor {
     private final OperandStackContext operandStackContext;
 
     @NotNull
-    private final IVisitor expressionVisitor;
+    private final ExpressionVisitor expressionVisitor;
 
     public PrintVisitor(
             @NotNull final OperandStackContext operandStackContext,
-            @NotNull final IVisitor expressionVisitor
+            @NotNull final ExpressionVisitor expressionVisitor
     ) {
        super();
        this.operandStackContext = operandStackContext;

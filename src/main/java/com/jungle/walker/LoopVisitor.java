@@ -15,15 +15,15 @@ public class LoopVisitor implements IVisitor {
     private final OperandStackContext operandStackContext;
 
     @NotNull
-    private final IVisitor expressionVisitor;
+    private final ExpressionVisitor expressionVisitor;
 
     @NotNull
-    private final IVisitor blockVisitor;
+    private final BlockVisitor blockVisitor;
 
     public LoopVisitor(
             @NotNull final OperandStackContext operandStackContext,
-            @NotNull final IVisitor expressionVisitor,
-            @NotNull final IVisitor blockVisitor
+            @NotNull final ExpressionVisitor expressionVisitor,
+            @NotNull final BlockVisitor blockVisitor
     ) {
         super();
         this.operandStackContext = operandStackContext;

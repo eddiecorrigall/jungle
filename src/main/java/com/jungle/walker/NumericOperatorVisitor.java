@@ -27,11 +27,11 @@ public class NumericOperatorVisitor implements IVisitor {
     private final OperandStackContext operandStackContext;
 
     @NotNull
-    private final IVisitor expressionVisitor;
+    private final ExpressionVisitor expressionVisitor;
 
     public NumericOperatorVisitor(
             @NotNull final OperandStackContext operandStackContext,
-            @NotNull final IVisitor expressionVisitor) {
+            @NotNull final ExpressionVisitor expressionVisitor) {
         super();
         this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;

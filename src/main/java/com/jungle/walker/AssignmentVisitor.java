@@ -10,11 +10,11 @@ public class AssignmentVisitor implements IVisitor {
     @NotNull
     private final OperandStackContext operandStackContext;
     @NotNull
-    private final IVisitor expressionVisitor;
+    private final ExpressionVisitor expressionVisitor;
 
     public AssignmentVisitor(
             @NotNull final OperandStackContext operandStackContext,
-            @NotNull final IVisitor expressionVisitor
+            @NotNull final ExpressionVisitor expressionVisitor
     ) {
         super();
         this.operandStackContext = operandStackContext;

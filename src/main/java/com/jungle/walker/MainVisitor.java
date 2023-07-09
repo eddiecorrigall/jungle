@@ -9,46 +9,31 @@ import org.objectweb.asm.MethodVisitor;
 
 public class MainVisitor implements IVisitor {
 
-    @NotNull
-    private final OperandStackContext operandStackContext = new OperandStackContext();
-
     // region Visitors
-
-    @NotNull
-    private final ExpressionVisitor expressionVisitor;
 
     @NotNull
     private final LiteralVisitor literalVisitor;
 
     @NotNull
-    final IdentifierVisitor identifierVisitor;
+    private final AssignmentVisitor assignmentVisitor;
 
     @NotNull
-    final CastIntegerVisitor castIntegerVisitor;
+    private final BlockVisitor blockVisitor;
 
     @NotNull
-    final AssignmentVisitor assignmentVisitor;
+    private final AssertVisitor assertVisitor;
 
     @NotNull
-    final NumericOperatorVisitor numericOperatorVisitor;
+    private final PrintVisitor printVisitor;
 
     @NotNull
-    final BooleanOperatorVisitor booleanOperatorVisitor;
+    private final IfVisitor ifVisitor;
 
     @NotNull
-    final BlockVisitor blockVisitor;
+    private final LoopVisitor loopVisitor;
 
     @NotNull
-    final AssertVisitor assertVisitor;
-
-    @NotNull
-    final PrintVisitor printVisitor;
-
-    @NotNull
-    final IfVisitor ifVisitor;
-
-    @NotNull
-    final LoopVisitor loopVisitor;
+    private final SequenceVisitor sequenceVisitor;
 
     // endregion
 
@@ -57,17 +42,22 @@ public class MainVisitor implements IVisitor {
 
         // Chicken before the egg problem...
 
+        OperandStackContext operandStackContext = new OperandStackContext();
+
+        ExpressionVisitor expressionVisitor = new ExpressionVisitor();
+
+        sequenceVisitor = new SequenceVisitor(this);
         blockVisitor = new BlockVisitor(this);
-
-        expressionVisitor = new ExpressionVisitor();
-
         ifVisitor = new IfVisitor(operandStackContext, expressionVisitor, blockVisitor);
         literalVisitor = new LiteralVisitor(operandStackContext);
-        identifierVisitor = new IdentifierVisitor(operandStackContext);
-        castIntegerVisitor = new CastIntegerVisitor(operandStackContext, expressionVisitor);
+        IdentifierVisitor identifierVisitor = new IdentifierVisitor(operandStackContext);
+        CastIntegerVisitor castIntegerVisitor = new CastIntegerVisitor(operandStackContext, expressionVisitor);
         assignmentVisitor = new AssignmentVisitor(operandStackContext, expressionVisitor);
-        numericOperatorVisitor = new NumericOperatorVisitor(operandStackContext, expressionVisitor);
-        booleanOperatorVisitor = new BooleanOperatorVisitor(ifVisitor);
+        NumericOperatorVisitor numericOperatorVisitor = new NumericOperatorVisitor(operandStackContext, expressionVisitor);
+        BooleanOperatorVisitor booleanOperatorVisitor = new BooleanOperatorVisitor(ifVisitor);
+        assertVisitor = new AssertVisitor(operandStackContext, expressionVisitor);
+        printVisitor = new PrintVisitor(operandStackContext, expressionVisitor);
+        loopVisitor = new LoopVisitor(operandStackContext, expressionVisitor, blockVisitor);
 
         expressionVisitor
                 .withIdentifierVisitor(identifierVisitor)
@@ -75,10 +65,6 @@ public class MainVisitor implements IVisitor {
                 .withNumericOperatorVisitor(numericOperatorVisitor)
                 .withCastIntegerVisitor(castIntegerVisitor)
                 .withBooleanOperatorVisitor(booleanOperatorVisitor);
-
-        assertVisitor = new AssertVisitor(operandStackContext, expressionVisitor);
-        printVisitor = new PrintVisitor(operandStackContext, expressionVisitor);
-        loopVisitor = new LoopVisitor(operandStackContext, expressionVisitor, blockVisitor);
     }
 
     public boolean canVisit(@NotNull INode ast) {
@@ -93,9 +79,8 @@ public class MainVisitor implements IVisitor {
             return;
         }
 
-        if (ast.getType() == NodeType.SEQUENCE) {
-            visit(mv, ast.getLeft());
-            visit(mv, ast.getRight());
+        if (sequenceVisitor.canVisit(ast)) {
+            sequenceVisitor.visit(mv, ast);
             return;
         }
 
