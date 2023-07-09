@@ -10,8 +10,8 @@ import java.util.Stack;
 
 public class IdentifierVisitor extends BaseVisitor {
     public IdentifierVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable
     ) {
         super(operandStackTypeStack, symbolTable);
     }

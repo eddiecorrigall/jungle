@@ -68,25 +68,13 @@ public class MainVisitor implements IVisitor {
 
         expressionVisitor = new ExpressionVisitor(operandStackTypeStack, symbolTable);
 
-        ifVisitor = new IfVisitor(operandStackTypeStack, symbolTable);
-        ifVisitor.withBlockVisitor(blockVisitor);
-        ifVisitor.withExpressionVisitor(expressionVisitor);
-
+        ifVisitor = new IfVisitor(operandStackTypeStack, symbolTable, expressionVisitor, blockVisitor);
         literalVisitor = new LiteralVisitor(operandStackTypeStack);
         identifierVisitor = new IdentifierVisitor(operandStackTypeStack, symbolTable);
-
-        castIntegerVisitor = new CastIntegerVisitor(operandStackTypeStack, symbolTable);
-        castIntegerVisitor.withExpressionVisitor(expressionVisitor);
-
-        assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable);
-        assignmentVisitor.withExpressionVisitor(expressionVisitor);
-
-        numericOperatorVisitor = new NumericOperatorVisitor(operandStackTypeStack, symbolTable);
-        numericOperatorVisitor.withExpressionVisitor(expressionVisitor);
-
-        booleanOperatorVisitor = new BooleanOperatorVisitor(operandStackTypeStack, symbolTable);
-        booleanOperatorVisitor.withExpressionVisitor(expressionVisitor);
-        booleanOperatorVisitor.withIfElseVisitor(ifVisitor);
+        castIntegerVisitor = new CastIntegerVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
+        assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
+        numericOperatorVisitor = new NumericOperatorVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
+        booleanOperatorVisitor = new BooleanOperatorVisitor(operandStackTypeStack, symbolTable, ifVisitor);
 
         expressionVisitor
                 .withIdentifierVisitor(identifierVisitor)
@@ -95,15 +83,9 @@ public class MainVisitor implements IVisitor {
                 .withCastIntegerVisitor(castIntegerVisitor)
                 .withBooleanOperatorVisitor(booleanOperatorVisitor);
 
-        assertVisitor = new AssertVisitor(operandStackTypeStack, symbolTable);
-        assertVisitor.withExpressionVisitor(expressionVisitor);
-
-        printVisitor = new PrintVisitor(operandStackTypeStack);
-        printVisitor.withExpressionVisitor(expressionVisitor);
-
-        loopVisitor = new LoopVisitor(operandStackTypeStack, symbolTable);
-        loopVisitor.withExpressionVisitor(expressionVisitor);
-        loopVisitor.withBlockVisitor(blockVisitor);
+        assertVisitor = new AssertVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
+        printVisitor = new PrintVisitor(operandStackTypeStack, expressionVisitor);
+        loopVisitor = new LoopVisitor(operandStackTypeStack, symbolTable, expressionVisitor, blockVisitor);
     }
 
     public boolean canVisit(@NotNull INode ast) {

@@ -4,7 +4,6 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -12,20 +11,16 @@ import org.objectweb.asm.Opcodes;
 import java.util.Stack;
 
 public class AssertVisitor extends BaseVisitor {
+    @NotNull
+    private final IVisitor expressionVisitor;
+
     public AssertVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IVisitor expressionVisitor
     ) {
         super(operandStackTypeStack, symbolTable);
-    }
-
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
-
-    @NotNull
-    public AssertVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
         this.expressionVisitor = expressionVisitor;
-        return this;
     }
 
     @Override

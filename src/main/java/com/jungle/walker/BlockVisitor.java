@@ -9,7 +9,7 @@ public class BlockVisitor implements IVisitor {
     @NotNull
     final IVisitor mainVisitor;
 
-    public BlockVisitor(@NotNull IVisitor mainVisitor) {
+    public BlockVisitor(@NotNull final IVisitor mainVisitor) {
         super();
         this.mainVisitor = mainVisitor;
     }

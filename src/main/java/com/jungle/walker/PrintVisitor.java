@@ -3,7 +3,6 @@ package com.jungle.walker;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Stack;
@@ -14,18 +13,16 @@ public class PrintVisitor implements IVisitor {
     @NotNull
     private final Stack<OperandStackType> operandStackTypeStack;
 
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
+    @NotNull
+    private final IVisitor expressionVisitor;
 
-    public PrintVisitor(@NotNull Stack<OperandStackType> operandStackTypeStack) {
+    public PrintVisitor(
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final IVisitor expressionVisitor
+    ) {
        super();
        this.operandStackTypeStack = operandStackTypeStack;
-    }
-
-    @NotNull
-    public PrintVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
-        this.expressionVisitor = expressionVisitor;
-        return this;
+       this.expressionVisitor = expressionVisitor;
     }
 
     @Override
@@ -34,7 +31,7 @@ public class PrintVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit print " + ast);
 
         if (!canVisit(ast)) {

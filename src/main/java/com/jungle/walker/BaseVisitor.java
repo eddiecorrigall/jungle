@@ -16,8 +16,8 @@ public abstract class BaseVisitor implements IVisitor {
     @NotNull
     private final SymbolTable symbolTable;
     public BaseVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable
     ) {
         super();
         this.operandStackTypeStack = operandStackTypeStack;

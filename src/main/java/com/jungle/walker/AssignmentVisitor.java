@@ -10,20 +10,16 @@ import org.objectweb.asm.MethodVisitor;
 import java.util.Stack;
 
 public class AssignmentVisitor extends BaseVisitor {
-    @Nullable
-    private IVisitor expressionVisitor;
+    @NotNull
+    private final IVisitor expressionVisitor;
 
     public AssignmentVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IVisitor expressionVisitor
     ) {
         super(operandStackTypeStack, symbolTable);
-    }
-
-    @NotNull
-    public AssignmentVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
         this.expressionVisitor = expressionVisitor;
-        return this;
     }
 
     @Override

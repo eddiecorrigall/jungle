@@ -13,28 +13,21 @@ import org.objectweb.asm.Opcodes;
 import java.util.Stack;
 
 public class IfVisitor extends BaseVisitor {
+    @NotNull
+    private final IVisitor expressionVisitor;
+
+    @NotNull
+    private final IVisitor blockVisitor;
+
     public IfVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IVisitor expressionVisitor,
+            @NotNull final IVisitor blockVisitor
     ) {
         super(operandStackTypeStack, symbolTable);
-    }
-
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
-
-    @NotNull
-    public IfVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
         this.expressionVisitor = expressionVisitor;
-        return this;
-    }
-
-    @NotNull
-    private BlockVisitor blockVisitor;
-
-    public IfVisitor withBlockVisitor(@NotNull BlockVisitor blockVisitor) {
         this.blockVisitor = blockVisitor;
-        return this;
     }
 
     @Override

@@ -5,7 +5,6 @@ import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
@@ -15,40 +14,15 @@ import java.util.Stack;
 
 public class BooleanOperatorVisitor extends BaseVisitor {
     @NotNull
-    public static INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
+    private static final INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
 
     @NotNull
-    public static INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
-
-    public BooleanOperatorVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
-            ) {
-        super(operandStackTypeStack, symbolTable);
-    }
-
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
+    private static final INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
 
     @NotNull
-    public BooleanOperatorVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
-        this.expressionVisitor = expressionVisitor;
-        return this;
-    }
-
-    @Nullable
-    private IfVisitor ifVisitor;
-
-    @NotNull
-    public BooleanOperatorVisitor withIfElseVisitor(@NotNull IfVisitor ifVisitor) {
-        this.ifVisitor = ifVisitor;
-        return this;
-    }
-
-    public static final Set<NodeType> BOOLEAN_OPERATORS = new HashSet<>(Arrays.asList(
+    private static final Set<NodeType> BOOLEAN_OPERATORS = new HashSet<>(Arrays.asList(
             // unary
             NodeType.OPERATOR_NOT,
-
             // binary
             NodeType.OPERATOR_AND,
             NodeType.OPERATOR_OR,
@@ -57,6 +31,19 @@ public class BooleanOperatorVisitor extends BaseVisitor {
             NodeType.OPERATOR_LESS_THAN,
             NodeType.OPERATOR_GREATER_THAN
     ));
+
+    @NotNull
+    private final IfVisitor ifVisitor; // TODO: convert to IVisitor
+
+    public BooleanOperatorVisitor(
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IfVisitor ifVisitor
+    ) {
+        super(operandStackTypeStack, symbolTable);
+        this.ifVisitor = ifVisitor;
+    }
+
     @Override
     public boolean canVisit(@NotNull INode ast) {
         return BOOLEAN_OPERATORS.contains(ast.getType());

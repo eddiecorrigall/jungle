@@ -14,21 +14,21 @@ import java.util.Stack;
 import static com.jungle.ast.NodeType.*;
 
 public class LiteralVisitor implements IVisitor {
-    @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack;
-
-    public LiteralVisitor(@NotNull Stack<OperandStackType> operandStackTypeStack) {
-       super();
-       this.operandStackTypeStack = operandStackTypeStack;
-    }
-
-    public static final Set<NodeType> LITERALS = new HashSet<>(Arrays.asList(
+    private static final Set<NodeType> LITERALS = new HashSet<>(Arrays.asList(
             LITERAL_BOOLEAN,
             LITERAL_CHARACTER,
             LITERAL_INTEGER,
             LITERAL_FLOAT,
             LITERAL_STRING
     ));
+
+    @NotNull
+    private final Stack<OperandStackType> operandStackTypeStack;
+
+    public LiteralVisitor(@NotNull final Stack<OperandStackType> operandStackTypeStack) {
+       super();
+       this.operandStackTypeStack = operandStackTypeStack;
+    }
 
     @Override
     public boolean canVisit(@NotNull INode ast) {

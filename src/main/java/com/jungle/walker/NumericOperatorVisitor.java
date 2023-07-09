@@ -16,7 +16,7 @@ import java.util.Stack;
 import static com.jungle.ast.NodeType.*;
 
 public class NumericOperatorVisitor extends BaseVisitor {
-    public static final Set<NodeType> NUMERIC_OPERATORS = new HashSet<>(Arrays.asList(
+    private static final Set<NodeType> NUMERIC_OPERATORS = new HashSet<>(Arrays.asList(
             OPERATOR_ADD,
             OPERATOR_SUBTRACT,
             OPERATOR_MULTIPLY,
@@ -24,19 +24,15 @@ public class NumericOperatorVisitor extends BaseVisitor {
             OPERATOR_MODULO
     ));
 
-    public NumericOperatorVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable) {
-        super(operandStackTypeStack, symbolTable);
-    }
-
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
-
     @NotNull
-    public NumericOperatorVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
+    private final IVisitor expressionVisitor;
+
+    public NumericOperatorVisitor(
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IVisitor expressionVisitor) {
+        super(operandStackTypeStack, symbolTable);
         this.expressionVisitor = expressionVisitor;
-        return this;
     }
 
     @Override

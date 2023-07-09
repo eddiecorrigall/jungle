@@ -12,28 +12,22 @@ import org.objectweb.asm.Opcodes;
 import java.util.Stack;
 
 public class LoopVisitor extends BaseVisitor {
-    public LoopVisitor(
-            @NotNull Stack<OperandStackType> operandStackTypeStack,
-            @NotNull SymbolTable symbolTable
-    ) {
-        super(operandStackTypeStack, symbolTable);
-    }
-
-    @Nullable
-    private ExpressionVisitor expressionVisitor;
 
     @NotNull
-    public LoopVisitor withExpressionVisitor(@NotNull ExpressionVisitor expressionVisitor) {
+    private final IVisitor expressionVisitor;
+
+    @NotNull
+    private final IVisitor blockVisitor;
+
+    public LoopVisitor(
+            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final SymbolTable symbolTable,
+            @NotNull final IVisitor expressionVisitor,
+            @NotNull final IVisitor blockVisitor
+    ) {
+        super(operandStackTypeStack, symbolTable);
         this.expressionVisitor = expressionVisitor;
-        return this;
-    }
-
-    @Nullable
-    private BlockVisitor blockVisitor;
-
-    public LoopVisitor withBlockVisitor(@NotNull BlockVisitor blockVisitor) {
         this.blockVisitor = blockVisitor;
-        return this;
     }
 
     @Override
