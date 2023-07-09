@@ -46,7 +46,7 @@ public class IfVisitor implements IVisitor {
         System.out.println("visit if " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected if");
         }
 
         /* Transform to inverse for efficient jump operation

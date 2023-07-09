@@ -1,7 +1,6 @@
 package com.jungle.walker;
 
 import com.jungle.ast.INode;
-import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,11 +71,11 @@ public class MainVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @Nullable INode ast) {
+    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+        System.out.println("visit main " + ast);
 
-        if (ast == null) {
-            // (No-op) No operation
-            return;
+        if (!canVisit(ast)) {
+            throw new Error("expected main");
         }
 
         if (sequenceVisitor.canVisit(ast)) {

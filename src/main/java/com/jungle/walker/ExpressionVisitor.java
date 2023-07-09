@@ -63,6 +63,10 @@ public class ExpressionVisitor implements IVisitor {
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         System.out.println("visit expression " + ast);
 
+        if (!canVisit(ast)) {
+            throw new Error("expected expression");
+        }
+
         if (identifierVisitor.canVisit(ast)) {
             identifierVisitor.visit(mv, ast);
             return;

@@ -46,7 +46,7 @@ public class LoopVisitor implements IVisitor {
         System.out.println("visit loop " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected loop");
         }
 
         if (ast.getLeft() == null) {

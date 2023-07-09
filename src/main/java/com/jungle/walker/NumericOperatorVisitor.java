@@ -47,7 +47,7 @@ public class NumericOperatorVisitor implements IVisitor {
         System.out.println("visit binary operator " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected numeric operator");
         }
 
         if (ast.getLeft() == null) {

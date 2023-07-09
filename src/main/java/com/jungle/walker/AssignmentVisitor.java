@@ -31,7 +31,7 @@ public class AssignmentVisitor implements IVisitor {
         System.out.println("visit assignment " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected assignment");
         }
 
         INode identifierNode = ast.getLeft();

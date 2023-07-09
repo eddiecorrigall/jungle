@@ -24,7 +24,7 @@ public class BlockVisitor implements IVisitor {
         System.out.println("visit block " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected block");
         }
 
         if (ast.getLeft() == null) {

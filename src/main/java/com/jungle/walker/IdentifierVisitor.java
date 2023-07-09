@@ -25,7 +25,7 @@ public class IdentifierVisitor implements IVisitor {
         System.out.println("visit identifier " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected identifier");
         }
 
         String variableName = ast.getRawValue();

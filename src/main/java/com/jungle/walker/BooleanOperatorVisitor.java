@@ -54,7 +54,7 @@ public class BooleanOperatorVisitor implements IVisitor {
         //  is it better to evaluate batches of operators, then test short circuit?
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected boolean operator");
         }
 
         if (ast.getLeft() == null) {

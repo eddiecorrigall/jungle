@@ -34,7 +34,7 @@ public class CastIntegerVisitor implements IVisitor {
         System.out.println("visit cast integer " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected cast integer");
         }
 
         if (ast.getLeft() == null) {

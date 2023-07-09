@@ -34,11 +34,11 @@ public class AssertVisitor implements IVisitor {
         System.out.println("visit assert " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected assert");
         }
 
         if (ast.getLeft() == null) {
-            throw new Error("assert missing expression");
+            throw new Error("assert condition missing expression");
         }
 
         // push expression/condition onto operand stack

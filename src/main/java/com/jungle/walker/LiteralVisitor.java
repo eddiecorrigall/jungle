@@ -40,7 +40,7 @@ public class LiteralVisitor implements IVisitor {
         System.out.println("visit literal " + ast);
 
         if (!canVisit(ast)) {
-            return;
+            throw new Error("expected literal");
         }
 
         if (ast.getRawValue() == null) {

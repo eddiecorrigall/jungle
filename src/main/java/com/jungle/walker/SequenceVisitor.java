@@ -21,9 +21,16 @@ public class SequenceVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+        System.out.println("visit sequence " + ast);
+
+        if (!canVisit(ast)) {
+            throw new Error("expected sequence");
+        }
+
         if (ast.getLeft() != null) {
             mainVisitor.visit(mv, ast.getLeft());
         }
+
         if (ast.getRight() != null) {
             mainVisitor.visit(mv, ast.getRight());
         }
