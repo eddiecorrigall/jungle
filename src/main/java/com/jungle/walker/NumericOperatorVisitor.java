@@ -2,20 +2,19 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import com.jungle.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 import static com.jungle.ast.NodeType.*;
 
-public class NumericOperatorVisitor extends BaseVisitor {
+public class NumericOperatorVisitor implements IVisitor {
     private static final Set<NodeType> NUMERIC_OPERATORS = new HashSet<>(Arrays.asList(
             OPERATOR_ADD,
             OPERATOR_SUBTRACT,
@@ -25,13 +24,16 @@ public class NumericOperatorVisitor extends BaseVisitor {
     ));
 
     @NotNull
+    private final OperandStackContext operandStackContext;
+
+    @NotNull
     private final IVisitor expressionVisitor;
 
     public NumericOperatorVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor) {
-        super(operandStackTypeStack, symbolTable);
+        super();
+        this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
     }
 
@@ -57,10 +59,10 @@ public class NumericOperatorVisitor extends BaseVisitor {
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
-        OperandStackType leftExpressionType = popOperandStackType();
+        OperandStackType leftExpressionType = operandStackContext.popOperandStackType();
 
         expressionVisitor.visit(mv, ast.getRight());
-        OperandStackType rightExpressionType = popOperandStackType();
+        OperandStackType rightExpressionType = operandStackContext.popOperandStackType();
 
         if (leftExpressionType != rightExpressionType) {
             throw new Error("binary operator left or right expression requires type cast " + ast);
@@ -78,6 +80,6 @@ public class NumericOperatorVisitor extends BaseVisitor {
             default: throw new Error("unhandled binary operator " + ast);
         }
 
-        pushOperandStackType(operandStackType);
+        operandStackContext.pushOperandStackType(operandStackType);
     }
 }

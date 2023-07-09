@@ -2,16 +2,17 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import java.util.Stack;
+public class LoopVisitor implements IVisitor {
 
-public class LoopVisitor extends BaseVisitor {
+    @NotNull
+    private final OperandStackContext operandStackContext;
 
     @NotNull
     private final IVisitor expressionVisitor;
@@ -20,12 +21,12 @@ public class LoopVisitor extends BaseVisitor {
     private final IVisitor blockVisitor;
 
     public LoopVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor,
             @NotNull final IVisitor blockVisitor
     ) {
-        super(operandStackTypeStack, symbolTable);
+        super();
+        this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
         this.blockVisitor = blockVisitor;
     }
@@ -62,7 +63,7 @@ public class LoopVisitor extends BaseVisitor {
         // loop-condition
         mv.visitLabel(loopLabel);
         expressionVisitor.visit(mv, ast.getLeft());
-        if (peekOperandStackType() != OperandStackType.INTEGER) {
+        if (operandStackContext.peekOperandStackType() != OperandStackType.INTEGER) {
             throw new Error("loop condition/expression expected to be type integer");
         }
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);

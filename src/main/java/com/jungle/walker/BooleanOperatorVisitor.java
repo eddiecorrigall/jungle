@@ -3,16 +3,14 @@ package com.jungle.walker;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
-public class BooleanOperatorVisitor extends BaseVisitor {
+public class BooleanOperatorVisitor implements IVisitor {
     @NotNull
     private static final INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
 
@@ -35,12 +33,8 @@ public class BooleanOperatorVisitor extends BaseVisitor {
     @NotNull
     private final IfVisitor ifVisitor; // TODO: convert to IVisitor
 
-    public BooleanOperatorVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
-            @NotNull final IfVisitor ifVisitor
-    ) {
-        super(operandStackTypeStack, symbolTable);
+    public BooleanOperatorVisitor(@NotNull final IfVisitor ifVisitor) {
+        super();
         this.ifVisitor = ifVisitor;
     }
 

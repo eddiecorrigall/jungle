@@ -2,26 +2,26 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
-
-import java.util.Stack;
 
 import static org.objectweb.asm.Opcodes.*;
 
 public class PrintVisitor implements IVisitor {
     @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack;
+    private final OperandStackContext operandStackContext;
 
     @NotNull
     private final IVisitor expressionVisitor;
 
     public PrintVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor
     ) {
        super();
-       this.operandStackTypeStack = operandStackTypeStack;
+       this.operandStackContext = operandStackContext;
        this.expressionVisitor = expressionVisitor;
     }
 
@@ -51,7 +51,7 @@ public class PrintVisitor implements IVisitor {
 
         // Prints what ever value is on the stack
 
-        OperandStackType operandStackType = operandStackTypeStack.pop();
+        OperandStackType operandStackType = operandStackContext.popOperandStackType();
         String descriptor;
         switch (operandStackType) {
             case BOOLEAN: descriptor = "(B)V"; break;

@@ -2,23 +2,22 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.Stack;
-
-public class AssignmentVisitor extends BaseVisitor {
+public class AssignmentVisitor implements IVisitor {
+    @NotNull
+    private final OperandStackContext operandStackContext;
     @NotNull
     private final IVisitor expressionVisitor;
 
     public AssignmentVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor
     ) {
-        super(operandStackTypeStack, symbolTable);
+        super();
+        this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
     }
 
@@ -54,6 +53,6 @@ public class AssignmentVisitor extends BaseVisitor {
         expressionVisitor.visit(mv, expressionNode);
 
         // store operand stack value and assign variable to index...
-        visitStore(mv, variableName);
+        operandStackContext.visitStore(mv, variableName);
     }
 }

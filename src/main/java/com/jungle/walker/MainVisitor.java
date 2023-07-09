@@ -2,22 +2,15 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.Stack;
-
 public class MainVisitor implements IVisitor {
-    // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
-    // When the jvm instruction adds to the stack, add the node type to this compile-time stack
-    // When the jvm instruction removes from the stack, remove the type from this compile-time stack
-    @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack = new Stack<>();
 
     @NotNull
-    private final SymbolTable symbolTable = new SymbolTable();
+    private final OperandStackContext operandStackContext = new OperandStackContext();
 
     // region Visitors
 
@@ -66,15 +59,15 @@ public class MainVisitor implements IVisitor {
 
         blockVisitor = new BlockVisitor(this);
 
-        expressionVisitor = new ExpressionVisitor(operandStackTypeStack, symbolTable);
+        expressionVisitor = new ExpressionVisitor();
 
-        ifVisitor = new IfVisitor(operandStackTypeStack, symbolTable, expressionVisitor, blockVisitor);
-        literalVisitor = new LiteralVisitor(operandStackTypeStack);
-        identifierVisitor = new IdentifierVisitor(operandStackTypeStack, symbolTable);
-        castIntegerVisitor = new CastIntegerVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
-        assignmentVisitor = new AssignmentVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
-        numericOperatorVisitor = new NumericOperatorVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
-        booleanOperatorVisitor = new BooleanOperatorVisitor(operandStackTypeStack, symbolTable, ifVisitor);
+        ifVisitor = new IfVisitor(operandStackContext, expressionVisitor, blockVisitor);
+        literalVisitor = new LiteralVisitor(operandStackContext);
+        identifierVisitor = new IdentifierVisitor(operandStackContext);
+        castIntegerVisitor = new CastIntegerVisitor(operandStackContext, expressionVisitor);
+        assignmentVisitor = new AssignmentVisitor(operandStackContext, expressionVisitor);
+        numericOperatorVisitor = new NumericOperatorVisitor(operandStackContext, expressionVisitor);
+        booleanOperatorVisitor = new BooleanOperatorVisitor(ifVisitor);
 
         expressionVisitor
                 .withIdentifierVisitor(identifierVisitor)
@@ -83,13 +76,13 @@ public class MainVisitor implements IVisitor {
                 .withCastIntegerVisitor(castIntegerVisitor)
                 .withBooleanOperatorVisitor(booleanOperatorVisitor);
 
-        assertVisitor = new AssertVisitor(operandStackTypeStack, symbolTable, expressionVisitor);
-        printVisitor = new PrintVisitor(operandStackTypeStack, expressionVisitor);
-        loopVisitor = new LoopVisitor(operandStackTypeStack, symbolTable, expressionVisitor, blockVisitor);
+        assertVisitor = new AssertVisitor(operandStackContext, expressionVisitor);
+        printVisitor = new PrintVisitor(operandStackContext, expressionVisitor);
+        loopVisitor = new LoopVisitor(operandStackContext, expressionVisitor, blockVisitor);
     }
 
     public boolean canVisit(@NotNull INode ast) {
-        return false;
+        return true; // TODO
     }
 
     @Override

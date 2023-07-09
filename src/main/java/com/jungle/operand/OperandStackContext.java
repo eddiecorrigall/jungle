@@ -1,6 +1,5 @@
-package com.jungle.walker;
+package com.jungle.operand;
 
-import com.jungle.ast.INode;
 import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
 import com.jungle.symbol.SymbolType;
@@ -9,43 +8,38 @@ import org.objectweb.asm.MethodVisitor;
 
 import java.util.Stack;
 
-public abstract class BaseVisitor implements IVisitor {
+public class OperandStackContext {
+    // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
+    // When the jvm instruction adds to the stack, add the node type to this compile-time stack
+    // When the jvm instruction removes from the stack, remove the type from this compile-time stack
     @NotNull
     private final Stack<OperandStackType> operandStackTypeStack;
     @NotNull
     private final SymbolTable symbolTable;
 
-    public BaseVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable
-    ) {
+    public OperandStackContext() {
         super();
-        this.operandStackTypeStack = operandStackTypeStack;
-        this.symbolTable = symbolTable;
+        this.operandStackTypeStack = new Stack<>();
+        this.symbolTable = new SymbolTable();
     }
 
     @NotNull
-    protected OperandStackType peekOperandStackType() {
+    public OperandStackType peekOperandStackType() {
         return operandStackTypeStack.peek();
     }
 
     @NotNull
-    protected OperandStackType popOperandStackType() {
+    public OperandStackType popOperandStackType() {
         return operandStackTypeStack.pop();
     }
 
-    protected void pushOperandStackType(@NotNull OperandStackType type) {
+    public void pushOperandStackType(@NotNull OperandStackType type) {
         operandStackTypeStack.push(type);
     }
 
     @NotNull
-    protected SymbolTable getSymbolTable() {
+    public SymbolTable getSymbolTable() {
         return symbolTable;
-    }
-
-    @Override
-    public boolean canVisit(@NotNull INode ast) {
-        throw new UnsupportedOperationException("not implemented");
     }
 
     public void visitLoad(

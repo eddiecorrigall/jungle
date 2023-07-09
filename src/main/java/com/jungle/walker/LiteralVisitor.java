@@ -2,14 +2,14 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import org.apache.commons.lang3.StringEscapeUtils;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 import static com.jungle.ast.NodeType.*;
 
@@ -23,11 +23,11 @@ public class LiteralVisitor implements IVisitor {
     ));
 
     @NotNull
-    private final Stack<OperandStackType> operandStackTypeStack;
+    private final OperandStackContext operandStackContext;
 
-    public LiteralVisitor(@NotNull final Stack<OperandStackType> operandStackTypeStack) {
+    public LiteralVisitor(@NotNull final OperandStackContext operandStackContext) {
        super();
-       this.operandStackTypeStack = operandStackTypeStack;
+       this.operandStackContext = operandStackContext;
     }
 
     @Override
@@ -75,6 +75,6 @@ public class LiteralVisitor implements IVisitor {
         }
 
         mv.visitLdcInsn(objectValue);
-        operandStackTypeStack.push(type);
+        operandStackContext.pushOperandStackType(type);
     }
 }

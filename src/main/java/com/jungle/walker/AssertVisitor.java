@@ -2,24 +2,25 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import java.util.Stack;
-
-public class AssertVisitor extends BaseVisitor {
+public class AssertVisitor implements IVisitor {
+    @NotNull
+    private final OperandStackContext operandStackContext;
     @NotNull
     private final IVisitor expressionVisitor;
 
     public AssertVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor
     ) {
-        super(operandStackTypeStack, symbolTable);
+        super();
+        this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
     }
 
@@ -45,7 +46,7 @@ public class AssertVisitor extends BaseVisitor {
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (peekOperandStackType() != OperandStackType.INTEGER) {
+        if (operandStackContext.peekOperandStackType() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

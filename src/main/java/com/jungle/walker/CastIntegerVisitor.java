@@ -2,23 +2,25 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
+import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import java.util.Stack;
+public class CastIntegerVisitor implements IVisitor {
+    @NotNull
+    private final OperandStackContext operandStackContext;
 
-public class CastIntegerVisitor extends BaseVisitor {
     @NotNull
     private final IVisitor expressionVisitor;
 
     public CastIntegerVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable,
+            @NotNull final OperandStackContext operandStackContext,
             @NotNull final IVisitor expressionVisitor
     ) {
-        super(operandStackTypeStack, symbolTable);
+        super();
+        this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
     }
 
@@ -40,7 +42,7 @@ public class CastIntegerVisitor extends BaseVisitor {
         }
 
         expressionVisitor.visit(mv, ast.getLeft());
-        OperandStackType type = popOperandStackType();
+        OperandStackType type = operandStackContext.popOperandStackType();
         switch (type) {
             case INTEGER: {
                 System.out.println("WARN: value is already an integer");
@@ -52,6 +54,6 @@ public class CastIntegerVisitor extends BaseVisitor {
                 throw new Error("integer cast not supported for " + ast);
             }
         }
-        pushOperandStackType(OperandStackType.INTEGER);
+        operandStackContext.pushOperandStackType(OperandStackType.INTEGER);
     }
 }

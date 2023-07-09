@@ -2,18 +2,17 @@ package com.jungle.walker;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.symbol.SymbolTable;
+import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.Stack;
+public class IdentifierVisitor implements IVisitor {
+    @NotNull
+    private final OperandStackContext operandStackContext;
 
-public class IdentifierVisitor extends BaseVisitor {
-    public IdentifierVisitor(
-            @NotNull final Stack<OperandStackType> operandStackTypeStack,
-            @NotNull final SymbolTable symbolTable
-    ) {
-        super(operandStackTypeStack, symbolTable);
+    public IdentifierVisitor(@NotNull final OperandStackContext operandStackContext) {
+        super();
+        this.operandStackContext = operandStackContext;
     }
 
     @Override
@@ -34,6 +33,6 @@ public class IdentifierVisitor extends BaseVisitor {
             throw new Error("identifier missing name");
         }
 
-        visitLoad(mv, variableName);
+        operandStackContext.visitLoad(mv, variableName);
     }
 }
