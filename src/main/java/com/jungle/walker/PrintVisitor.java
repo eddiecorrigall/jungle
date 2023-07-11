@@ -5,24 +5,44 @@ import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
 public class PrintVisitor implements IVisitor {
-    @NotNull
-    private final OperandStackContext operandStackContext;
+    @Nullable
+    private OperandStackContext operandStackContext;
+
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
 
     @NotNull
-    private final ExpressionVisitor expressionVisitor;
+    private ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor();
+        }
+        return expressionVisitor;
+    }
 
-    public PrintVisitor(
+    private PrintVisitor(
             @NotNull final OperandStackContext operandStackContext,
             @NotNull final ExpressionVisitor expressionVisitor
     ) {
        super();
        this.operandStackContext = operandStackContext;
        this.expressionVisitor = expressionVisitor;
+    }
+
+    public PrintVisitor() {
+        super();
     }
 
     @Override
@@ -42,7 +62,7 @@ public class PrintVisitor implements IVisitor {
             throw new Error("print missing expression");
         }
 
-        expressionVisitor.visit(mv, ast.getLeft());
+        getExpressionVisitor().visit(mv, ast.getLeft());
         visitPrint(mv);
     }
 
@@ -51,7 +71,7 @@ public class PrintVisitor implements IVisitor {
 
         // Prints what ever value is on the stack
 
-        OperandStackType operandStackType = operandStackContext.pop();
+        OperandStackType operandStackType = getOperandStackContext().pop();
         String descriptor;
         switch (operandStackType) {
             case BOOLEAN: descriptor = "(B)V"; break;

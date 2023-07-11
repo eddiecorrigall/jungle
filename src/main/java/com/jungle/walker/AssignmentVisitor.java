@@ -4,21 +4,42 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class AssignmentVisitor implements IVisitor {
-    @NotNull
-    private final OperandStackContext operandStackContext;
-    @NotNull
-    private final ExpressionVisitor expressionVisitor;
+    @Nullable
+    private OperandStackContext operandStackContext;
 
-    public AssignmentVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
+
+    @NotNull
+    private ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor();
+        }
+        return expressionVisitor;
+    }
+
+    private AssignmentVisitor(
+            @Nullable OperandStackContext operandStackContext,
+            @Nullable ExpressionVisitor expressionVisitor
     ) {
         super();
         this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
+    }
+
+    public AssignmentVisitor() {
+        super();
     }
 
     @Override
@@ -50,9 +71,9 @@ public class AssignmentVisitor implements IVisitor {
         }
 
         // evaluate expression to have value pushed onto operand stack...
-        expressionVisitor.visit(mv, expressionNode);
+        getExpressionVisitor().visit(mv, expressionNode);
 
         // store operand stack value and assign variable to index...
-        operandStackContext.visitStore(mv, variableName);
+        getOperandStackContext().visitStore(mv, variableName);
     }
 }

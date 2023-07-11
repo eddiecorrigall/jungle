@@ -1,69 +1,124 @@
 package com.jungle.walker;
 
 import com.jungle.ast.INode;
-import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class MainVisitor implements IVisitor {
-
-    // region Visitors
-
-    @NotNull
-    private final LiteralVisitor literalVisitor;
+    @Nullable
+    private LiteralVisitor literalVisitor;
 
     @NotNull
-    private final AssignmentVisitor assignmentVisitor;
+    private LiteralVisitor getLiteralVisitor() {
+        if (literalVisitor == null) {
+            literalVisitor = new LiteralVisitor();
+        }
+        return literalVisitor;
+    }
+
+    @Nullable
+    private AssignmentVisitor assignmentVisitor;
 
     @NotNull
-    private final BlockVisitor blockVisitor;
+    private AssignmentVisitor getAssignmentVisitor() {
+        if (assignmentVisitor == null) {
+            assignmentVisitor = new AssignmentVisitor();
+        }
+        return assignmentVisitor;
+    }
+
+    @Nullable
+    private BlockVisitor blockVisitor;
 
     @NotNull
-    private final AssertVisitor assertVisitor;
+    private BlockVisitor getBlockVisitor() {
+        if (blockVisitor == null) {
+            blockVisitor = new BlockVisitor();
+        }
+        return blockVisitor;
+    }
+
+    @Nullable
+    private AssertVisitor assertVisitor;
 
     @NotNull
-    private final PrintVisitor printVisitor;
+    private AssertVisitor getAssertVisitor() {
+        if (assertVisitor == null) {
+            assertVisitor = new AssertVisitor();
+        }
+        return assertVisitor;
+    }
+
+    @Nullable
+    private PrintVisitor printVisitor;
 
     @NotNull
-    private final IfVisitor ifVisitor;
+    private PrintVisitor getPrintVisitor() {
+        if (printVisitor == null) {
+            printVisitor = new PrintVisitor();
+        }
+        return printVisitor;
+    }
+
+    @Nullable
+    private IfVisitor ifVisitor;
 
     @NotNull
-    private final LoopVisitor loopVisitor;
+    private IfVisitor getIfVisitor() {
+        if (ifVisitor == null) {
+            ifVisitor = new IfVisitor();
+        }
+        return ifVisitor;
+    }
+
+    @Nullable
+    private LoopVisitor loopVisitor;
 
     @NotNull
-    private final SequenceVisitor sequenceVisitor;
+    private LoopVisitor getLoopVisitor() {
+        if (loopVisitor == null) {
+            loopVisitor = new LoopVisitor();
+        }
+        return loopVisitor;
+    }
+
+    @Nullable
+    private SequenceVisitor sequenceVisitor;
+
+    @NotNull
+    private SequenceVisitor getSequenceVisitor() {
+        if (sequenceVisitor == null) {
+            sequenceVisitor = new SequenceVisitor();
+        }
+        return sequenceVisitor;
+    }
 
     // endregion
 
+    private MainVisitor(
+            @NotNull final LiteralVisitor literalVisitor,
+            @NotNull final AssignmentVisitor assignmentVisitor,
+            @NotNull final BlockVisitor blockVisitor,
+            @NotNull final AssertVisitor assertVisitor,
+            @NotNull final PrintVisitor printVisitor,
+            @NotNull final IfVisitor ifVisitor,
+            @NotNull final LoopVisitor loopVisitor,
+            @NotNull final SequenceVisitor sequenceVisitor
+    ) {
+        super();
+        this.literalVisitor = literalVisitor;
+        this.assignmentVisitor = assignmentVisitor;
+        this.blockVisitor = blockVisitor;
+        this.assertVisitor = assertVisitor;
+        this.printVisitor = printVisitor;
+        this.ifVisitor = ifVisitor;
+        this.loopVisitor = loopVisitor;
+        this.sequenceVisitor = sequenceVisitor;
+    }
+
     public MainVisitor() {
         super();
-
-        // Chicken before the egg problem...
-
-        OperandStackContext operandStackContext = new OperandStackContext();
-
-        ExpressionVisitor expressionVisitor = new ExpressionVisitor();
-
-        sequenceVisitor = new SequenceVisitor(this);
-        blockVisitor = new BlockVisitor(this);
-        ifVisitor = new IfVisitor(operandStackContext, expressionVisitor, blockVisitor);
-        literalVisitor = new LiteralVisitor(operandStackContext);
-        IdentifierVisitor identifierVisitor = new IdentifierVisitor(operandStackContext);
-        CastIntegerVisitor castIntegerVisitor = new CastIntegerVisitor(operandStackContext, expressionVisitor);
-        assignmentVisitor = new AssignmentVisitor(operandStackContext, expressionVisitor);
-        NumericOperatorVisitor numericOperatorVisitor = new NumericOperatorVisitor(operandStackContext, expressionVisitor);
-        BooleanOperatorVisitor booleanOperatorVisitor = new BooleanOperatorVisitor(ifVisitor);
-        assertVisitor = new AssertVisitor(operandStackContext, expressionVisitor);
-        printVisitor = new PrintVisitor(operandStackContext, expressionVisitor);
-        loopVisitor = new LoopVisitor(operandStackContext, expressionVisitor, blockVisitor);
-
-        expressionVisitor
-                .withIdentifierVisitor(identifierVisitor)
-                .withLiteralVisitor(literalVisitor)
-                .withNumericOperatorVisitor(numericOperatorVisitor)
-                .withCastIntegerVisitor(castIntegerVisitor)
-                .withBooleanOperatorVisitor(booleanOperatorVisitor);
     }
 
     public boolean canVisit(@NotNull INode ast) {
@@ -78,43 +133,43 @@ public class MainVisitor implements IVisitor {
             throw new Error("expected main");
         }
 
-        if (sequenceVisitor.canVisit(ast)) {
-            sequenceVisitor.visit(mv, ast);
+        if (getSequenceVisitor().canVisit(ast)) {
+            getSequenceVisitor().visit(mv, ast);
             return;
         }
 
-        if (blockVisitor.canVisit(ast)) {
-            blockVisitor.visit(mv, ast);
+        if (getBlockVisitor().canVisit(ast)) {
+            getBlockVisitor().visit(mv, ast);
             return;
         }
 
-        if (literalVisitor.canVisit(ast)) {
-            literalVisitor.visit(mv, ast);
+        if (getLiteralVisitor().canVisit(ast)) {
+            getLiteralVisitor().visit(mv, ast);
             return;
         }
 
-        if (assignmentVisitor.canVisit(ast)) {
-            assignmentVisitor.visit(mv, ast);
+        if (getAssignmentVisitor().canVisit(ast)) {
+            getAssignmentVisitor().visit(mv, ast);
             return;
         }
 
-        if (assertVisitor.canVisit(ast)) {
-            assertVisitor.visit(mv, ast);
+        if (getAssertVisitor().canVisit(ast)) {
+            getAssertVisitor().visit(mv, ast);
             return;
         }
 
-        if (printVisitor.canVisit(ast)) {
-            printVisitor.visit(mv, ast);
+        if (getPrintVisitor().canVisit(ast)) {
+            getPrintVisitor().visit(mv, ast);
             return;
         }
 
-        if (ifVisitor.canVisit(ast)) {
-            ifVisitor.visit(mv, ast);
+        if (getIfVisitor().canVisit(ast)) {
+            getIfVisitor().visit(mv, ast);
             return;
         }
 
-        if (loopVisitor.canVisit(ast)) {
-            loopVisitor.visit(mv, ast);
+        if (getLoopVisitor().canVisit(ast)) {
+            getLoopVisitor().visit(mv, ast);
             return;
         }
 

@@ -3,15 +3,27 @@ package com.jungle.walker;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class SequenceVisitor implements IVisitor {
-    @NotNull
-    private final MainVisitor mainVisitor;
+    @Nullable
+    private MainVisitor mainVisitor;
 
-    public SequenceVisitor(@NotNull final MainVisitor mainVisitor) {
+    private MainVisitor getMainVisitor() {
+        if (mainVisitor == null) {
+            mainVisitor = new MainVisitor();
+        }
+        return mainVisitor;
+    }
+
+    private SequenceVisitor(@NotNull final MainVisitor mainVisitor) {
         super();
         this.mainVisitor = mainVisitor;
+    }
+
+    public SequenceVisitor() {
+        super();
     }
 
     @Override
@@ -28,11 +40,11 @@ public class SequenceVisitor implements IVisitor {
         }
 
         if (ast.getLeft() != null) {
-            mainVisitor.visit(mv, ast.getLeft());
+            getMainVisitor().visit(mv, ast.getLeft());
         }
 
         if (ast.getRight() != null) {
-            mainVisitor.visit(mv, ast.getRight());
+            getMainVisitor().visit(mv, ast.getRight());
         }
     }
 }

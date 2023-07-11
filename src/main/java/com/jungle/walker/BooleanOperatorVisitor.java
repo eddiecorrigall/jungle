@@ -4,6 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
@@ -30,12 +31,24 @@ public class BooleanOperatorVisitor implements IVisitor {
             NodeType.OPERATOR_GREATER_THAN
     ));
 
-    @NotNull
-    private final IfVisitor ifVisitor; // TODO: convert to IVisitor
+    @Nullable
+    private IfVisitor ifVisitor;
 
-    public BooleanOperatorVisitor(@NotNull final IfVisitor ifVisitor) {
+    @NotNull
+    private IfVisitor getIfVisitor() {
+        if (ifVisitor == null) {
+            ifVisitor = new IfVisitor();
+        }
+        return ifVisitor;
+    }
+
+    private BooleanOperatorVisitor(@NotNull final IfVisitor ifVisitor) {
         super();
         this.ifVisitor = ifVisitor;
+    }
+
+    public BooleanOperatorVisitor() {
+        super();
     }
 
     @Override
@@ -67,7 +80,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.ZERO,     // when 0 (false), jump to else
                         ast.getLeft(),      // if-condition
@@ -80,7 +93,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.NONZERO, // when non-0 (true), jump to else
                         ast.getLeft(),     // if-condition
@@ -95,7 +108,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() != null) {
                     throw new Error("boolean (unary) operator with unexpected right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.ZERO,  // when 0 (false), jump to else
                         ast.getLeft(),   // if-condition
@@ -112,7 +125,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.NONZERO, // when non-0 (true), jump to else
                         new Node(NodeType.OPERATOR_SUBTRACT)
@@ -131,7 +144,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.GREATER_OR_EQUAL_THAN_ZERO, // when >= 0, jump to else
                         new Node(NodeType.OPERATOR_SUBTRACT)
@@ -150,7 +163,7 @@ public class BooleanOperatorVisitor implements IVisitor {
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                ifVisitor.visit(
+                getIfVisitor().visit(
                         mv,
                         CompareTo.LESS_OR_EQUAL_THAN_ZERO, // when <= 0, jump to else
                         new Node(NodeType.OPERATOR_SUBTRACT)

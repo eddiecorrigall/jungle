@@ -4,15 +4,28 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class IdentifierVisitor implements IVisitor {
-    @NotNull
-    private final OperandStackContext operandStackContext;
+    @Nullable
+    private OperandStackContext operandStackContext;
 
-    public IdentifierVisitor(@NotNull final OperandStackContext operandStackContext) {
+    @NotNull
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    private IdentifierVisitor(@Nullable OperandStackContext operandStackContext) {
         super();
         this.operandStackContext = operandStackContext;
+    }
+
+    public IdentifierVisitor() {
+        super();
     }
 
     @Override
@@ -33,6 +46,6 @@ public class IdentifierVisitor implements IVisitor {
             throw new Error("identifier missing name");
         }
 
-        operandStackContext.visitLoad(mv, variableName);
+        getOperandStackContext().visitLoad(mv, variableName);
     }
 }

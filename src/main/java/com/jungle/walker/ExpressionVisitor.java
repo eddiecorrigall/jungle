@@ -6,52 +6,77 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class ExpressionVisitor implements IVisitor {
-    public ExpressionVisitor() {
-        super();
-    }
-
     @Nullable
     private IdentifierVisitor identifierVisitor;
 
     @NotNull
-    public ExpressionVisitor withIdentifierVisitor(@NotNull IdentifierVisitor identifierVisitor) {
-        this.identifierVisitor = identifierVisitor;
-        return this;
+    private IdentifierVisitor getIdentifierVisitor() {
+        if (identifierVisitor == null) {
+            identifierVisitor = new IdentifierVisitor();
+        }
+        return identifierVisitor;
     }
 
     @Nullable
     private LiteralVisitor literalVisitor;
 
     @NotNull
-    public ExpressionVisitor withLiteralVisitor(@NotNull LiteralVisitor literalVisitor) {
-        this.literalVisitor = literalVisitor;
-        return this;
+    private LiteralVisitor getLiteralVisitor() {
+        if (literalVisitor == null) {
+            literalVisitor = new LiteralVisitor();
+        }
+        return literalVisitor;
     }
 
     @Nullable
     private NumericOperatorVisitor numericOperatorVisitor;
 
     @NotNull
-    public ExpressionVisitor withNumericOperatorVisitor(@NotNull NumericOperatorVisitor numericOperatorVisitor) {
-        this.numericOperatorVisitor = numericOperatorVisitor;
-        return this;
+    private NumericOperatorVisitor getNumericOperatorVisitor() {
+        if (numericOperatorVisitor == null) {
+            numericOperatorVisitor = new NumericOperatorVisitor();
+        }
+        return numericOperatorVisitor;
     }
 
     @Nullable
     private CastIntegerVisitor castIntegerVisitor;
 
     @NotNull
-    public ExpressionVisitor withCastIntegerVisitor(@NotNull CastIntegerVisitor castIntegerVisitor) {
-        this.castIntegerVisitor = castIntegerVisitor;
-        return this;
+    private CastIntegerVisitor getCastIntegerVisitor() {
+        if (castIntegerVisitor == null) {
+            castIntegerVisitor = new CastIntegerVisitor();
+        }
+        return castIntegerVisitor;
     }
 
     @Nullable BooleanOperatorVisitor booleanOperatorVisitor;
 
     @NotNull
-    public ExpressionVisitor withBooleanOperatorVisitor(@NotNull BooleanOperatorVisitor booleanOperatorVisitor) {
+    private BooleanOperatorVisitor getBooleanOperatorVisitor() {
+        if (booleanOperatorVisitor == null) {
+            booleanOperatorVisitor = new BooleanOperatorVisitor();
+        }
+        return booleanOperatorVisitor;
+    }
+
+    private ExpressionVisitor(
+            @Nullable IdentifierVisitor identifierVisitor,
+            @Nullable LiteralVisitor literalVisitor,
+            @Nullable NumericOperatorVisitor numericOperatorVisitor,
+            @Nullable CastIntegerVisitor castIntegerVisitor,
+            @Nullable BooleanOperatorVisitor booleanOperatorVisitor
+    ) {
+        super();
+        this.identifierVisitor = identifierVisitor;
+        this.literalVisitor = literalVisitor;
+        this.numericOperatorVisitor = numericOperatorVisitor;
+        this.castIntegerVisitor = castIntegerVisitor;
         this.booleanOperatorVisitor = booleanOperatorVisitor;
-        return this;
+    }
+
+    public ExpressionVisitor() {
+        super();
     }
 
     @Override
@@ -67,28 +92,28 @@ public class ExpressionVisitor implements IVisitor {
             throw new Error("expected expression");
         }
 
-        if (identifierVisitor.canVisit(ast)) {
-            identifierVisitor.visit(mv, ast);
+        if (getIdentifierVisitor().canVisit(ast)) {
+            getIdentifierVisitor().visit(mv, ast);
             return;
         }
 
-        if (literalVisitor.canVisit(ast)) {
-            literalVisitor.visit(mv, ast);
+        if (getLiteralVisitor().canVisit(ast)) {
+            getLiteralVisitor().visit(mv, ast);
             return;
         }
 
-        if (numericOperatorVisitor.canVisit(ast)) {
-            numericOperatorVisitor.visit(mv, ast);
+        if (getNumericOperatorVisitor().canVisit(ast)) {
+            getNumericOperatorVisitor().visit(mv, ast);
             return;
         }
 
-        if (castIntegerVisitor.canVisit(ast)) {
-            castIntegerVisitor.visit(mv, ast);
+        if (getCastIntegerVisitor().canVisit(ast)) {
+            getCastIntegerVisitor().visit(mv, ast);
             return;
         }
 
-        if (booleanOperatorVisitor.canVisit(ast)) {
-            booleanOperatorVisitor.visit(mv, ast);
+        if (getBooleanOperatorVisitor().canVisit(ast)) {
+            getBooleanOperatorVisitor().visit(mv, ast);
             return;
         }
 

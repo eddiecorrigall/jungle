@@ -6,6 +6,7 @@ import com.jungle.operand.OperandStackContext;
 import com.jungle.operand.OperandStackType;
 import com.jungle.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
@@ -23,18 +24,38 @@ public class NumericOperatorVisitor implements IVisitor {
             OPERATOR_MODULO
     ));
 
-    @NotNull
-    private final OperandStackContext operandStackContext;
+    @Nullable
+    private OperandStackContext operandStackContext;
+
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
 
     @NotNull
-    private final ExpressionVisitor expressionVisitor;
+    public ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor();
+        }
+        return expressionVisitor;
+    }
 
     public NumericOperatorVisitor(
             @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor) {
+            @NotNull final ExpressionVisitor expressionVisitor
+    ) {
         super();
         this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
+    }
+
+    public NumericOperatorVisitor() {
+        this(null, null);
     }
 
     @Override
@@ -58,11 +79,11 @@ public class NumericOperatorVisitor implements IVisitor {
             throw new Error("binary operator missing right expression");
         }
 
-        expressionVisitor.visit(mv, ast.getLeft());
-        OperandStackType leftExpressionType = operandStackContext.pop();
+        getExpressionVisitor().visit(mv, ast.getLeft());
+        OperandStackType leftExpressionType = getOperandStackContext().pop();
 
-        expressionVisitor.visit(mv, ast.getRight());
-        OperandStackType rightExpressionType = operandStackContext.pop();
+        getExpressionVisitor().visit(mv, ast.getRight());
+        OperandStackType rightExpressionType = getOperandStackContext().pop();
 
         if (leftExpressionType != rightExpressionType) {
             throw new Error("binary operator left or right expression requires type cast " + ast);
@@ -80,6 +101,6 @@ public class NumericOperatorVisitor implements IVisitor {
             default: throw new Error("unhandled binary operator " + ast);
         }
 
-        operandStackContext.push(operandStackType);
+        getOperandStackContext().push(operandStackType);
     }
 }

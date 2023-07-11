@@ -5,6 +5,7 @@ import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;
@@ -22,12 +23,23 @@ public class LiteralVisitor implements IVisitor {
             LITERAL_STRING
     ));
 
-    @NotNull
-    private final OperandStackContext operandStackContext;
+    @Nullable
+    private OperandStackContext operandStackContext;
 
-    public LiteralVisitor(@NotNull final OperandStackContext operandStackContext) {
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    private LiteralVisitor(@NotNull final OperandStackContext operandStackContext) {
        super();
        this.operandStackContext = operandStackContext;
+    }
+
+    public LiteralVisitor() {
+        super();
     }
 
     @Override
@@ -75,6 +87,6 @@ public class LiteralVisitor implements IVisitor {
         }
 
         mv.visitLdcInsn(objectValue);
-        operandStackContext.push(type);
+        getOperandStackContext().push(type);
     }
 }

@@ -12,14 +12,37 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class IfVisitor implements IVisitor {
-    @NotNull
-    private final OperandStackContext operandStackContext;
+    @Nullable
+    private OperandStackContext operandStackContext;
+
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
 
     @NotNull
-    private final ExpressionVisitor expressionVisitor;
+    private ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor();
+        }
+        return expressionVisitor;
+    }
+
+    @Nullable
+    private BlockVisitor blockVisitor;
 
     @NotNull
-    private final BlockVisitor blockVisitor;
+    private BlockVisitor getBlockVisitor() {
+        if (blockVisitor == null) {
+            blockVisitor = new BlockVisitor();
+        }
+        return blockVisitor;
+    }
 
     public IfVisitor(
             @NotNull final OperandStackContext operandStackContext,
@@ -30,6 +53,10 @@ public class IfVisitor implements IVisitor {
         this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
         this.blockVisitor = blockVisitor;
+    }
+
+    public IfVisitor() {
+        super();
     }
 
     @Override
@@ -79,8 +106,8 @@ public class IfVisitor implements IVisitor {
             throw new Error("expected if condition/expression");
         }
 
-        expressionVisitor.visit(mv, conditionNode);
-        if (operandStackContext.peek() != OperandStackType.INTEGER) {
+        getExpressionVisitor().visit(mv, conditionNode);
+        if (getOperandStackContext().peek() != OperandStackType.INTEGER) {
             throw new Error("if condition/expression expected to be type integer");
         }
 
@@ -110,12 +137,12 @@ public class IfVisitor implements IVisitor {
 
             // if-block
             mv.visitLabel(ifBlockLabel);
-            blockVisitor.visit(mv, ifBlockNode);
+            getBlockVisitor().visit(mv, ifBlockNode);
             mv.visitJumpInsn(Opcodes.GOTO, endLabel);
 
             // else-block
             mv.visitLabel(elseBlockLabel);
-            blockVisitor.visit(mv, elseBlockNode);
+            getBlockVisitor().visit(mv, elseBlockNode);
 
             // end
             mv.visitLabel(endLabel);
@@ -124,7 +151,7 @@ public class IfVisitor implements IVisitor {
             mv.visitJumpInsn(jumpCode, endLabel);
 
             // if-block
-            blockVisitor.visit(mv, bodyNode);
+            getBlockVisitor().visit(mv, bodyNode);
 
             // end
             mv.visitLabel(endLabel);

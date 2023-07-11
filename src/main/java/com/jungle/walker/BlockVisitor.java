@@ -3,15 +3,27 @@ package com.jungle.walker;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class BlockVisitor implements IVisitor {
-    @NotNull
-    final IVisitor mainVisitor;
+    @Nullable
+    private MainVisitor mainVisitor;
 
-    public BlockVisitor(@NotNull final IVisitor mainVisitor) {
+    private MainVisitor getMainVisitor() {
+        if (mainVisitor == null) {
+            mainVisitor = new MainVisitor();
+        }
+        return mainVisitor;
+    }
+
+    private BlockVisitor(@NotNull final MainVisitor mainVisitor) {
         super();
         this.mainVisitor = mainVisitor;
+    }
+
+    public BlockVisitor() {
+        super();
     }
 
     @Override
@@ -35,6 +47,6 @@ public class BlockVisitor implements IVisitor {
             throw new Error("block right AST must NOT be defined");
         }
 
-        mainVisitor.visit(mv, ast.getLeft());
+        getMainVisitor().visit(mv, ast.getLeft());
     }
 }

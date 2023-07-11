@@ -5,23 +5,44 @@ import com.jungle.ast.NodeType;
 import com.jungle.operand.OperandStackContext;
 import com.jungle.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class AssertVisitor implements IVisitor {
-    @NotNull
-    private final OperandStackContext operandStackContext;
-    @NotNull
-    private final ExpressionVisitor expressionVisitor;
+    @Nullable
+    private OperandStackContext operandStackContext;
 
-    public AssertVisitor(
+    private OperandStackContext getOperandStackContext() {
+        if (operandStackContext == null) {
+            operandStackContext = OperandStackContext.getInstance();
+        }
+        return operandStackContext;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
+
+    @NotNull
+    private ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor();
+        }
+        return expressionVisitor;
+    }
+
+    private AssertVisitor(
             @NotNull final OperandStackContext operandStackContext,
             @NotNull final ExpressionVisitor expressionVisitor
     ) {
         super();
         this.operandStackContext = operandStackContext;
         this.expressionVisitor = expressionVisitor;
+    }
+
+    public AssertVisitor() {
+        super();
     }
 
     @Override
@@ -42,11 +63,11 @@ public class AssertVisitor implements IVisitor {
         }
 
         // push expression/condition onto operand stack
-        expressionVisitor.visit(mv, ast.getLeft());
+        getExpressionVisitor().visit(mv, ast.getLeft());
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (operandStackContext.peek() != OperandStackType.INTEGER) {
+        if (getOperandStackContext().peek() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

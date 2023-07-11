@@ -4,11 +4,24 @@ import com.jungle.symbol.SymbolEntry;
 import com.jungle.symbol.SymbolTable;
 import com.jungle.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Stack;
 
 public class OperandStackContext {
+    // region Singleton Factory
+    @Nullable
+    private static OperandStackContext operandStackContext = null;
+    @NotNull
+    public static OperandStackContext getInstance() {
+        if (operandStackContext == null) {
+            operandStackContext = new OperandStackContext();
+        }
+        return operandStackContext;
+    }
+    // endregion
+
     // Track the node type that goes onto the jvm stack to catch semantic errors before they are runtime errors
     // When the jvm instruction adds to the stack, add the node type to this compile-time stack
     // When the jvm instruction removes from the stack, remove the type from this compile-time stack
