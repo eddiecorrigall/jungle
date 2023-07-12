@@ -5,44 +5,56 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.jungle.token.IToken;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-// TODO: Test abstract class only
-
 public class AbstractScannerTest {
+  private static class TestScanner extends AbstractScanner {
+    public TestScanner(@NotNull Iterable<String> lineIterable) {
+      super(lineIterable.iterator());
+    }
+
+    @Override
+    public @Nullable Iterable<IToken> scan() {
+      throw new UnsupportedOperationException("not implemented");
+    }
+  }
+
   @Test(expected = IndexOutOfBoundsException.class)
   public void testSetPositionNegative() {
-    Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     scanner.setCharacterIndex(-1);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testSetLineNumberNegative() {
-    Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     scanner.setLineNumber(-1);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testSetLineNumberZero() {
-    Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     scanner.setLineNumber(0);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testSetCharacterNumberNegative() {
-  Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     scanner.setCharacterNumber(-1);
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testSetCharacterNumberZero() {
-    Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     scanner.setCharacterNumber(0);
   }
 
   @Test
   public void testConsume_singleLine() {
-    Scanner scanner = new Scanner(Collections.singletonList("Hello"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("Hello"));
     assertEquals(1, scanner.getCharacterNumber());
     assertEquals('H', scanner.consume());
     assertEquals(2, scanner.getCharacterNumber());
@@ -64,7 +76,7 @@ public class AbstractScannerTest {
 
   @Test
   public void testConsume_multipleLines() {
-    Scanner scanner = new Scanner(Arrays.asList("Hello", "World!"));
+    TestScanner scanner = new TestScanner(Arrays.asList("Hello", "World!"));
     assertEquals(1, scanner.getCharacterNumber());
     assertEquals('H', scanner.consume());
     assertEquals(2, scanner.getCharacterNumber());
@@ -97,13 +109,13 @@ public class AbstractScannerTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void testConsume_invalidNegativeCharacterNumber() {
-    Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("var abc = 123;"));
     scanner.consume(-1);
   }
 
   @Test
   public void testConsume_validCharacterNumber() {
-    Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("var abc = 123;"));
     assertEquals("", scanner.consume(0));
     assertEquals(1, scanner.getCharacterNumber());
     assertEquals("var", scanner.consume(3));
@@ -112,16 +124,8 @@ public class AbstractScannerTest {
 
   @Test()
   public void testConsume_invalidPositiveCharacterNumber() {
-    Scanner scanner = new Scanner(Collections.singletonList("var abc = 123;"));
+    TestScanner scanner = new TestScanner(Collections.singletonList("var abc = 123;"));
     String result = scanner.consume(100);
     assertEquals("var abc = 123;\n", result);
-  }
-
-  @Test
-  public void testConsumeUntilAndSkip() {
-    Scanner scanner = new Scanner(Collections.singletonList("var text = \"Hello world!\";"));
-    scanner.consume(12);
-    assertEquals("Hello world!", scanner.consumeUntilAndSkip('\"'));
-    assertEquals(26, scanner.getCharacterNumber());
   }
 }

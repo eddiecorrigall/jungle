@@ -127,4 +127,12 @@ public class ScannerTest {
     // terminal
     assertEquals(new Token(TokenType.TERMINAL), scanner.scanToken());
   }
+
+  @Test
+  public void testConsumeUntilAndSkip() {
+    Scanner scanner = new Scanner(Collections.singletonList("var text = \"Hello world!\";"));
+    scanner.consume(12);
+    assertEquals("Hello world!", scanner.consumeUntilAndSkip('\"'));
+    assertEquals(26, scanner.getCharacterNumber());
+  }
 }
