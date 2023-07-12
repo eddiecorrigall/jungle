@@ -1,7 +1,7 @@
 package com.jungle.compiler;
 
 import com.jungle.ast.INode;
-import com.jungle.walker.IVisitor;
+import com.jungle.compiler.visitor.IVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;

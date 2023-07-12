@@ -1,4 +1,4 @@
-package com.jungle.walker;
+package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;

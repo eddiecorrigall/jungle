@@ -3,7 +3,7 @@ package com.jungle.compiler;
 import com.jungle.ast.INode;
 import com.jungle.error.CompilerError;
 import com.jungle.logger.FileLogger;
-import com.jungle.walker.*;
+import com.jungle.compiler.visitor.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;

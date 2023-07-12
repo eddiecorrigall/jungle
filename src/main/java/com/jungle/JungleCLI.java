@@ -7,7 +7,7 @@ import com.jungle.parser.Parser;
 import com.jungle.scanner.Scanner;
 import com.jungle.token.IToken;
 import com.jungle.token.Token;
-import com.jungle.walker.*;
+import com.jungle.compiler.visitor.*;
 import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
 

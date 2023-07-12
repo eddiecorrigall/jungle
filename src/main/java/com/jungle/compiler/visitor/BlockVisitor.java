@@ -1,4 +1,4 @@
-package com.jungle.walker;
+package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class SequenceVisitor implements IVisitor {
+public class BlockVisitor implements IVisitor {
     @Nullable
     private MainVisitor mainVisitor;
 
@@ -17,34 +17,36 @@ public class SequenceVisitor implements IVisitor {
         return mainVisitor;
     }
 
-    private SequenceVisitor(@NotNull final MainVisitor mainVisitor) {
+    private BlockVisitor(@NotNull final MainVisitor mainVisitor) {
         super();
         this.mainVisitor = mainVisitor;
     }
 
-    public SequenceVisitor() {
+    public BlockVisitor() {
         super();
     }
 
     @Override
     public boolean canVisit(@NotNull INode ast) {
-        return ast.getType() == NodeType.SEQUENCE;
+        return NodeType.BLOCK.equals(ast.getType());
     }
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit sequence " + ast);
+        System.out.println("visit block " + ast);
 
         if (!canVisit(ast)) {
-            throw new Error("expected sequence");
+            throw new Error("expected block");
         }
 
-        if (ast.getLeft() != null) {
-            getMainVisitor().visit(mv, ast.getLeft());
+        if (ast.getLeft() == null) {
+            throw new Error("block left AST must be defined");
         }
 
         if (ast.getRight() != null) {
-            getMainVisitor().visit(mv, ast.getRight());
+            throw new Error("block right AST must NOT be defined");
         }
+
+        getMainVisitor().visit(mv, ast.getLeft());
     }
 }
