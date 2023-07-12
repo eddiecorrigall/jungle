@@ -1,6 +1,6 @@
 package com.jungle.compiler.operand;
 
-import com.jungle.symbol.SymbolType;
+import com.jungle.compiler.symbol.SymbolType;
 
 public enum OperandStackType {
     INDEX,

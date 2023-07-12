@@ -1,4 +1,4 @@
-package com.jungle.symbol;
+package com.jungle.compiler.symbol;
 
 import org.objectweb.asm.Opcodes;
 

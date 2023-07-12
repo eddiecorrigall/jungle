@@ -1,8 +1,8 @@
 package com.jungle.compiler.operand;
 
-import com.jungle.symbol.SymbolEntry;
-import com.jungle.symbol.SymbolTable;
-import com.jungle.symbol.SymbolType;
+import com.jungle.compiler.symbol.SymbolEntry;
+import com.jungle.compiler.symbol.SymbolTable;
+import com.jungle.compiler.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
