@@ -2,8 +2,8 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
-import com.jungle.operand.OperandStackContext;
-import com.jungle.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandStackContext;
+import com.jungle.compiler.operand.OperandStackType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;

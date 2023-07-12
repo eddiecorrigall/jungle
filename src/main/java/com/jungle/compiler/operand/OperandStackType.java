@@ -1,4 +1,4 @@
-package com.jungle.operand;
+package com.jungle.compiler.operand;
 
 import com.jungle.symbol.SymbolType;
 
