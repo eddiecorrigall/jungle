@@ -107,6 +107,12 @@ void addMainMethod() {
 }
 ```
 
+## Java Project
+
+- IntelliJ
+    - [Package into JAR](https://www.jetbrains.com/help/idea/compiling-applications.html#package_into_jar)
+    - [Run Packaged JAR](https://www.jetbrains.com/help/idea/compiling-applications.html#run_packaged_jar)
+
 ## Ideas
 
 - Should I store the symbol table in the entrypoint class?
