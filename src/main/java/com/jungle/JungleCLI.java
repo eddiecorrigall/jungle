@@ -106,7 +106,7 @@ public class JungleCLI {
             System.err.println("failed to close ast reader - " + e.getMessage());
             System.exit(1);
         }
-        String outputFileName = cli.getOptionValue("output");
+        String outputFileName = cli.getOptionValue("output", "Entrypoint");
         Compiler compiler = new Compiler();
         compiler.compile(outputFileName, new MainVisitor(), ast);
     }
@@ -138,18 +138,7 @@ public class JungleCLI {
         switch (command) {
             case "scan": scanCommand(cli); break;
             case "parse": parseCommand(cli); break;
-            case "compile": {
-                String output = cli.getOptionValue("output");
-                boolean isNullOrEmpty = output == null || output.length() == 0;
-                if (isNullOrEmpty) {
-                    // Note: output is only required for compile
-                    System.err.println("Missing required option - output");
-                    helpCommand(options);
-                    System.exit(1);
-                } else {
-                    compileCommand(cli);
-                }
-            } break;
+            case "compile": compileCommand(cli); break;
             default: {
                 System.err.println("Unknown command-line argument - " + command);
                 helpCommand(options);

@@ -5,23 +5,42 @@ Jungle
 
 A toy programming language built for the Java Virtual Machine.
 
+## Setup
+
+Requires a Java Runtime Environment (JRE) with minimum version `1.8`.
+Either install the OpenJDK or Oracle JRE.
+
 ```bash
-# Scan from Source
+# Make the command-line interface available to shell.
+source jungle-setup.bash
+
+# Test command.
+jungle --help
+```
+
+## Demo
+
+Breakdown of commands.
+
+```bash
+# Scan from standard input Source file
 cat program.source | jungle scan --output program.tokens
 
-# Parse from Tokens
+# Parse from standard input Tokens file
 cat program.tokens | jungle parse --output program.ast
 
-# Compile from AST
+# Compile from standard input AST file
 cat program.ast | jungle compile --output Entrypoint
 
 # Run program
 java Entrypoint
 ```
 
-```bash
-# Example program to count down
+### Working example
 
+Compile and run a countdown program.
+
+```bash
 echo '
 i = 3
 loop (greaterThan i 0) {
@@ -30,11 +49,21 @@ loop (greaterThan i 0) {
   i = - i 1
 }
 print("Blast off!\n")
-'  | ./jungle scan \
-   | ./jungle parse \
-   | ./jungle compile --output Entrypoint
+'  | jungle scan \
+   | jungle parse \
+   | jungle compile
 
+# Run class file produced by compiler
 java Entrypoint
+```
+
+Output of countdown program.
+
+```
+3...
+2...
+1...
+Blast off!
 ```
 
 ## Useful Commands

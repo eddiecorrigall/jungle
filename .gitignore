@@ -1,5 +1,7 @@
 target
-*.class
-.idea
-.vscode
+out/release
+out/test
 *.log*
+
+# Default output of compile command
+Entrypoint.class
