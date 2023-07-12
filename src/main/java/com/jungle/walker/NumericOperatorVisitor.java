@@ -55,7 +55,7 @@ public class NumericOperatorVisitor implements IVisitor {
     }
 
     public NumericOperatorVisitor() {
-        this(null, null);
+        super();
     }
 
     @Override
