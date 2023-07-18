@@ -8,6 +8,7 @@ import com.jungle.compiler.symbol.SymbolType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -79,28 +80,46 @@ public class NumericOperatorVisitor implements IVisitor {
             throw new Error("binary operator missing right expression");
         }
 
+        // prepare for operation...
+
         getExpressionVisitor().visit(mv, ast.getLeft());
         OperandStackType leftExpressionType = getOperandStackContext().pop();
 
         getExpressionVisitor().visit(mv, ast.getRight());
         OperandStackType rightExpressionType = getOperandStackContext().pop();
 
-        if (leftExpressionType != rightExpressionType) {
+        // prepare for operation - cast types...
+
+        OperandStackType operandStackType;
+
+        if (leftExpressionType == rightExpressionType) {
+            operandStackType = leftExpressionType;
+            getOperandStackContext().push(operandStackType);
+        } else if (OperandStackType.INTEGER == leftExpressionType && OperandStackType.CHARACTER == rightExpressionType) {
+            mv.visitInsn(Opcodes.SWAP); // move integer (left) to top
+            mv.visitInsn(Opcodes.I2C); // convert integer to character
+            mv.visitInsn(Opcodes.SWAP); // restore
+            operandStackType = OperandStackType.INTEGER; // operation
+            getOperandStackContext().push(OperandStackType.CHARACTER); // final type
+        } else if (OperandStackType.CHARACTER == leftExpressionType && OperandStackType.INTEGER == rightExpressionType) {
+            mv.visitInsn(Opcodes.I2C); // convert integer (right)
+            operandStackType = OperandStackType.INTEGER; // operation
+            getOperandStackContext().push(OperandStackType.CHARACTER); // final type
+        } else {
             throw new Error("binary operator left or right expression requires type cast " + ast);
         }
 
-        OperandStackType operandStackType = leftExpressionType;
-        SymbolType type = operandStackType.getSymbolType();
+        // perform operation...
+
+        SymbolType symbolType = operandStackType.getSymbolType();
 
         switch (ast.getType()) {
-            case OPERATOR_ADD: mv.visitInsn(type.getAddOpcode()); break;
-            case OPERATOR_SUBTRACT: mv.visitInsn(type.getSubtractOpcode()); break;
-            case OPERATOR_MULTIPLY: mv.visitInsn(type.getMultiplyOpcode()); break;
-            case OPERATOR_DIVIDE: mv.visitInsn(type.getDivideOpcode()); break;
-            case OPERATOR_MODULO: mv.visitInsn(type.getModuloOpcode()); break;
+            case OPERATOR_ADD: mv.visitInsn(symbolType.getAddOpcode()); break;
+            case OPERATOR_SUBTRACT: mv.visitInsn(symbolType.getSubtractOpcode()); break; // order matters
+            case OPERATOR_MULTIPLY: mv.visitInsn(symbolType.getMultiplyOpcode()); break;
+            case OPERATOR_DIVIDE: mv.visitInsn(symbolType.getDivideOpcode()); break; // order matters
+            case OPERATOR_MODULO: mv.visitInsn(symbolType.getModuloOpcode()); break; // order matters
             default: throw new Error("unhandled binary operator " + ast);
         }
-
-        getOperandStackContext().push(operandStackType);
     }
 }

@@ -280,9 +280,9 @@ public class ParserTest {
     assertNull(ast.getRight());
   }
 
-  @Test(expected = Error.class)
-  public void testParseExpressionBoolean_booleanAndNumeric() {
-    // Note: mixing boolean and integer not allowed
+  @Test
+  public void testParseExpressionBoolean_mixBooleanAndNumberExpression() {
+    // Note: mixing boolean and number allowed at parser level
     List<IToken> tokenList = new LinkedList<>();
     tokenList.add(new Token(TokenType.KEYWORD).withValue("not"));
     tokenList.add(new Token(TokenType.SPACE));
@@ -296,6 +296,22 @@ public class ParserTest {
     parser.nextToken();
 
     parser.parseBooleanExpression();
+  }
+
+  @Test
+  public void testParseExpression_mixTextAndNumberExpression() {
+    // Note: mixing text and number allowed at parser level
+    List<IToken> tokenList = new LinkedList<>();
+    tokenList.add(new Token(TokenType.PLUS));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.TEXT).withValue("0"));
+    tokenList.add(new Token(TokenType.SPACE));
+    tokenList.add(new Token(TokenType.NUMBER).withValue("6"));
+    tokenList.add(new Token(TokenType.TERMINAL));
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    parser.parseExpression();
   }
 
   @Test

@@ -59,7 +59,7 @@ public class OperandStackContext {
             @NotNull MethodVisitor mv,
             @NotNull String variableName
     ) {
-        // Get local variable index value and push on the operand stack
+        // Get local variable index value and push variable value onto the operand stack
         System.out.println("visit load " + variableName);
 
         SymbolEntry entry = getSymbolTable().get(variableName);
@@ -83,7 +83,7 @@ public class OperandStackContext {
             @NotNull MethodVisitor mv,
             @NotNull String variableName
     ) {
-        // Pop value on the operand stack and set local variable index value
+        // Pop value off the operand stack and set local variable index value
         System.out.println("visit store " + variableName);
 
         OperandStackType variableType = pop();

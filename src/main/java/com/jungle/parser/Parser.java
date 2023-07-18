@@ -36,6 +36,7 @@ public class Parser extends AbstractParser {
     consumeWhitespace();
     expect(TokenType.BRACKET_ROUND_OPEN);
     INode expressionNode = parseCallback.get();
+    consumeWhitespace();
     expect(TokenType.BRACKET_ROUND_CLOSE);
     return expressionNode;
   }
@@ -78,42 +79,48 @@ public class Parser extends AbstractParser {
 
   @Nullable
   public INode parseNumberExpression() {
+    /*
+     * number_expression := number
+     *                    | "(" number_expression ")"
+     *                    | ( "+" | "-" | "*" | "/" | "%" ) expression expression
+     *                    ;
+     */
     consumeWhitespace();
     if (accepts(TokenType.NUMBER)) {
       return parseNumber();
     }
-    if (accepts(TokenType.SYMBOL)) {
-      return parseIdentifier();
+    if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
+      return parseParenthesis(this::parseNumberExpression);
     }
     if (accepts(TokenType.PLUS)) {
       expect(TokenType.PLUS);
       return new Node(NodeType.OPERATOR_ADD)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (accepts(TokenType.MINUS)) {
       expect(TokenType.MINUS);
       return new Node(NodeType.OPERATOR_SUBTRACT)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (accepts(TokenType.ASTERISK)) {
       expect(TokenType.ASTERISK);
       return new Node(NodeType.OPERATOR_MULTIPLY)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (accepts(TokenType.SLASH_RIGHT)) {
       expect(TokenType.SLASH_RIGHT);
       return new Node(NodeType.OPERATOR_DIVIDE)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (accepts(TokenType.PERCENT)) {
       expect(TokenType.PERCENT);
       return new Node(NodeType.OPERATOR_MODULO)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     throw newError("not a number expression");
   }
@@ -144,12 +151,8 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseTextExpression() {
     /*
-     * text_expression := identifier
-     *                  | text_literal
+     * text_expression := text_literal ;
      */
-    if (accepts(TokenType.SYMBOL)) {
-      return parseIdentifier();
-    }
     if (accepts(TokenType.TEXT)) {
       return parseTextLiteral();
     }
@@ -160,25 +163,8 @@ public class Parser extends AbstractParser {
 
   // region boolean
 
-  @Nullable
-  protected INode parseBooleanExpression() {
-    /*
-     * boolean_expression := boolean_identifier
-     *                     | "(" boolean_expression ")"
-     *                     | ( "true" | "false" )
-     *                     | ( "and" | "or" ) boolean_expression boolean_expression
-     *                     | ( "greaterThan" | "lessThan" ) numeric_expression numeric_expression
-     *                     | "equals" expression expression
-     *                     | "not" boolean_expression
-     *                     ;
-     */
-    consumeWhitespace();
-    // region identifier
-    if (accepts(TokenType.SYMBOL)) {
-      return parseIdentifier();
-    }
-    // endregion
-    // region literal
+  @NotNull
+  protected INode parseBooleanLiteral() {
     if (acceptKeyword(KEYWORD_TRUE)) {
       expectKeyword(KEYWORD_TRUE);
       return new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
@@ -187,24 +173,41 @@ public class Parser extends AbstractParser {
       expectKeyword(KEYWORD_FALSE);
       return new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
     }
+    throw newError("not a boolean literal");
+  }
+
+  @Nullable
+  protected INode parseBooleanExpression() {
+    /*
+     * boolean_expression := boolean_literal
+     *                     | "(" boolean_expression ")"
+     *                     | ( "and" | "or" | "greaterThan" | "lessThan" | "equals" ) expression expression
+     *                     | "not" expression
+     *                     ;
+     */
+    consumeWhitespace();
+    // region literal
+    if (acceptKeywords(KEYWORD_TRUE, KEYWORD_FALSE)) {
+      return parseBooleanLiteral();
+    }
     // endregion
     // region parenthesis
     if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
       return parseParenthesis(this::parseBooleanExpression);
     }
     // endregion
-    // region predicate
+    // region predicate - boolean operator
     if (acceptKeyword(KEYWORD_AND)) {
       expectKeyword(KEYWORD_AND);
       return new Node(NodeType.OPERATOR_AND)
-              .withLeft(parseBooleanExpression())
-              .withRight(parseBooleanExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (acceptKeyword(KEYWORD_OR)) {
       expectKeyword(KEYWORD_OR);
       return new Node(NodeType.OPERATOR_OR)
-              .withLeft(parseBooleanExpression())
-              .withRight(parseBooleanExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (acceptKeyword(KEYWORD_EQUALS)) {
       expectKeyword(KEYWORD_EQUALS);
@@ -215,19 +218,21 @@ public class Parser extends AbstractParser {
     if (acceptKeyword(KEYWORD_GREATER_THAN)) {
       expectKeyword(KEYWORD_GREATER_THAN);
       return new Node(NodeType.OPERATOR_GREATER_THAN)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
     if (acceptKeyword(KEYWORD_LESS_THAN)) {
       expectKeyword(KEYWORD_LESS_THAN);
       return new Node(NodeType.OPERATOR_LESS_THAN)
-              .withLeft(parseNumberExpression())
-              .withRight(parseNumberExpression());
+              .withLeft(parseExpression())
+              .withRight(parseExpression());
     }
+    // endregion
+    // region predicate - unary operator
     if (acceptKeyword(KEYWORD_NOT)) {
       expectKeyword(KEYWORD_NOT);
       return new Node(NodeType.OPERATOR_NOT)
-              .withLeft(parseBooleanExpression());
+              .withLeft(parseExpression());
     }
     // endregion
     throw newError("not a boolean expression");
@@ -267,7 +272,7 @@ public class Parser extends AbstractParser {
     if (isBooleanExpression) {
       return parseBooleanExpression();
     }
-    boolean isTextExpression = accepts(TokenType.TEXT); // TODO
+    boolean isTextExpression = accepts(TokenType.TEXT);
     if (isTextExpression) {
       return parseTextExpression();
     }
@@ -301,7 +306,7 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementLoop() {
     /*
-     * statement_loop := "loop" whitespace expression_parenthesis whitespace statement_block ;
+     * statement_loop := "loop" boolean_expression statement_block ;
      */
     expectKeyword(KEYWORD_LOOP);
     INode expressionNode = parseBooleanExpression();
@@ -323,9 +328,7 @@ public class Parser extends AbstractParser {
   @Nullable
   protected INode parseStatementIf() {
     /*
-     * statement_if := "if" expression_boolean statement_block
-     *              | "if" expression_boolean statement_block "else" statement_block
-     *              ;
+     * statement_if := "if" boolean_expression statement_block [ "else" statement_block ] ;
      */
     expectKeyword(KEYWORD_IF);
     Node ifNode = new Node(NodeType.IF).withLeft(parseBooleanExpression());

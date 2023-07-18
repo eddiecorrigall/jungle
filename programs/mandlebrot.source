@@ -1,0 +1,36 @@
+leftEdge   = -0 420
+rightEdge  =    300
+topEdge    =    300
+bottomEdge = -0 300
+xStep      =    7
+yStep      =    15
+maxIter    =    200
+
+yZero = topEdge
+loop (greaterThan yZero bottomEdge) {
+    xZero = leftEdge
+    loop (lessThan xZero rightEdge) {
+        y = 0
+        x = 0
+        theChar = ' '
+        i = 0
+        loop (lessThan i maxIter) {
+            xx = / (* x x) 200
+            yy = / (* y y) 200
+            if (greaterThan (+ xx yy) 800) {
+                theChar = + '0' i
+                if (greaterThan i 9) {
+                    theChar = '@'
+                }
+                i = maxIter
+            }
+            y = + (/ (* x y) 100) yZero
+            x = + (- xx yy) xZero
+            i = + i 1
+        }
+        print theChar
+        xZero = + xZero xStep
+    }
+    print '\n'
+    yZero = - yZero yStep
+}
