@@ -18,6 +18,12 @@ source jungle-setup.bash
 jungle --help
 ```
 
+## Compile the Jungle Compiler
+
+1. Load project using VS Code
+1. Select Terminal > Run Build Task...
+1. Select JungleCLI
+
 ## Demo
 
 Breakdown of commands.
@@ -64,6 +70,57 @@ Output of countdown program.
 2...
 1...
 Blast off!
+```
+
+#### Multitasking
+
+Jungle supports Java threading using the keyword `multitask`.
+To use this keyword, supply a `*.class` file path (excluding extension).
+
+Ensure the class:
+- implements the `java.lang.Runnable` interface
+- has a default constructor
+- compiled with the `JUNGLEPATH` environment variable with the classpath
+
+```shell
+mkdir -p /tmp/app/com/example
+echo '
+package com.example;
+
+public class MultitaskDemo implements Runnable {
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(", world!");
+    }
+}
+' > /tmp/app/com/example/MultitaskDemo.java
+
+javac /tmp/app/com/example/MultitaskDemo.java
+```
+
+```shell
+# Declare the classpath before compiling,
+# so that the user defined class can be validated
+export JUNGLEPATH=".:/tmp/app"
+
+echo '
+multitask "com.example.MultitaskDemo"
+print "Hello"
+' | jungle scan \
+  | jungle parse \
+  | jungle compile
+
+java -classpath $JUNGLEPATH Entrypoint
+```
+
+Expected output:
+```
+Hello, world!
 ```
 
 ## Useful Commands

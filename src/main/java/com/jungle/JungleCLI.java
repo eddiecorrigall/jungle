@@ -114,6 +114,7 @@ public class JungleCLI {
     public static void main(String[] args) {
         Options options = new Options();
         options.addOption("h", "help", false, "Show help options.");
+        options.addOption("k", "keywords", false, "Show keywords.");
         options.addOption("o", "output", true, "Output file name.");
 
         CommandLineParser cliParser = new DefaultParser();
@@ -127,6 +128,10 @@ public class JungleCLI {
         }
         if (cli.hasOption("help")) {
             helpCommand(options);
+            System.exit(0);
+        }
+        if (cli.hasOption("keywords")) {
+            System.out.println(String.join(" ", Scanner.KEYWORDS));
             System.exit(0);
         }
         if (args.length == 0) {

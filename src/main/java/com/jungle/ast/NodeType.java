@@ -59,6 +59,7 @@ public enum NodeType {
 
   ASSERT,
   PRINT,
+  MULTITASK,
 
   TRUE,
   FALSE;

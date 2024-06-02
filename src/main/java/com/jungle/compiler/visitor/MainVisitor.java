@@ -84,6 +84,17 @@ public class MainVisitor implements IVisitor {
     }
 
     @Nullable
+    private MultitaskVisitor multitaskVisitor;
+
+    @NotNull
+    private MultitaskVisitor getMultitaskVisitor() {
+        if (multitaskVisitor == null) {
+            multitaskVisitor = new MultitaskVisitor();
+        }
+        return multitaskVisitor;
+    }
+
+    @Nullable
     private SequenceVisitor sequenceVisitor;
 
     @NotNull
@@ -170,6 +181,11 @@ public class MainVisitor implements IVisitor {
 
         if (getLoopVisitor().canVisit(ast)) {
             getLoopVisitor().visit(mv, ast);
+            return;
+        }
+
+        if (getMultitaskVisitor().canVisit(ast)) {
+            getMultitaskVisitor().visit(mv, ast);
             return;
         }
 

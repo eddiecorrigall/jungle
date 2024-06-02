@@ -129,6 +129,15 @@ public class Parser extends AbstractParser {
 
   // region text
 
+  @NotNull
+  protected INode parseStringLiteral() {
+    String textValue = expect(TokenType.TEXT);
+    if (textValue == null) {
+      throw newError("text token missing value");
+    }
+    return new Node(NodeType.LITERAL_STRING).withRawValue(textValue);
+  }
+
   @Nullable
   public INode parseTextLiteral() {
     /*
@@ -325,6 +334,28 @@ public class Parser extends AbstractParser {
     return new Node(NodeType.PRINT).withLeft(parseExpression());
   }
 
+  @NotNull
+  protected INode parseClass() {
+    /*
+     * class := string ;
+     */
+    if (accepts(TokenType.TEXT)) {
+      return parseStringLiteral();
+    }
+    throw newError("not a class");
+  }
+
+  @NotNull
+  protected INode parseStatementMultitask() {
+    /*
+     * statement_multitask := "multitask" class ;
+     */
+    // TODO: consume a statement block of code instead of a class
+    expectKeyword(KEYWORD_MULTITASK);
+    consumeWhitespace();
+    return new Node(NodeType.MULTITASK).withLeft(parseClass());
+  }
+
   @Nullable
   protected INode parseStatementIf() {
     /*
@@ -380,6 +411,7 @@ public class Parser extends AbstractParser {
      *                   | statement_loop
      *                   | statement_print
      *                   | statement_if
+     *                   | statement_multitask
      *                   ;
      */
     consumeWhitespace();
@@ -394,6 +426,9 @@ public class Parser extends AbstractParser {
     }
     if (acceptKeyword(KEYWORD_IF)) {
       return parseStatementIf();
+    }
+    if (acceptKeyword(KEYWORD_MULTITASK)) {
+      return parseStatementMultitask();
     }
     throw newError("not a keyword statement");
   }

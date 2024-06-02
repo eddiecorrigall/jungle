@@ -16,6 +16,7 @@ public class Scanner extends AbstractScanner {
   public static final String KEYWORD_ELSE = "else";
   public static final String KEYWORD_LOOP = "loop";
   public static final String KEYWORD_PRINT = "print";
+  public static final String KEYWORD_MULTITASK = "multitask";
   public static final String KEYWORD_AND = "and";
   public static final String KEYWORD_OR = "or";
   public static final String KEYWORD_NOT = "not";
@@ -33,6 +34,7 @@ public class Scanner extends AbstractScanner {
           KEYWORD_ELSE,
           KEYWORD_LOOP,
           KEYWORD_PRINT,
+          KEYWORD_MULTITASK,
           KEYWORD_AND,
           KEYWORD_OR,
           KEYWORD_NOT,
