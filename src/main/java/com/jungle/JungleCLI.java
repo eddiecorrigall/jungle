@@ -2,6 +2,7 @@ package com.jungle;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
+import com.jungle.common.ClassLoader;
 import com.jungle.compiler.Compiler;
 import com.jungle.parser.Parser;
 import com.jungle.scanner.Scanner;
@@ -12,6 +13,9 @@ import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,7 +44,7 @@ public class JungleCLI {
 
     protected static void helpCommand(@NotNull Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("jungle (scan|parse|compile) OPTIONS", options);
+        formatter.printHelp("jungle (scan|parse|compile|run) OPTIONS", options);
     }
 
     protected static void scanCommand(@NotNull CommandLine cli) {
@@ -111,6 +115,48 @@ public class JungleCLI {
         compiler.compile(outputFileName, new MainVisitor(), ast);
     }
 
+    protected static void runCommand(@NotNull CommandLine cli) {
+        BufferedReader reader = getStandardInputBufferedReader();
+        // Scan...
+        Iterator<String> lineIterator = reader.lines().iterator();
+        Scanner scanner = new Scanner(lineIterator);
+        Iterable<IToken> tokenList = scanner.scan();
+        // Parse...
+        Parser parser = new Parser(tokenList);
+        INode ast = parser.parse();
+        // Compile...
+        String entrypointClassName = cli.getOptionValue("output", "Entrypoint");
+        Compiler compiler = new Compiler();
+        compiler.compile(entrypointClassName, new MainVisitor(), ast);
+        // Run...
+        Class<?> entrypointClass = null;
+        try {
+            entrypointClass = ClassLoader.load(entrypointClassName);
+        } catch (MalformedURLException | ClassNotFoundException e) {
+            // Loading failed
+            e.printStackTrace();
+            return;
+        }
+        Method mainMethod = null;
+        try {
+            mainMethod = entrypointClass.getMethod("main", String[].class);
+        } catch (NoSuchMethodException | SecurityException e) {
+            // Invoking entrypoint failed
+            e.printStackTrace();
+            return;
+        }
+        // TODO: pass in arguments from command-line
+        Object[] arguments = new Object[]{
+            new String[]{"hello"}
+        };
+        try {
+            mainMethod.invoke(null, arguments);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
     public static void main(String[] args) {
         Options options = new Options();
         options.addOption("h", "help", false, "Show help options.");
@@ -144,6 +190,7 @@ public class JungleCLI {
             case "scan": scanCommand(cli); break;
             case "parse": parseCommand(cli); break;
             case "compile": compileCommand(cli); break;
+            case "run": runCommand(cli); break;
             default: {
                 System.err.println("Unknown command-line argument - " + command);
                 helpCommand(options);

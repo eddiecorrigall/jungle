@@ -5,9 +5,25 @@ Jungle
 
 A toy programming language built for the Java Virtual Machine.
 
+## Features
+
+Most features are inherited from JVM.
+
+- Automatic garbage collection
+- Concurrency
+- Objects
+
+This project is for educational purposes (but mostly to have fun). There are a couple of goals for this language.
+
+- JVM programming accessibility for command-line
+- fully transparent compiling process
+- simplified Java language feature
+    - no classes
+    - no `null`
+
 ## Setup
 
-Requires a Java Runtime Environment (JRE) with minimum version `1.8`.
+A Java Runtime Environment (JRE) is required with minimum version `1.8`.
 Either install the OpenJDK or Oracle JRE.
 
 ```bash
@@ -18,53 +34,37 @@ source jungle-setup.bash
 jungle --help
 ```
 
-## Compile the Jungle Compiler
-
-1. Load project using VS Code
-1. Select Terminal > Run Build Task...
-1. Select JungleCLI
-
 ## Demo
 
-Breakdown of commands.
+Our standard [Hello, World!](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) program.
 
-```bash
-# Scan from standard input Source file
-cat program.source | jungle scan --output program.tokens
-
-# Parse from standard input Tokens file
-cat program.tokens | jungle parse --output program.ast
-
-# Compile from standard input AST file
-cat program.ast | jungle compile --output Entrypoint
-
-# Run program
-java Entrypoint
+```shell
+echo 'print "Hello, World!"' | jungle run
 ```
 
-### Working example
+Expected output:
+```
+Hello, World!
+```
 
-Compile and run a countdown program.
+### Count-down
 
-```bash
+Now a slightly more sophisticated program using a loop and variables to wow our reader.
+This program performs a count-down.
+
+```shell
 echo '
-i = 3
-loop (greaterThan i 0) {
-  print i
-  print "...\n"
-  i = - i 1
-}
-print("Blast off!\n")
-'  | jungle scan \
-   | jungle parse \
-   | jungle compile
-
-# Run class file produced by compiler
-java Entrypoint
+    i = 3
+    loop (greaterThan i 0) {
+        print i
+        print "...\n"
+        i = - i 1
+    }
+    print("Blast off!\n")
+' | jungle run
 ```
 
-Output of countdown program.
-
+Expected output:
 ```
 3...
 2...
@@ -72,22 +72,56 @@ Output of countdown program.
 Blast off!
 ```
 
-#### Multitasking
+### Inspection Friendly
 
-Jungle supports Java threading using the keyword `multitask`.
-To use this keyword, supply a `*.class` file path (excluding extension).
+Let's breakdown some commands in a short demo to help you understand their purpose.
+The advantage here is that all inputs and outputs of these stages are inspection friendly.
+For each stage of the compiler, you can provide input and inspect output for the
+1. Stage 1: [scanner](https://en.wikipedia.org/wiki/Lexical_analysis#Scanner)
+    - input is source code
+    - output is tokens
+2. Stage 2: [parser](https://en.wikipedia.org/wiki/Lexical_analysis#Lexer_generator)
+    - input is tokens
+    - output is [abstract syntax tree (AST)](https://en.wikipedia.org/wiki/Abstract_syntax_tree)
+3. Stage 3: [compiler]()
+    - input is AST
+    - output is [Java bytecode](https://en.wikipedia.org/wiki/Java_bytecode) - a class file
 
-Ensure the class:
-- implements the `java.lang.Runnable` interface
+```bash
+# Scan from standard input Source file
+cat programs/hello-world.source | jungle scan
+
+# Parse from standard input Tokens file
+cat programs/hello-world.tokens | jungle parse
+
+# Compile from standard input AST file
+cat programs/hello-world.ast | jungle compile --output HelloWorld
+
+# Run program
+java HelloWorld
+```
+
+### Multitasking
+
+Ok, let's get this party started.
+
+Jungle supports Java [threads](https://en.wikipedia.org/wiki/Thread_(computing)) using the keyword `multitask`.
+To use this keyword, supply a `*.class` file/binary path (excluding extension).
+
+Ensure the class for `multitask`:
 - has a default constructor
+- implements the `java.lang.Runnable` interface
 - compiled with the `JUNGLEPATH` environment variable with the classpath
 
 ```shell
-mkdir -p /tmp/app/com/example
+# Create a folder for out program example.
+mkdir -p /tmp/demo/com/example
+
+# Write a Runnable Java class
 echo '
 package com.example;
 
-public class MultitaskDemo implements Runnable {
+public class MultitaskRunnable implements Runnable {
     @Override
     public void run() {
         try {
@@ -98,24 +132,26 @@ public class MultitaskDemo implements Runnable {
         System.out.println(", world!");
     }
 }
-' > /tmp/app/com/example/MultitaskDemo.java
+' > /tmp/demo/com/example/MultitaskRunnable.java
 
-javac /tmp/app/com/example/MultitaskDemo.java
+# Compile the Java class
+javac /tmp/demo/com/example/MultitaskRunnable.java
 ```
 
 ```shell
 # Declare the classpath before compiling,
-# so that the user defined class can be validated
-export JUNGLEPATH=".:/tmp/app"
+# so that our Runnable class can be validated
+export JUNGLEPATH=".:/tmp/demo"
 
+# Compile and run the program
 echo '
-multitask "com.example.MultitaskDemo"
-print "Hello"
+  multitask "com.example.MultitaskRunnable"
+  print "Hello"
 ' | jungle scan \
   | jungle parse \
-  | jungle compile
+  | jungle compile --output Demo
 
-java -classpath $JUNGLEPATH Entrypoint
+java -classpath $JUNGLEPATH Demo
 ```
 
 Expected output:
@@ -123,10 +159,22 @@ Expected output:
 Hello, world!
 ```
 
+## Compile the Compiler
+
+1. Load project using VS Code
+1. Select Terminal > Run Build Task...
+1. Select JungleCLI
+
 ## Useful Commands
 
-- Decompile a `*.class` file: `javap -c MyClass.class`
-- Run class file containing `main()` method: `java MyClass`
+- Decompile a `*.class` file
+    ```shell
+    javap -c MyClass.class
+    ```
+- Run class file containing `main()` method
+    ```shell
+    java MyClass
+    ```
 
 ## Useful resources
 

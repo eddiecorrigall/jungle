@@ -2,14 +2,9 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.common.ClassLoader;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
@@ -35,40 +30,6 @@ public class MultitaskVisitor implements IVisitor {
         return NodeType.MULTITASK.equals(ast.getType());
     }
 
-    private Class<?> loadClass(@NotNull String classPaths, @NotNull String className)
-        throws MalformedURLException, ClassNotFoundException
-    {
-        List<URL> urls = new LinkedList<URL>();
-        for (String path : classPaths.split(":")) {
-            File file = new File(path);
-            URL url = file.toURI().toURL();
-            urls.add(url);
-        }
-        URLClassLoader urlClassLoader = new URLClassLoader(urls.toArray(new URL[0]));
-        Class<?> clazz;
-        try {
-            clazz = urlClassLoader.loadClass(className);
-        } finally {
-            try {
-                urlClassLoader.close();
-            } catch (IOException e) {
-            }
-        }
-        return clazz;
-    }
-
-    private Class<?> loadClass(@NotNull String className)
-        throws MalformedURLException, ClassNotFoundException
-    {
-        // TODO: break-out configuration
-        String classPath = System.getenv("JUNGLEPATH");
-        if (classPath == null) {
-            classPath = ".";
-        }
-        System.out.println(String.format("loading class from %s", classPath));
-        return loadClass(classPath, className);
-    }
-
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
         if (!canVisit(ast)) {
@@ -90,7 +51,7 @@ public class MultitaskVisitor implements IVisitor {
         String clazzName = ast.getLeft().getStringValue();
         try {
             // Note: Class.forName() does not consider classpath
-            clazz = loadClass(clazzName);
+            clazz = ClassLoader.load(clazzName);
         } catch (ClassNotFoundException e) {
             throw new Error("multitask class not found - " + clazzName, e);
         } catch (MalformedURLException e) {
