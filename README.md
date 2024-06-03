@@ -39,7 +39,7 @@ jungle --help
 Our standard [Hello, World!](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) program.
 
 ```shell
-echo 'print "Hello, World!"' | jungle run
+echo 'print "Hello, World!\n"' | jungle run
 ```
 
 Expected output:

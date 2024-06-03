@@ -1,5 +1,5 @@
 1	1	KEYWORD	print
 1	6	SPACE
-1	7	TEXT	Hello, World!
+1	7	TEXT	Hello, World!\\n
 1	22	NEWLINE
 1	23	TERMINAL
