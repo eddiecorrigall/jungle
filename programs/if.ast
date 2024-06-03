@@ -7,7 +7,7 @@ SEQUENCE
           LITERAL_STRING	Within if-block - which should not be possible\n
           ;
         ASSERT
-          LITERAL_INTEGER	10
+          LITERAL_INTEGER	0
           ;
       ;
   PRINT
