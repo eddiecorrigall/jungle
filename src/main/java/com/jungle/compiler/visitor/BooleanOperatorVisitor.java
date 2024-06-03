@@ -3,6 +3,8 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -12,6 +14,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BooleanOperatorVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(BooleanOperatorVisitor.class.getName());
+
     @NotNull
     private static final INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
 
@@ -58,7 +63,7 @@ public class BooleanOperatorVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit boolean operator " + ast);
+        logger.debug("visit boolean operator " + ast);
 
         // Optimization idea:
         //  if the left expression has a shorter depth (fewer operations) than the right,

@@ -3,11 +3,16 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class IdentifierVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(IdentifierVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -35,7 +40,7 @@ public class IdentifierVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit identifier " + ast);
+        logger.debug("visit identifier " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected identifier");

@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractLogger implements ILogger {
     @NotNull
-    public static final LogLevel DEFAULT_LOG_LEVEL = LogLevel.INFO;
+    public static final LogLevel DEFAULT_LOG_LEVEL = LogLevel.WARN;
 
     @NotNull
     public static LogLevel getLogLevel() {
@@ -16,7 +16,7 @@ public abstract class AbstractLogger implements ILogger {
             return DEFAULT_LOG_LEVEL;
         }
         try {
-            return LogLevel.valueOf(logLevelString);
+            return LogLevel.valueOf(logLevelString.toUpperCase());
         } catch (IllegalArgumentException e) {
             return DEFAULT_LOG_LEVEL;
         }

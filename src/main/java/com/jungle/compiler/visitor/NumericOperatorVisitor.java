@@ -5,6 +5,8 @@ import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
 import com.jungle.compiler.symbol.SymbolType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -17,6 +19,9 @@ import java.util.Set;
 import static com.jungle.ast.NodeType.*;
 
 public class NumericOperatorVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
+
     private static final Set<NodeType> NUMERIC_OPERATORS = new HashSet<>(Arrays.asList(
             OPERATOR_ADD,
             OPERATOR_SUBTRACT,
@@ -66,7 +71,7 @@ public class NumericOperatorVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit binary operator " + ast);
+        logger.debug("visit binary operator " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected numeric operator");

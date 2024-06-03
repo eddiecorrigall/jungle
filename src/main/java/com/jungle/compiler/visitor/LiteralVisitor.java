@@ -4,6 +4,8 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -15,6 +17,9 @@ import java.util.Set;
 import static com.jungle.ast.NodeType.*;
 
 public class LiteralVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(LiteralVisitor.class.getName());
+
     private static final Set<NodeType> LITERALS = new HashSet<>(Arrays.asList(
             LITERAL_BOOLEAN,
             LITERAL_CHARACTER,
@@ -49,7 +54,7 @@ public class LiteralVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit literal " + ast);
+        logger.debug("visit literal " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected literal");

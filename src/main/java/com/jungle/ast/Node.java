@@ -166,7 +166,7 @@ public class Node implements INode {
 
   // region Save AST
   @NotNull
-  private static final FileLogger saveLog = new FileLogger("SaveAst");
+  private static final FileLogger saveLogger = new FileLogger("SaveAst");
 
   public static void save(@NotNull BufferedWriter writer, @Nullable INode node) {
     // Non-recursive traversal
@@ -174,36 +174,36 @@ public class Node implements INode {
     nodeStack.push(node);
     while (nodeStack.size() > 0) {
       INode nextNode = nodeStack.pop();
-      saveLog.debug("---");
+      saveLogger.debug("---");
       if (nextNode == null) {
-        saveLog.debug("node is terminal");
+        saveLogger.debug("node is terminal");
         try {
           writer.write(TERMINAL);
         } catch (IOException e) {
           throw new SaveError("failed to write terminal", e);
         }
       } else {
-        saveLog.debug("type: " + nextNode.getType());
-        saveLog.debug("value: " + nextNode.getRawValue());
+        saveLogger.debug("type: " + nextNode.getType());
+        saveLogger.debug("value: " + nextNode.getRawValue());
         try {
           writer.write(nextNode.getType().name());
         } catch (IOException e) {
           String message = "failed to write node type";
-          saveLog.error(message, e);
+          saveLogger.error(message, e);
           throw new SaveError(message);
         }
         if (nextNode.isLeaf()) {
-          saveLog.debug("node is leaf");
+          saveLogger.debug("node is leaf");
           try {
             writer.write(DELIMITER_FIELD);
             writer.write(nextNode.getRawValue());
           } catch (IOException e) {
             String message = "failed to write node value";
-            saveLog.error(message, e);
+            saveLogger.error(message, e);
             throw new SaveError(message);
           }
         } else {
-          saveLog.debug("node is parent");
+          saveLogger.debug("node is parent");
           nodeStack.push(nextNode.getRight());
           nodeStack.push(nextNode.getLeft());
         }
@@ -212,7 +212,7 @@ public class Node implements INode {
         writer.write(DELIMITER_LINE);
       } catch (IOException e) {
         String message = "failed to write line delimiter";
-        saveLog.error(message, e);
+        saveLogger.error(message, e);
         throw new SaveError(message);
       }
     }
@@ -222,7 +222,7 @@ public class Node implements INode {
 
   // region Load AST
 
-  private static final FileLogger loadLog = new FileLogger("LoadAst");
+  private static final FileLogger loadLogger = new FileLogger("LoadAst");
 
   @Nullable
   public static INode load(@NotNull BufferedReader reader) {
@@ -235,21 +235,21 @@ public class Node implements INode {
       line = reader.readLine();
     } catch (IOException e) {
       String message = "failed to read file";
-      loadLog.error(message, e);
+      loadLogger.error(message, e);
       throw new LoadError(message);
     }
     boolean hasStreamEnded = line == null;
     if (hasStreamEnded) {
-      loadLog.warn("end of stream reached");
+      loadLogger.warn("end of stream reached");
       return null;
     }
     boolean hasEmptyLine = line.length() == 0;
     if (hasEmptyLine) {
-      loadLog.debug("line is empty");
+      loadLogger.debug("line is empty");
       return null;
     }
     if (line.trim().startsWith(Character.toString(TERMINAL))) {
-      loadLog.debug("line is terminal");
+      loadLogger.debug("line is terminal");
       return null;
     }
     int splitIndex = line.indexOf(DELIMITER_FIELD);
@@ -260,22 +260,22 @@ public class Node implements INode {
       value = null;
     } else if (splitIndex == 0) {
       String message = "line missing type";
-      loadLog.error(message);
+      loadLogger.error(message);
       throw new LoadError(message);
     } else {
       type = line.substring(0, splitIndex);
       value = line.substring(splitIndex + 1);
     }
     type = type.trim();
-    loadLog.debug("---");
-    loadLog.debug("type: " + type);
-    loadLog.debug("value: " + value);
+    loadLogger.debug("---");
+    loadLogger.debug("type: " + type);
+    loadLogger.debug("value: " + value);
     Node node;
     try {
        node = new Node(NodeType.valueOf(type));
     } catch (IllegalArgumentException e) {
       String message = "line type invalid";
-      loadLog.error(message, e);
+      loadLogger.error(message, e);
       throw new LoadError(message);
     }
     boolean isLeafNode = value != null;

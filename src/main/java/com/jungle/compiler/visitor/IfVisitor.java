@@ -5,6 +5,8 @@ import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
@@ -12,6 +14,9 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class IfVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(IfVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -70,7 +75,7 @@ public class IfVisitor implements IVisitor {
     }
 
     protected void visit(@NotNull MethodVisitor mv, @NotNull CompareTo compareTo, @NotNull INode ast) {
-        System.out.println("visit if " + ast);
+        logger.debug("visit if " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected if");

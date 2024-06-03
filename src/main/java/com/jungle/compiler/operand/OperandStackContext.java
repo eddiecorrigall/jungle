@@ -3,6 +3,8 @@ package com.jungle.compiler.operand;
 import com.jungle.compiler.symbol.SymbolEntry;
 import com.jungle.compiler.symbol.SymbolTable;
 import com.jungle.compiler.symbol.SymbolType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -10,6 +12,9 @@ import org.objectweb.asm.MethodVisitor;
 import java.util.Stack;
 
 public class OperandStackContext {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(OperandStackContext.class.getName());
+
     // region Singleton Factory
     @Nullable
     private static OperandStackContext operandStackContext = null;
@@ -60,7 +65,7 @@ public class OperandStackContext {
             @NotNull String variableName
     ) {
         // Get local variable index value and push variable value onto the operand stack
-        System.out.println("visit load " + variableName);
+        logger.debug("visit load " + variableName);
 
         SymbolEntry entry = getSymbolTable().get(variableName);
         if (entry == null) {
@@ -84,7 +89,7 @@ public class OperandStackContext {
             @NotNull String variableName
     ) {
         // Pop value off the operand stack and set local variable index value
-        System.out.println("visit store " + variableName);
+        logger.debug("visit store " + variableName);
 
         OperandStackType variableType = pop();
         SymbolType variableSymbolType = variableType.getSymbolType();

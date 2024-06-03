@@ -10,7 +10,12 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.jungle.logger.FileLogger;
+
 public class ClassLoader {
+
+    @NotNull
+    private static final FileLogger logger = new FileLogger(ClassLoader.class.getName());
 
     public static Class<?> load(@NotNull String classPaths, @NotNull String className)
         throws MalformedURLException, ClassNotFoundException
@@ -42,7 +47,7 @@ public class ClassLoader {
         if (classPath == null) {
             classPath = ".";
         }
-        System.out.println(String.format("loading class from %s", classPath));
+        logger.debug(String.format("loading class from %s", classPath));
         return load(classPath, className);
     }
 }

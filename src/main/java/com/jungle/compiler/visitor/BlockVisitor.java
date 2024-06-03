@@ -2,11 +2,16 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class BlockVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(BlockVisitor.class.getName());
+
     @Nullable
     private MainVisitor mainVisitor;
 
@@ -33,7 +38,7 @@ public class BlockVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit block " + ast);
+        logger.debug("visit block " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected block");

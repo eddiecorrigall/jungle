@@ -4,6 +4,8 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
@@ -11,6 +13,9 @@ import org.objectweb.asm.MethodVisitor;
 import static org.objectweb.asm.Opcodes.*;
 
 public class PrintVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -52,7 +57,7 @@ public class PrintVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit print " + ast);
+        logger.debug("visit print " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected print");

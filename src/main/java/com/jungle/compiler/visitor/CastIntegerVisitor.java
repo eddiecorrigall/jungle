@@ -4,12 +4,17 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class CastIntegerVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(CastIntegerVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -51,7 +56,7 @@ public class CastIntegerVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit cast integer " + ast);
+        logger.debug("visit cast integer " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected cast integer");
@@ -65,7 +70,7 @@ public class CastIntegerVisitor implements IVisitor {
         OperandStackType type = getOperandStackContext().pop();
         switch (type) {
             case INTEGER: {
-                System.out.println("WARN: value is already an integer");
+                logger.warn("value is already an integer");
             } break;
             case FLOAT: {
                 mv.visitInsn(Opcodes.F2I);

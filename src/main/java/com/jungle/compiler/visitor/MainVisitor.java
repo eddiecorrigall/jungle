@@ -1,11 +1,17 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class MainVisitor implements IVisitor {
+
+    @NotNull
+    private static final FileLogger logger = new FileLogger(MainVisitor.class.getSimpleName());
+
     @Nullable
     private LiteralVisitor literalVisitor;
 
@@ -138,7 +144,7 @@ public class MainVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit main " + ast);
+        logger.debug("visit main " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected main");

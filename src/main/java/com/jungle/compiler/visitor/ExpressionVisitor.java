@@ -1,11 +1,16 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class ExpressionVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(ExpressionVisitor.class.getName());
+
     @Nullable
     private IdentifierVisitor identifierVisitor;
 
@@ -86,7 +91,7 @@ public class ExpressionVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit expression " + ast);
+        logger.debug("visit expression " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected expression");

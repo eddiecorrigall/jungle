@@ -4,6 +4,8 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
@@ -11,6 +13,9 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class LoopVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(LoopVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -70,7 +75,7 @@ public class LoopVisitor implements IVisitor {
                GOTO #loop
          end:  ...
          */
-        System.out.println("visit loop " + ast);
+        logger.debug("visit loop " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected loop");

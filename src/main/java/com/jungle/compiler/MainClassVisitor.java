@@ -2,12 +2,17 @@ package com.jungle.compiler;
 
 import com.jungle.ast.INode;
 import com.jungle.compiler.visitor.IVisitor;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class MainClassVisitor extends ClassVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(MainClassVisitor.class.getSimpleName());
+
     @NotNull
     private final IVisitor mainVisitor;
 
@@ -25,7 +30,7 @@ public class MainClassVisitor extends ClassVisitor {
         MethodVisitor mv = super.visitMethod(flags, name, desc, signature, exceptions);
         boolean isMainMethod = MainMethodVisitor.MAIN_METHOD_NAME.equals(name);
         if (isMainMethod) {
-            Compiler.log.debug("emit custom instructions in main class");
+            logger.debug("emit custom instructions in main class");
             return new MainMethodVisitor(mv, mainVisitor, ast);
         }
         return mv;

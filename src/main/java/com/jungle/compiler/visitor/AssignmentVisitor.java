@@ -3,11 +3,16 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class AssignmentVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(AssignmentVisitor.class.getName());
+
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -49,7 +54,7 @@ public class AssignmentVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit assignment " + ast);
+        logger.debug("visit assignment " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected assignment");

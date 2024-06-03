@@ -2,11 +2,16 @@ package com.jungle.compiler;
 
 import com.jungle.ast.INode;
 import com.jungle.compiler.visitor.IVisitor;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class MainMethodVisitor extends MethodVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(MainMethodVisitor.class.getSimpleName());
+
     public static final String MAIN_METHOD_NAME = "main";
 
     @NotNull
@@ -24,7 +29,7 @@ public class MainMethodVisitor extends MethodVisitor {
     @Override
     public void visitInsn(final int opcode) {
         if (opcode == Opcodes.RETURN) {
-            Compiler.log.debug("emit instructions just before existing RETURN operation");
+            logger.debug("emit instructions just before existing RETURN operation");
             mainVisitor.visit(this, ast);
         }
         super.visitInsn(opcode);

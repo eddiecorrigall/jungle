@@ -4,6 +4,8 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.logger.FileLogger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
@@ -11,6 +13,13 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class AssertVisitor implements IVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(AssertVisitor.class.getName());
+
+    /* TODO
+     * It might be possible to use reflection to provide more context on the assertion.
+     * For example: which method, which line, which variables, etc.
+     */
     @Nullable
     private OperandStackContext operandStackContext;
 
@@ -52,7 +61,7 @@ public class AssertVisitor implements IVisitor {
 
     @Override
     public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        System.out.println("visit assert " + ast);
+        logger.debug("visit assert " + ast);
 
         if (!canVisit(ast)) {
             throw new Error("expected assert");
