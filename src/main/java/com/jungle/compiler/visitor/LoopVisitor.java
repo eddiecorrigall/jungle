@@ -12,7 +12,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class LoopVisitor implements IVisitor {
+public class LoopVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(LoopVisitor.class.getName());
 
@@ -32,7 +32,7 @@ public class LoopVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
@@ -43,24 +43,13 @@ public class LoopVisitor implements IVisitor {
     @NotNull
     private BlockVisitor getBlockVisitor() {
         if (blockVisitor == null) {
-            blockVisitor = new BlockVisitor();
+            blockVisitor = new BlockVisitor(getClassPath());
         }
         return blockVisitor;
     }
 
-    public LoopVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor,
-            @NotNull final BlockVisitor blockVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-        this.blockVisitor = blockVisitor;
-    }
-
-    public LoopVisitor() {
-        super();
+    public LoopVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

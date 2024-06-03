@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class AssignmentVisitor implements IVisitor {
+public class AssignmentVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(AssignmentVisitor.class.getName());
 
@@ -29,22 +29,13 @@ public class AssignmentVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
 
-    private AssignmentVisitor(
-            @Nullable OperandStackContext operandStackContext,
-            @Nullable ExpressionVisitor expressionVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-    }
-
-    public AssignmentVisitor() {
-        super();
+    public AssignmentVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

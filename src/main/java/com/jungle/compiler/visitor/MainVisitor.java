@@ -29,7 +29,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private AssignmentVisitor getAssignmentVisitor() {
         if (assignmentVisitor == null) {
-            assignmentVisitor = new AssignmentVisitor();
+            assignmentVisitor = new AssignmentVisitor(getClassPath());
         }
         return assignmentVisitor;
     }
@@ -51,7 +51,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private AssertVisitor getAssertVisitor() {
         if (assertVisitor == null) {
-            assertVisitor = new AssertVisitor();
+            assertVisitor = new AssertVisitor(getClassPath());
         }
         return assertVisitor;
     }
@@ -62,7 +62,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private PrintVisitor getPrintVisitor() {
         if (printVisitor == null) {
-            printVisitor = new PrintVisitor();
+            printVisitor = new PrintVisitor(getClassPath());
         }
         return printVisitor;
     }
@@ -73,7 +73,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private IfVisitor getIfVisitor() {
         if (ifVisitor == null) {
-            ifVisitor = new IfVisitor();
+            ifVisitor = new IfVisitor(getClassPath());
         }
         return ifVisitor;
     }
@@ -84,7 +84,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private LoopVisitor getLoopVisitor() {
         if (loopVisitor == null) {
-            loopVisitor = new LoopVisitor();
+            loopVisitor = new LoopVisitor(getClassPath());
         }
         return loopVisitor;
     }

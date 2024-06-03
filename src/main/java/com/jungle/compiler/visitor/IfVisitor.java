@@ -13,7 +13,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class IfVisitor implements IVisitor {
+public class IfVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(IfVisitor.class.getName());
 
@@ -33,7 +33,7 @@ public class IfVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
@@ -44,24 +44,13 @@ public class IfVisitor implements IVisitor {
     @NotNull
     private BlockVisitor getBlockVisitor() {
         if (blockVisitor == null) {
-            blockVisitor = new BlockVisitor();
+            blockVisitor = new BlockVisitor(getClassPath());
         }
         return blockVisitor;
     }
 
-    public IfVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor,
-            @NotNull final BlockVisitor blockVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-        this.blockVisitor = blockVisitor;
-    }
-
-    public IfVisitor() {
-        super();
+    public IfVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

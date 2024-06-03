@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BooleanOperatorVisitor implements IVisitor {
+public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(BooleanOperatorVisitor.class.getName());
 
@@ -42,18 +42,13 @@ public class BooleanOperatorVisitor implements IVisitor {
     @NotNull
     private IfVisitor getIfVisitor() {
         if (ifVisitor == null) {
-            ifVisitor = new IfVisitor();
+            ifVisitor = new IfVisitor(getClassPath());
         }
         return ifVisitor;
     }
 
-    private BooleanOperatorVisitor(@NotNull final IfVisitor ifVisitor) {
-        super();
-        this.ifVisitor = ifVisitor;
-    }
-
-    public BooleanOperatorVisitor() {
-        super();
+    public BooleanOperatorVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

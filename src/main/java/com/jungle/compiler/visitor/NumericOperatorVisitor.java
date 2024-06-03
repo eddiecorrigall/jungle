@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static com.jungle.ast.NodeType.*;
 
-public class NumericOperatorVisitor implements IVisitor {
+public class NumericOperatorVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
 
@@ -46,22 +46,13 @@ public class NumericOperatorVisitor implements IVisitor {
     @NotNull
     public ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
 
-    public NumericOperatorVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-    }
-
-    public NumericOperatorVisitor() {
-        super();
+    public NumericOperatorVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

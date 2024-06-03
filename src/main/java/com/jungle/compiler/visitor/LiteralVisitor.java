@@ -38,11 +38,6 @@ public class LiteralVisitor implements IVisitor {
         return operandStackContext;
     }
 
-    private LiteralVisitor(@NotNull final OperandStackContext operandStackContext) {
-       super();
-       this.operandStackContext = operandStackContext;
-    }
-
     public LiteralVisitor() {
         super();
     }

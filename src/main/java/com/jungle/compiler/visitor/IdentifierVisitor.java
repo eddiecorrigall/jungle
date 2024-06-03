@@ -24,11 +24,6 @@ public class IdentifierVisitor implements IVisitor {
         return operandStackContext;
     }
 
-    private IdentifierVisitor(@Nullable OperandStackContext operandStackContext) {
-        super();
-        this.operandStackContext = operandStackContext;
-    }
-
     public IdentifierVisitor() {
         super();
     }

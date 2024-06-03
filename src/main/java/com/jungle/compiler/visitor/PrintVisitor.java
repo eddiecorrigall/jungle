@@ -12,7 +12,7 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class PrintVisitor implements IVisitor {
+public class PrintVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
 
@@ -32,22 +32,13 @@ public class PrintVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
 
-    private PrintVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor
-    ) {
-       super();
-       this.operandStackContext = operandStackContext;
-       this.expressionVisitor = expressionVisitor;
-    }
-
-    public PrintVisitor() {
-        super();
+    public PrintVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

@@ -12,7 +12,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class AssertVisitor implements IVisitor {
+public class AssertVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(AssertVisitor.class.getName());
 
@@ -36,22 +36,13 @@ public class AssertVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
 
-    private AssertVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-    }
-
-    public AssertVisitor() {
-        super();
+    public AssertVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

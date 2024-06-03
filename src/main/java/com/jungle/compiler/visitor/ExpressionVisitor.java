@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class ExpressionVisitor implements IVisitor {
+public class ExpressionVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(ExpressionVisitor.class.getName());
 
@@ -39,7 +39,7 @@ public class ExpressionVisitor implements IVisitor {
     @NotNull
     private NumericOperatorVisitor getNumericOperatorVisitor() {
         if (numericOperatorVisitor == null) {
-            numericOperatorVisitor = new NumericOperatorVisitor();
+            numericOperatorVisitor = new NumericOperatorVisitor(getClassPath());
         }
         return numericOperatorVisitor;
     }
@@ -50,7 +50,7 @@ public class ExpressionVisitor implements IVisitor {
     @NotNull
     private CastIntegerVisitor getCastIntegerVisitor() {
         if (castIntegerVisitor == null) {
-            castIntegerVisitor = new CastIntegerVisitor();
+            castIntegerVisitor = new CastIntegerVisitor(getClassPath());
         }
         return castIntegerVisitor;
     }
@@ -60,28 +60,13 @@ public class ExpressionVisitor implements IVisitor {
     @NotNull
     private BooleanOperatorVisitor getBooleanOperatorVisitor() {
         if (booleanOperatorVisitor == null) {
-            booleanOperatorVisitor = new BooleanOperatorVisitor();
+            booleanOperatorVisitor = new BooleanOperatorVisitor(getClassPath());
         }
         return booleanOperatorVisitor;
     }
 
-    private ExpressionVisitor(
-            @Nullable IdentifierVisitor identifierVisitor,
-            @Nullable LiteralVisitor literalVisitor,
-            @Nullable NumericOperatorVisitor numericOperatorVisitor,
-            @Nullable CastIntegerVisitor castIntegerVisitor,
-            @Nullable BooleanOperatorVisitor booleanOperatorVisitor
-    ) {
-        super();
-        this.identifierVisitor = identifierVisitor;
-        this.literalVisitor = literalVisitor;
-        this.numericOperatorVisitor = numericOperatorVisitor;
-        this.castIntegerVisitor = castIntegerVisitor;
-        this.booleanOperatorVisitor = booleanOperatorVisitor;
-    }
-
-    public ExpressionVisitor() {
-        super();
+    public ExpressionVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

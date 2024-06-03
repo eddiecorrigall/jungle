@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class CastIntegerVisitor implements IVisitor {
+public class CastIntegerVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(CastIntegerVisitor.class.getName());
 
@@ -31,22 +31,13 @@ public class CastIntegerVisitor implements IVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor();
+            expressionVisitor = new ExpressionVisitor(getClassPath());
         }
         return expressionVisitor;
     }
 
-    private CastIntegerVisitor(
-            @NotNull final OperandStackContext operandStackContext,
-            @NotNull final ExpressionVisitor expressionVisitor
-    ) {
-        super();
-        this.operandStackContext = operandStackContext;
-        this.expressionVisitor = expressionVisitor;
-    }
-
-    public CastIntegerVisitor() {
-        super();
+    public CastIntegerVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override
