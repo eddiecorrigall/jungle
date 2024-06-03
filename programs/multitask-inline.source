@@ -1,0 +1,3 @@
+multitask {
+    print "Inline thread!"
+}

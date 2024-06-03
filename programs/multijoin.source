@@ -1,0 +1,4 @@
+threadOne = multitask "com.example.MultitaskRunnable" ("thread-one")
+threadTwo = multitask "com.example.MultitaskRunnable" ("thread-two")
+
+multijoin threadOne threadTwo

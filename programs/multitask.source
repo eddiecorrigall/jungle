@@ -1,13 +1,2 @@
-multitask "com/example/MultitaskDemo"
-print "Hello word!"
-
-# Idea 1:
-multitask {
-    print "Inline thread!"
-}
-
-# Idea 2:
-# thread = multitask "com.example.MultitaskDemo" (firstConstructorArgument)
-
-# Idea 3:
-# multijoin(25s) threadOne threadTwo
+multitask "com.example.MultitaskRunnable"
+print "Hello"
