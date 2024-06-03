@@ -171,8 +171,9 @@ Ensure the class for `multitask`:
 # Compile the Java class used by our program
 javac programs/com/example/MultitaskRunnable.java
 
-# Declare the classpath before compiling or running,
-# so that our Runnable class can be validated
+# Declare or provide the junglepath before compiling or running,
+# so that our Runnable class can be validated during compile and found during runtime.
+# The junglepath is an isolated classpath for the just the program.
 export JUNGLEPATH='.:./programs'
 
 # Compile and run the program
