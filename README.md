@@ -168,44 +168,15 @@ Ensure the class for `multitask`:
 - compiled with the `JUNGLEPATH` environment variable with the classpath
 
 ```shell
-# Create a folder for out program example.
-mkdir -p /tmp/demo/com/example
+# Compile the Java class used by our program
+javac programs/com/example/MultitaskRunnable.java
 
-# Write a Runnable Java class
-echo '
-package com.example;
-
-public class MultitaskRunnable implements Runnable {
-    @Override
-    public void run() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(", world!");
-    }
-}
-' > /tmp/demo/com/example/MultitaskRunnable.java
-
-# Compile the Java class
-javac /tmp/demo/com/example/MultitaskRunnable.java
-```
-
-```shell
-# Declare the classpath before compiling,
+# Declare the classpath before compiling or running,
 # so that our Runnable class can be validated
-export JUNGLEPATH=".:/tmp/demo"
+export JUNGLEPATH='.:./programs'
 
 # Compile and run the program
-echo '
-  multitask "com.example.MultitaskRunnable"
-  print "Hello"
-' | jungle scan \
-  | jungle parse \
-  | jungle compile --output Demo
-
-java -classpath $JUNGLEPATH Demo
+cat programs/multitask.source | jungle run
 ```
 
 Expected output:
