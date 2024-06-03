@@ -1,0 +1,8 @@
+if (false) {
+    print "Within if-block - which should not be possible\n"
+    assert false
+} else {
+    print "Within else-block\n"
+}
+
+print "Resume program\n"
