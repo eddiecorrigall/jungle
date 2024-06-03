@@ -3,6 +3,8 @@ package com.jungle.compiler.visitor;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractClassPathVisitor implements IVisitor {
+    // TODO: Make this generic for all configuration, not just class path
+
     /* When a classpath is required, inherit this abstract class for the property */
 
     @NotNull
