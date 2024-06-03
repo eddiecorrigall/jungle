@@ -18,7 +18,7 @@ This project is for educational purposes (but mostly to have fun). There are a c
 - JVM programming accessibility for command-line
 - fully transparent compiling process
 - simplified Java language feature
-    - no classes
+    - no object oriented programming
     - no `null`
 
 ## Setup
@@ -76,7 +76,7 @@ Blast off!
 
 Let's breakdown some commands in a short demo to help you understand their purpose.
 The advantage here is that all inputs and outputs of these stages are inspection friendly.
-For each stage of the compiler, you can provide input and inspect output for the
+For each stage of the compiler, you can provide input and inspect output:
 1. Stage 1: [scanner](https://en.wikipedia.org/wiki/Lexical_analysis#Scanner)
     - input is source code
     - output is tokens
