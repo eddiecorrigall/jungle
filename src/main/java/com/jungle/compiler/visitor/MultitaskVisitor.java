@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class MultitaskVisitor implements IVisitor {
+public class MultitaskVisitor extends AbstractClassPathVisitor {
     protected static boolean hasInterface(@NotNull Class<?> clazz, @NotNull String interfaceName) {
         for (Class<?> clazzInterface : clazz.getInterfaces()) {
             if (interfaceName.equals(clazzInterface.getName())) {
@@ -23,6 +23,10 @@ public class MultitaskVisitor implements IVisitor {
     protected static boolean hasPublicDefaultConstructor(@NotNull Class<?> clazz) {
         // TODO: check for public default constructor on multitask class
         return true; // TODO
+    }
+
+    public MultitaskVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override
@@ -43,17 +47,17 @@ public class MultitaskVisitor implements IVisitor {
             throw new Error("expected multitask class to be string literal");
         }
 
-        /* Note: It makes sense to find and validate the user defined class (UDC) before running.
-         * However, we want to avoid including the UDC in the compiler classpath.
-         * At compile time, the compiler must be provided the UDC classpath to complete the compilation.
+        /* Note: It makes sense to find and validate the user class for the program before running.
+         * However, we want to avoid including the user class in the compiler classpath.
+         * At compile time, the compiler must be provided the isolated classpath to complete the compilation.
          */
         Class<?> clazz;
-        String clazzName = ast.getLeft().getStringValue();
+        String className = ast.getLeft().getStringValue();
         try {
             // Note: Class.forName() does not consider classpath
-            clazz = ClassLoader.load(clazzName);
+            clazz = ClassLoader.loadClass(getClassPath(), className);
         } catch (ClassNotFoundException e) {
-            throw new Error("multitask class not found - " + clazzName, e);
+            throw new Error("multitask class not found - " + className, e);
         } catch (MalformedURLException e) {
             throw new Error("malformed jungle classpath", e);
         }
@@ -63,7 +67,7 @@ public class MultitaskVisitor implements IVisitor {
         if (!hasPublicDefaultConstructor(clazz)) {
             throw new Error("expected multitask class to have public default constructor");
         }
-        String clazzOwner = clazzName.replace('.', '/'); // eg. "com/jungle/examples/RunnableTest";
+        String clazzOwner = className.replace('.', '/'); // eg. "com/jungle/examples/RunnableTest";
 
         // new Thread...
         String threadClassType = "java/lang/Thread";

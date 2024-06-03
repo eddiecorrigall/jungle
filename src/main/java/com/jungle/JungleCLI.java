@@ -2,7 +2,6 @@ package com.jungle;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
-import com.jungle.common.ClassLoader;
 import com.jungle.compiler.Compiler;
 import com.jungle.parser.Parser;
 import com.jungle.scanner.Scanner;
@@ -13,9 +12,6 @@ import org.apache.commons.cli.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,6 +36,20 @@ public class JungleCLI {
             // Write to file
             return new BufferedWriter(new FileWriter(outputFileName));
         }
+    }
+
+    public static String DEFAULT_JUNGLEPATH = ".";
+
+    @NotNull
+    protected static String getJunglePath(@NotNull CommandLine cli) {
+        /* The junglepath should be independent of classpath,
+         * since the dependencies of the compiler should be isolated from the program
+         */
+        String cliValue = cli.getOptionValue("junglepath");
+        if (cliValue != null) return cliValue;
+        String environmentValue = System.getenv("JUNGLEPATH");
+        if (environmentValue != null) return environmentValue;
+        return DEFAULT_JUNGLEPATH;
     }
 
     protected static void helpCommand(@NotNull Options options) {
@@ -111,8 +121,9 @@ public class JungleCLI {
             System.exit(1);
         }
         String outputFileName = cli.getOptionValue("output", "Entrypoint");
+        String junglePath = getJunglePath(cli);
         Compiler compiler = new Compiler();
-        compiler.compile(outputFileName, new MainVisitor(), ast);
+        compiler.compile(outputFileName, new MainVisitor(junglePath), ast);
     }
 
     protected static void runCommand(@NotNull CommandLine cli) {
@@ -126,32 +137,36 @@ public class JungleCLI {
         INode ast = parser.parse();
         // Compile...
         String entrypointClassName = cli.getOptionValue("output", "Entrypoint");
+        String junglePath = getJunglePath(cli);
         Compiler compiler = new Compiler();
-        compiler.compile(entrypointClassName, new MainVisitor(), ast);
+        compiler.compile(entrypointClassName, new MainVisitor(junglePath), ast);
         // Run...
-        Class<?> entrypointClass = null;
-        try {
-            entrypointClass = ClassLoader.load(entrypointClassName);
-        } catch (MalformedURLException | ClassNotFoundException e) {
-            // Loading failed
-            e.printStackTrace();
-            return;
-        }
-        Method mainMethod = null;
-        try {
-            mainMethod = entrypointClass.getMethod("main", String[].class);
-        } catch (NoSuchMethodException | SecurityException e) {
-            // Invoking entrypoint failed
-            e.printStackTrace();
-            return;
-        }
-        // TODO: pass in arguments from command-line
-        Object[] arguments = new Object[]{
-            new String[]{"hello"}
+        /* Problem:
+         * Loading the new class using reflection and invoking main appears to work in some cases.
+         * However, when a custom classpath is provided then URLClassLoader::loadClass() fails to find the classes that are in the classpath.
+         * This happens even when the classpath appears to be valid and passed available to the running code.
+         * 
+         * Solution:
+         * Execute the java program in a new process using exec.
+         */
+        
+        String[] command = {
+            "java",
+            "-classpath", getJunglePath(cli),
+            entrypointClassName
         };
+        Process process;
+        ProcessBuilder processBuilder = new ProcessBuilder(command).inheritIO();
         try {
-            mainMethod.invoke(null, arguments);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            process = processBuilder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        try {
+            int exitCode = process.waitFor();
+            System.exit(exitCode);
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return;
         }
@@ -162,6 +177,7 @@ public class JungleCLI {
         options.addOption("h", "help", false, "Show help options.");
         options.addOption("k", "keywords", false, "Show keywords.");
         options.addOption("o", "output", true, "Output file name.");
+        options.addOption("p", "junglepath", true, "Class path of the jungle program.");
 
         CommandLineParser cliParser = new DefaultParser();
         CommandLine cli = null;

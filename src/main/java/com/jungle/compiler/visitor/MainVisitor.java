@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class MainVisitor implements IVisitor {
+public class MainVisitor extends AbstractClassPathVisitor {
 
     @NotNull
     private static final FileLogger logger = new FileLogger(MainVisitor.class.getSimpleName());
@@ -40,7 +40,7 @@ public class MainVisitor implements IVisitor {
     @NotNull
     private BlockVisitor getBlockVisitor() {
         if (blockVisitor == null) {
-            blockVisitor = new BlockVisitor();
+            blockVisitor = new BlockVisitor(getClassPath());
         }
         return blockVisitor;
     }
@@ -95,7 +95,7 @@ public class MainVisitor implements IVisitor {
     @NotNull
     private MultitaskVisitor getMultitaskVisitor() {
         if (multitaskVisitor == null) {
-            multitaskVisitor = new MultitaskVisitor();
+            multitaskVisitor = new MultitaskVisitor(getClassPath());
         }
         return multitaskVisitor;
     }
@@ -106,36 +106,15 @@ public class MainVisitor implements IVisitor {
     @NotNull
     private SequenceVisitor getSequenceVisitor() {
         if (sequenceVisitor == null) {
-            sequenceVisitor = new SequenceVisitor();
+            sequenceVisitor = new SequenceVisitor(getClassPath());
         }
         return sequenceVisitor;
     }
 
     // endregion
 
-    private MainVisitor(
-            @NotNull final LiteralVisitor literalVisitor,
-            @NotNull final AssignmentVisitor assignmentVisitor,
-            @NotNull final BlockVisitor blockVisitor,
-            @NotNull final AssertVisitor assertVisitor,
-            @NotNull final PrintVisitor printVisitor,
-            @NotNull final IfVisitor ifVisitor,
-            @NotNull final LoopVisitor loopVisitor,
-            @NotNull final SequenceVisitor sequenceVisitor
-    ) {
-        super();
-        this.literalVisitor = literalVisitor;
-        this.assignmentVisitor = assignmentVisitor;
-        this.blockVisitor = blockVisitor;
-        this.assertVisitor = assertVisitor;
-        this.printVisitor = printVisitor;
-        this.ifVisitor = ifVisitor;
-        this.loopVisitor = loopVisitor;
-        this.sequenceVisitor = sequenceVisitor;
-    }
-
-    public MainVisitor() {
-        super();
+    public MainVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     public boolean canVisit(@NotNull INode ast) {

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class BlockVisitor implements IVisitor {
+public class BlockVisitor extends AbstractClassPathVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(BlockVisitor.class.getName());
 
@@ -17,18 +17,13 @@ public class BlockVisitor implements IVisitor {
 
     private MainVisitor getMainVisitor() {
         if (mainVisitor == null) {
-            mainVisitor = new MainVisitor();
+            mainVisitor = new MainVisitor(getClassPath());
         }
         return mainVisitor;
     }
 
-    private BlockVisitor(@NotNull final MainVisitor mainVisitor) {
-        super();
-        this.mainVisitor = mainVisitor;
-    }
-
-    public BlockVisitor() {
-        super();
+    public BlockVisitor(@NotNull final String classPath) {
+        super(classPath);
     }
 
     @Override

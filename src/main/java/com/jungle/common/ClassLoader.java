@@ -17,9 +17,10 @@ public class ClassLoader {
     @NotNull
     private static final FileLogger logger = new FileLogger(ClassLoader.class.getName());
 
-    public static Class<?> load(@NotNull String classPaths, @NotNull String className)
+    public static Class<?> loadClass(@NotNull String classPaths, @NotNull String className)
         throws MalformedURLException, ClassNotFoundException
     {
+        logger.debug(String.format("loading class from %s", classPaths));
         List<URL> urls = new LinkedList<URL>();
         for (String path : classPaths.split(":")) {
             File file = new File(path);
@@ -37,17 +38,5 @@ public class ClassLoader {
             }
         }
         return clazz;
-    }
-
-    public static Class<?> load(@NotNull String className)
-        throws MalformedURLException, ClassNotFoundException
-    {
-        // TODO: break-out configuration
-        String classPath = System.getenv("JUNGLEPATH");
-        if (classPath == null) {
-            classPath = ".";
-        }
-        logger.debug(String.format("loading class from %s", classPath));
-        return load(classPath, className);
     }
 }
