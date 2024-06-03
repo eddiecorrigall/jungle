@@ -1,0 +1,6 @@
+m = 0.5
+x = 2.0
+b = 1.0
+y = + (* m x) b
+print y
+print '\n'
