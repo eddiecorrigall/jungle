@@ -34,7 +34,7 @@ Either install the OpenJDK or Oracle JRE.
 
 ```bash
 # Make the command-line interface available to shell.
-source jungle-setup.bash
+source setup.bash
 
 # Test command.
 jungle --help
