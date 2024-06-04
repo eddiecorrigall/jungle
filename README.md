@@ -5,6 +5,10 @@ Jungle
 
 A toy programming language built for the Java Virtual Machine.
 
+## TODO
+
+- casting: integer, float, character
+
 ## Features
 
 Most features are inherited from JVM.
@@ -12,6 +16,8 @@ Most features are inherited from JVM.
 - Automatic garbage collection
 - Concurrency
 - Objects
+- Multi-platform
+- [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation)
 
 This project is for educational purposes (but mostly to have fun). There are a couple of goals for this language.
 
@@ -169,12 +175,12 @@ Ensure the class for `multitask`:
 
 ```shell
 # Compile the Java class used by our program
-javac programs/com/example/MultitaskRunnable.java
+javac programs/classes/com/example/MultitaskRunnable.java
 
 # Declare or provide the junglepath before compiling or running,
 # so that our Runnable class can be validated during compile and found during runtime.
 # The junglepath is an isolated classpath for the just the program.
-export JUNGLEPATH='.:./programs'
+export JUNGLEPATH='.:./programs/classes'
 
 # Compile and run the program
 cat programs/multitask.source | jungle run
