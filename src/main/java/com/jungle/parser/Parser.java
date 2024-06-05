@@ -454,6 +454,12 @@ public class Parser extends AbstractParser {
   }
 
   @Nullable
+  protected INode parseStatementComment() {
+    nextToken();
+    return null;
+  }
+
+  @Nullable
   protected INode parseStatement() {
     /*
      * statement := statement_block
@@ -471,6 +477,9 @@ public class Parser extends AbstractParser {
     if (accepts(TokenType.SYMBOL)) {
       return parseStatementSymbol();
     }
+    if (accepts(TokenType.COMMENT)) {
+      return parseStatementComment();
+    }
     throw newError("not a statement");
   }
 
@@ -487,7 +496,7 @@ public class Parser extends AbstractParser {
     while (true) {
       if (getCurrentToken() == null) break;
       if (accepts(TokenType.TERMINAL)) break;
-      if (accepts(TokenType.NEWLINE)) {
+      if (accepts(TokenType.NEWLINE) || accepts(TokenType.COMMENT)) {
         nextToken();
         continue;
       }

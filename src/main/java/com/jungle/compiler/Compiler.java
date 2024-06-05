@@ -40,7 +40,7 @@ public class Compiler {
     public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
         // TODO: handle multi-class
         if (ast == null) {
-            String message = "AST is null";
+            String message = "AST is null - source files must contain code";
             logger.error(message);
             throw new CompilerError(message);
         }

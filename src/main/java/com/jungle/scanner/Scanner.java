@@ -150,6 +150,9 @@ public class Scanner extends AbstractScanner {
       case '|':
         token = new Token(TokenType.PIPE);
         break;
+      case '#':
+        token = new Token(TokenType.COMMENT).withValue(consumeUntilAndSkip('\n'));
+        break;
       // Text
       case '"':
         token = new Token(TokenType.TEXT).withValue(consumeUntilAndSkip('"'));

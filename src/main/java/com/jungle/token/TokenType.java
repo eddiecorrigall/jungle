@@ -34,6 +34,7 @@ public enum TokenType {
   DOT,
   PIPE,
 
+  COMMENT,
   NUMBER,
   TEXT,
   KEYWORD,

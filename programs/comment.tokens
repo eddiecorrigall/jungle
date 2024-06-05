@@ -1,0 +1,8 @@
+1	1	COMMENT	 this is a comment
+2	1	NEWLINE
+3	1	KEYWORD	assert
+3	7	SPACE
+3	8	KEYWORD	true
+3	12	SPACE
+3	13	COMMENT	 comment after statement
+3	39	TERMINAL
