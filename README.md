@@ -8,6 +8,7 @@ A toy programming language built for the Java Virtual Machine.
 ## TODO
 
 - casting: integer, float, character
+- compile a runnable class
 
 ## Features
 
