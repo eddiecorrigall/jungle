@@ -1,0 +1,11 @@
+SEQUENCE
+  MULTITASK
+    LITERAL_STRING	com.example.RunnableTask
+    BLOCK
+      SEQUENCE
+        PRINT
+          LITERAL_STRING	Inline thread!
+          ;
+        ;
+      ;
+  ;

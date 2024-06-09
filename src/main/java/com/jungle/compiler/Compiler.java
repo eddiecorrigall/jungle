@@ -11,10 +11,9 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -24,10 +23,34 @@ public class Compiler {
 
     // region Helpers
 
-    public static void writeClassFile(@NotNull String className, byte[] classData) {
-        Path classPath = Paths.get(className + ".class");
+    @NotNull
+    public static String asInternalClassName(@NotNull String className) {
+        return className.replace('.', '/');
+    }
+
+    public static void writeClassFile(@NotNull String fullClassName, byte[] classData) {
+        // TODO: new class files should be placed in a target directory
+        // ...
+        String classFileString = fullClassName.replace('.', '/') + ".class";
+        logger.debug(String.format("write class file - %s", classFileString));
+        File classFile = new File(classFileString);
+        File classParentFile = classFile.getParentFile();
+        if (classParentFile != null) {
+            // Ensure folder path exists
+            classParentFile.mkdir();
+        }
         try {
-            Files.write(classPath, classData);
+            boolean hasCreatedNewFile = classFile.createNewFile();
+            if (!hasCreatedNewFile) {
+                logger.debug(String.format("class already exists - %s", fullClassName));
+            }
+        } catch (IOException e) {
+            String message = "failed to create class file";
+            logger.error(message, e);
+            throw new CompilerError(message);
+        }
+        try {
+            Files.write(classFile.toPath(), classData);
         } catch (IOException e) {
             String message = "failed to write to class file";
             logger.error(message, e);
@@ -37,22 +60,38 @@ public class Compiler {
 
     // endregion
 
-    public void compile(@NotNull String mainClassName, @NotNull IVisitor mainVisitor, @Nullable INode ast) {
-        // TODO: handle multi-class
+    public void compileMain(@NotNull String mainClassName, @NotNull IVisitor languageVisitor, @Nullable INode ast) {
+        ClassWriter initialClassWriter = visitMainClass(mainClassName); // template
+        ClassWriter classWriter = visitEntrypoint("main", initialClassWriter, languageVisitor, ast);
+        writeClassFile(mainClassName, classWriter.toByteArray());
+    }
+
+    public void compileRunnable(@NotNull String runnableClassName, @NotNull IVisitor languageVisitor, @Nullable INode ast) {
+        ClassWriter initialClassWriter = visitRunnableClass(runnableClassName); // template
+        ClassWriter classWriter = visitEntrypoint("run", initialClassWriter, languageVisitor, ast);
+        writeClassFile(runnableClassName, classWriter.toByteArray());
+    }
+
+    @NotNull
+    public ClassWriter visitEntrypoint(
+        @NotNull String targetMethodName,
+        @NotNull ClassWriter initialClassWriter,
+        @NotNull IVisitor languageVisitor,
+        @Nullable INode ast
+    ) {
         if (ast == null) {
             String message = "AST is null - source files must contain code";
             logger.error(message);
             throw new CompilerError(message);
         }
-        logger.debug("generating entrypoint class from template");
-        ClassWriter initialClassWriter = visitMainClass(mainClassName); // template
+        logger.debug("generating entrypoint class from initial class");
         ClassReader classReader = new ClassReader(initialClassWriter.toByteArray());
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        ClassVisitor entrypoint = new MainClassVisitor(classWriter, mainVisitor, ast);
+        ClassVisitor entrypoint = new JungleClassVisitor(targetMethodName, classWriter, languageVisitor, ast);
         logger.debug("traversing AST");
         classReader.accept(entrypoint, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
         logger.debug("writing class file");
-        writeClassFile(mainClassName, classWriter.toByteArray());
+        return classWriter;
     }
 
     // region Emit Classes - ClassWriter factories
@@ -66,12 +105,32 @@ public class Compiler {
         cw.visit(
                 V1_8,
                 ACC_PUBLIC + ACC_SUPER,
-                className,
+                asInternalClassName(className),
                 null,
                 "java/lang/Object",
-                null);
+                null
+        );
         visitDefaultConstructor(cw);
         visitMainMethod(cw);
+        cw.visitEnd();
+        return cw;
+    }
+
+    @NotNull
+    public static ClassWriter visitRunnableClass(@NotNull String className) {
+        logger.debug("visit runnable class");
+        int flags = ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES;
+        ClassWriter cw = new ClassWriter(flags);
+        cw.visit(
+                V1_8,
+                ACC_PUBLIC + ACC_SUPER,
+                asInternalClassName(className),
+                null,
+                "java/lang/Object",
+                new String[]{"java/lang/Runnable"}
+        );
+        visitDefaultConstructor(cw);
+        visitRunnableRunMethod(cw);
         cw.visitEnd();
         return cw;
     }
@@ -79,8 +138,8 @@ public class Compiler {
     // endregion
 
     // region Emit Methods - MethodVisitor factories
-    @NotNull
-    public static MethodVisitor visitDefaultConstructor(@NotNull ClassWriter cw) {
+
+    public static void visitDefaultConstructor(@NotNull ClassWriter cw) {
         // public ClassConstructor() { Object::super(); return; }
         logger.debug("visit default constructor");
         MethodVisitor mv = cw.visitMethod(
@@ -90,35 +149,48 @@ public class Compiler {
                 null,
                 null);
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitMethodInsn(
+        mv.visitMethodInsn( // super()
                 INVOKESPECIAL,
                 "java/lang/Object",
                 "<init>",
                 "()V",
                 false);
-        // Code should be added here using a MethodVisitor...
+        // Use a MethodVisitor to emit code before the return statement
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
-        return mv;
     }
 
-    @NotNull
-    public static MethodVisitor visitMainMethod(@NotNull ClassWriter cw) {
+    public static void visitMainMethod(@NotNull ClassWriter cw) {
         // public static void main(String[]) { return; }
         logger.debug("visit main method");
         MethodVisitor mv = cw.visitMethod(
                 ACC_PUBLIC + ACC_STATIC,
-                MainMethodVisitor.MAIN_METHOD_NAME,
+                "main",
                 "([Ljava/lang/String;)V",
                 null,
                 null);
         mv.visitCode();
-        // Code should be added here using a MethodVisitor...
+        // Use a MethodVisitor to emit code before the return statement
         mv.visitInsn(RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
-        return mv;
+    }
+
+    public static void visitRunnableRunMethod(@NotNull ClassWriter cw) {
+        // public void run() { return; }
+        logger.debug("visit runnable run method");
+        MethodVisitor mv = cw.visitMethod(
+                ACC_PUBLIC,
+                "run",
+                "()V",
+                null,
+                null);
+        mv.visitCode();
+        // Use a MethodVisitor to emit code before the return statement
+        mv.visitInsn(RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 
     //endregion

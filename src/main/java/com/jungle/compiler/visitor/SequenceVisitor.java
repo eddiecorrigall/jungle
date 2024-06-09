@@ -2,6 +2,7 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,11 @@ public class SequenceVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit sequence " + ast);
 
         if (!canVisit(ast)) {
@@ -40,11 +45,11 @@ public class SequenceVisitor extends AbstractClassPathVisitor {
         }
 
         if (ast.getLeft() != null) {
-            getMainVisitor().visit(mv, ast.getLeft());
+            getMainVisitor().visit(mv, ast.getLeft(), context);
         }
 
         if (ast.getRight() != null) {
-            getMainVisitor().visit(mv, ast.getRight());
+            getMainVisitor().visit(mv, ast.getRight(), context);
         }
     }
 }

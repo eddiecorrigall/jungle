@@ -17,16 +17,6 @@ public class PrintVisitor extends AbstractClassPathVisitor {
     private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -47,7 +37,11 @@ public class PrintVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit print " + ast);
 
         if (!canVisit(ast)) {
@@ -58,16 +52,16 @@ public class PrintVisitor extends AbstractClassPathVisitor {
             throw new Error("print missing expression");
         }
 
-        getExpressionVisitor().visit(mv, ast.getLeft());
-        visitPrint(mv);
+        getExpressionVisitor().visit(mv, ast.getLeft(), context);
+        visitPrint(mv, context);
     }
 
-    protected void visitPrint(@NotNull MethodVisitor mv) {
+    protected void visitPrint(@NotNull MethodVisitor mv, @NotNull OperandStackContext context) {
         // System.out.print(stack[0]);
 
         // Prints what ever value is on the stack
 
-        OperandStackType operandStackType = getOperandStackContext().pop();
+        OperandStackType operandStackType = context.pop();
         String descriptor;
         switch (operandStackType) {
             case BOOLEAN: descriptor = "(B)V"; break;

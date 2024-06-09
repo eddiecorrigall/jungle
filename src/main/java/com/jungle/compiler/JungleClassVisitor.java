@@ -9,9 +9,12 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class MainClassVisitor extends ClassVisitor {
+public class JungleClassVisitor extends ClassVisitor {
     @NotNull
-    private static final FileLogger logger = new FileLogger(MainClassVisitor.class.getSimpleName());
+    private static final FileLogger logger = new FileLogger(JungleClassVisitor.class.getSimpleName());
+
+    @NotNull
+    private final String targetMethodName;
 
     @NotNull
     private final IVisitor mainVisitor;
@@ -19,8 +22,14 @@ public class MainClassVisitor extends ClassVisitor {
     @NotNull
     private final INode ast;
 
-    public MainClassVisitor(ClassVisitor classVisitor, @NotNull IVisitor mainVisitor, @NotNull INode ast) {
+    public JungleClassVisitor(
+        @NotNull String targetMethodName,
+        @NotNull ClassVisitor classVisitor,
+        @NotNull IVisitor mainVisitor,
+        @NotNull INode ast
+    ) {
         super(Opcodes.ASM5, classVisitor);
+        this.targetMethodName = targetMethodName;
         this.mainVisitor = mainVisitor;
         this.ast = ast;
     }
@@ -28,10 +37,10 @@ public class MainClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int flags, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(flags, name, desc, signature, exceptions);
-        boolean isMainMethod = MainMethodVisitor.MAIN_METHOD_NAME.equals(name);
-        if (isMainMethod) {
-            logger.debug("emit custom instructions in main class");
-            return new MainMethodVisitor(mv, mainVisitor, ast);
+        boolean isTargetMethod = targetMethodName.equals(name);
+        if (isTargetMethod) {
+            logger.debug("emit custom instructions into class method");
+            return new JungleMethodVisitor(mv, mainVisitor, ast);
         }
         return mv;
     }

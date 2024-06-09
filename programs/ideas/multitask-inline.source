@@ -1,3 +1,0 @@
-multitask "com.example.RunnableTask" {
-    print "Inline thread!"
-}

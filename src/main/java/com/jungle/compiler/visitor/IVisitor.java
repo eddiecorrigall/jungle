@@ -1,11 +1,17 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.compiler.operand.OperandStackContext;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 public interface IVisitor {
-    boolean canVisit(@NotNull final INode ast);
+    boolean canVisit(@NotNull INode ast);
 
-    void visit(@NotNull final MethodVisitor mv, @NotNull final INode ast);
+    void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    );
 }

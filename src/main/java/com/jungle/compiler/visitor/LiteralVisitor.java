@@ -28,16 +28,6 @@ public class LiteralVisitor implements IVisitor {
             LITERAL_STRING
     ));
 
-    @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
     public LiteralVisitor() {
         super();
     }
@@ -48,7 +38,11 @@ public class LiteralVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit literal " + ast);
 
         if (!canVisit(ast)) {
@@ -87,6 +81,6 @@ public class LiteralVisitor implements IVisitor {
         }
 
         mv.visitLdcInsn(objectValue);
-        getOperandStackContext().push(type);
+        context.push(type);
     }
 }

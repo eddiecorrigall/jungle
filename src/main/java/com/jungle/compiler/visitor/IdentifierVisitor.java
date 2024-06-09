@@ -13,17 +13,6 @@ public class IdentifierVisitor implements IVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(IdentifierVisitor.class.getName());
 
-    @Nullable
-    private OperandStackContext operandStackContext;
-
-    @NotNull
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
     public IdentifierVisitor() {
         super();
     }
@@ -34,7 +23,11 @@ public class IdentifierVisitor implements IVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit identifier " + ast);
 
         if (!canVisit(ast)) {
@@ -46,6 +39,6 @@ public class IdentifierVisitor implements IVisitor {
             throw new Error("identifier missing name");
         }
 
-        getOperandStackContext().visitLoad(mv, variableName);
+        context.visitLoad(mv, variableName);
     }
 }

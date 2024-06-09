@@ -3,6 +3,7 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +58,11 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit boolean operator " + ast);
 
         // Optimization idea:
@@ -85,7 +90,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                         CompareTo.ZERO,     // when 0 (false), jump to else
                         ast.getLeft(),      // if-condition
                         ast.getRight(),     // if-block: compute other half of AND operation
-                        PUSH_FALSE_NODE     // else-block: short circuit
+                        PUSH_FALSE_NODE,    // else-block: short circuit
+                        context
                 );
             } break;
             case OPERATOR_OR: {
@@ -98,7 +104,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                         CompareTo.NONZERO, // when non-0 (true), jump to else
                         ast.getLeft(),     // if-condition
                         ast.getRight(),    // if-block: compute other half of OR operation
-                        PUSH_TRUE_NODE     // else-block: short circuit
+                        PUSH_TRUE_NODE,    // else-block: short circuit
+                        context
                 );
             } break;
             case OPERATOR_NOT: {
@@ -113,7 +120,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                         CompareTo.ZERO,  // when 0 (false), jump to else
                         ast.getLeft(),   // if-condition
                         PUSH_FALSE_NODE, // if-block: when condition is true then return false
-                        PUSH_TRUE_NODE   // else-block: when condition is false then return true
+                        PUSH_TRUE_NODE,  // else-block: when condition is false then return true
+                        context
                 );
             } break;
             case OPERATOR_EQUAL: {
@@ -132,7 +140,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                                 .withLeft(ast.getLeft())
                                 .withRight(ast.getRight()),
                         PUSH_TRUE_NODE,
-                        PUSH_FALSE_NODE
+                        PUSH_FALSE_NODE,
+                        context
                 );
             } break;
             case OPERATOR_LESS_THAN: {
@@ -151,7 +160,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                                 .withLeft(ast.getLeft())
                                 .withRight(ast.getRight()),
                         PUSH_TRUE_NODE,
-                        PUSH_FALSE_NODE
+                        PUSH_FALSE_NODE,
+                        context
                 );
             } break;
             case OPERATOR_GREATER_THAN: {
@@ -170,7 +180,8 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
                                 .withLeft(ast.getLeft())
                                 .withRight(ast.getRight()),
                         PUSH_TRUE_NODE,
-                        PUSH_FALSE_NODE
+                        PUSH_FALSE_NODE,
+                        context
                 );
             } break;
             default: {

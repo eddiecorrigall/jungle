@@ -31,16 +31,6 @@ public class NumericOperatorVisitor extends AbstractClassPathVisitor {
     ));
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -61,7 +51,11 @@ public class NumericOperatorVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit binary operator " + ast);
 
         if (!canVisit(ast)) {
@@ -78,11 +72,11 @@ public class NumericOperatorVisitor extends AbstractClassPathVisitor {
 
         // prepare for operation...
 
-        getExpressionVisitor().visit(mv, ast.getLeft());
-        OperandStackType leftExpressionType = getOperandStackContext().pop();
+        getExpressionVisitor().visit(mv, ast.getLeft(), context);
+        OperandStackType leftExpressionType = context.pop();
 
-        getExpressionVisitor().visit(mv, ast.getRight());
-        OperandStackType rightExpressionType = getOperandStackContext().pop();
+        getExpressionVisitor().visit(mv, ast.getRight(), context);
+        OperandStackType rightExpressionType = context.pop();
 
         // prepare for operation - cast types...
 
@@ -90,17 +84,17 @@ public class NumericOperatorVisitor extends AbstractClassPathVisitor {
 
         if (leftExpressionType == rightExpressionType) {
             operandStackType = leftExpressionType;
-            getOperandStackContext().push(operandStackType);
+            context.push(operandStackType);
         } else if (OperandStackType.INTEGER == leftExpressionType && OperandStackType.CHARACTER == rightExpressionType) {
             mv.visitInsn(Opcodes.SWAP); // move integer (left) to top
             mv.visitInsn(Opcodes.I2C); // convert integer to character
             mv.visitInsn(Opcodes.SWAP); // restore
             operandStackType = OperandStackType.INTEGER; // operation
-            getOperandStackContext().push(OperandStackType.CHARACTER); // final type
+            context.push(OperandStackType.CHARACTER); // final type
         } else if (OperandStackType.CHARACTER == leftExpressionType && OperandStackType.INTEGER == rightExpressionType) {
             mv.visitInsn(Opcodes.I2C); // convert integer (right)
             operandStackType = OperandStackType.INTEGER; // operation
-            getOperandStackContext().push(OperandStackType.CHARACTER); // final type
+            context.push(OperandStackType.CHARACTER); // final type
         } else {
             throw new Error("binary operator left or right expression requires type cast " + ast);
         }

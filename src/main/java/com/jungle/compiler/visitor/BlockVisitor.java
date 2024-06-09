@@ -2,6 +2,7 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,11 @@ public class BlockVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit block " + ast);
 
         if (!canVisit(ast)) {
@@ -47,6 +52,6 @@ public class BlockVisitor extends AbstractClassPathVisitor {
             throw new Error("block right AST must NOT be defined");
         }
 
-        getMainVisitor().visit(mv, ast.getLeft());
+        getMainVisitor().visit(mv, ast.getLeft(), context);
     }
 }

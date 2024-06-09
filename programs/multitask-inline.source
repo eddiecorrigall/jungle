@@ -1,0 +1,12 @@
+multitask "com.example.RunnableTaskOne" : {
+    # Wait a little
+    x = 999999
+    loop (greaterThan x 0) {
+        x = - x 1
+    }
+    print "thread!\n"
+}
+
+multitask "com.example.RunnableTaskTwo" : {
+    print "Inline..."
+}

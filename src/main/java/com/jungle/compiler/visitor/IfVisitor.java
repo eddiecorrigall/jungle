@@ -18,16 +18,6 @@ public class IfVisitor extends AbstractClassPathVisitor {
     private static final FileLogger logger = new FileLogger(IfVisitor.class.getName());
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -59,11 +49,20 @@ public class IfVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
-        visit(mv, CompareTo.ZERO, ast);
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
+        visit(mv, CompareTo.ZERO, ast, context);
     }
 
-    protected void visit(@NotNull MethodVisitor mv, @NotNull CompareTo compareTo, @NotNull INode ast) {
+    protected void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull CompareTo compareTo,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit if " + ast);
 
         if (!canVisit(ast)) {
@@ -100,8 +99,8 @@ public class IfVisitor extends AbstractClassPathVisitor {
             throw new Error("expected if condition/expression");
         }
 
-        getExpressionVisitor().visit(mv, conditionNode);
-        if (getOperandStackContext().peek() != OperandStackType.INTEGER) {
+        getExpressionVisitor().visit(mv, conditionNode, context);
+        if (context.peek() != OperandStackType.INTEGER) {
             throw new Error("if condition/expression expected to be type integer");
         }
 
@@ -131,12 +130,12 @@ public class IfVisitor extends AbstractClassPathVisitor {
 
             // if-block
             mv.visitLabel(ifBlockLabel);
-            getBlockVisitor().visit(mv, ifBlockNode);
+            getBlockVisitor().visit(mv, ifBlockNode, context);
             mv.visitJumpInsn(Opcodes.GOTO, endLabel);
 
             // else-block
             mv.visitLabel(elseBlockLabel);
-            getBlockVisitor().visit(mv, elseBlockNode);
+            getBlockVisitor().visit(mv, elseBlockNode, context);
 
             // end
             mv.visitLabel(endLabel);
@@ -145,7 +144,7 @@ public class IfVisitor extends AbstractClassPathVisitor {
             mv.visitJumpInsn(jumpCode, endLabel);
 
             // if-block
-            getBlockVisitor().visit(mv, bodyNode);
+            getBlockVisitor().visit(mv, bodyNode, context);
 
             // end
             mv.visitLabel(endLabel);
@@ -157,7 +156,8 @@ public class IfVisitor extends AbstractClassPathVisitor {
             @NotNull CompareTo compareTo,
             @NotNull INode conditionNode,
             @NotNull INode ifBlockNode,
-            @Nullable INode elseBlockNode
+            @Nullable INode elseBlockNode,
+            @NotNull OperandStackContext context
     ) {
         if (elseBlockNode == null) {
             visit(
@@ -165,7 +165,8 @@ public class IfVisitor extends AbstractClassPathVisitor {
                     compareTo,
                     new Node(NodeType.IF)
                         .withLeft(conditionNode)
-                        .withRight(new Node(NodeType.BLOCK).withLeft(ifBlockNode))
+                        .withRight(new Node(NodeType.BLOCK).withLeft(ifBlockNode)),
+                    context
             );
         } else {
             visit(
@@ -176,7 +177,8 @@ public class IfVisitor extends AbstractClassPathVisitor {
                         .withRight(new Node(NodeType.IF_ELSE)
                                 .withLeft(new Node(NodeType.BLOCK).withLeft(ifBlockNode))
                                 .withRight(new Node(NodeType.BLOCK).withLeft(elseBlockNode))
-                        )
+                        ),
+                    context
             );
         }
     }
@@ -185,9 +187,10 @@ public class IfVisitor extends AbstractClassPathVisitor {
             @NotNull MethodVisitor mv,
             @NotNull INode conditionNode,
             @NotNull INode ifBlockNode,
-            @Nullable INode elseBlockNode
+            @Nullable INode elseBlockNode,
+            @NotNull OperandStackContext context
     ) {
-        visit(mv, CompareTo.NONZERO, conditionNode, ifBlockNode, elseBlockNode);
+        visit(mv, CompareTo.NONZERO, conditionNode, ifBlockNode, elseBlockNode, context);
     }
 }
 

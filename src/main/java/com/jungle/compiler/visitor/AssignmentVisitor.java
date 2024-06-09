@@ -14,16 +14,6 @@ public class AssignmentVisitor extends AbstractClassPathVisitor {
     private static final FileLogger logger = new FileLogger(AssignmentVisitor.class.getName());
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -44,7 +34,11 @@ public class AssignmentVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit assignment " + ast);
 
         if (!canVisit(ast)) {
@@ -67,9 +61,9 @@ public class AssignmentVisitor extends AbstractClassPathVisitor {
         }
 
         // evaluate expression to have value pushed onto operand stack...
-        getExpressionVisitor().visit(mv, expressionNode);
+        getExpressionVisitor().visit(mv, expressionNode, context);
 
         // store operand stack value and assign variable to index...
-        getOperandStackContext().visitStore(mv, variableName);
+        context.visitStore(mv, variableName);
     }
 }

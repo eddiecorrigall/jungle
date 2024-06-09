@@ -1,6 +1,7 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -122,7 +123,11 @@ public class MainVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit main " + ast);
 
         if (!canVisit(ast)) {
@@ -130,47 +135,47 @@ public class MainVisitor extends AbstractClassPathVisitor {
         }
 
         if (getSequenceVisitor().canVisit(ast)) {
-            getSequenceVisitor().visit(mv, ast);
+            getSequenceVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getBlockVisitor().canVisit(ast)) {
-            getBlockVisitor().visit(mv, ast);
+            getBlockVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getLiteralVisitor().canVisit(ast)) {
-            getLiteralVisitor().visit(mv, ast);
+            getLiteralVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getAssignmentVisitor().canVisit(ast)) {
-            getAssignmentVisitor().visit(mv, ast);
+            getAssignmentVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getAssertVisitor().canVisit(ast)) {
-            getAssertVisitor().visit(mv, ast);
+            getAssertVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getPrintVisitor().canVisit(ast)) {
-            getPrintVisitor().visit(mv, ast);
+            getPrintVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getIfVisitor().canVisit(ast)) {
-            getIfVisitor().visit(mv, ast);
+            getIfVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getLoopVisitor().canVisit(ast)) {
-            getLoopVisitor().visit(mv, ast);
+            getLoopVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getMultitaskVisitor().canVisit(ast)) {
-            getMultitaskVisitor().visit(mv, ast);
+            getMultitaskVisitor().visit(mv, ast, context);
             return;
         }
 

@@ -1,6 +1,7 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,11 @@ public class ExpressionVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit expression " + ast);
 
         if (!canVisit(ast)) {
@@ -83,27 +88,27 @@ public class ExpressionVisitor extends AbstractClassPathVisitor {
         }
 
         if (getIdentifierVisitor().canVisit(ast)) {
-            getIdentifierVisitor().visit(mv, ast);
+            getIdentifierVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getLiteralVisitor().canVisit(ast)) {
-            getLiteralVisitor().visit(mv, ast);
+            getLiteralVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getNumericOperatorVisitor().canVisit(ast)) {
-            getNumericOperatorVisitor().visit(mv, ast);
+            getNumericOperatorVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getCastIntegerVisitor().canVisit(ast)) {
-            getCastIntegerVisitor().visit(mv, ast);
+            getCastIntegerVisitor().visit(mv, ast, context);
             return;
         }
 
         if (getBooleanOperatorVisitor().canVisit(ast)) {
-            getBooleanOperatorVisitor().visit(mv, ast);
+            getBooleanOperatorVisitor().visit(mv, ast, context);
             return;
         }
 

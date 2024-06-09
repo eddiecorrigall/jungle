@@ -3,14 +3,31 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.common.ClassLoader;
+import com.jungle.compiler.Compiler;
+import com.jungle.compiler.operand.OperandStackContext;
+import com.jungle.logger.FileLogger;
 
 import java.net.MalformedURLException;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class MultitaskVisitor extends AbstractClassPathVisitor {
+    @NotNull
+    private static final FileLogger logger = new FileLogger(MultitaskVisitor.class.getSimpleName());
+
+    @Nullable
+    private MainVisitor mainVisitor;
+
+    private MainVisitor getMainVisitor() {
+        if (mainVisitor == null) {
+            mainVisitor = new MainVisitor(getClassPath());
+        }
+        return mainVisitor;
+    }
+
     protected static boolean hasInterface(@NotNull Class<?> clazz, @NotNull String interfaceName) {
         for (Class<?> clazzInterface : clazz.getInterfaces()) {
             if (interfaceName.equals(clazzInterface.getName())) {
@@ -35,24 +52,35 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         if (!canVisit(ast)) {
             throw new Error("expected multitask");
         }
         if (ast.getLeft() == null) {
             throw new Error("missing multitask class");
         }
-        boolean isClassStringLiteral = NodeType.LITERAL_STRING.equals(ast.getLeft().getType());
-        if (!isClassStringLiteral) {
+        String className = ast.getLeft().getStringValue();
+        boolean hasInlineCode = ast.getRight() != null;
+        if (hasInlineCode) {
+            // generate the new class file using inline code
+            logger.debug(String.format("compile inline multitask class - %s", className));
+            Compiler compiler = new Compiler();
+            logger.info("inline code - " + ast.getRight());
+            compiler.compileRunnable(className, getMainVisitor(), ast.getRight());
+        }
+        boolean hasClassStringLiteral = NodeType.LITERAL_STRING.equals(ast.getLeft().getType());
+        if (!hasClassStringLiteral) {
             throw new Error("expected multitask class to be string literal");
         }
-
         /* Note: It makes sense to find and validate the user class for the program before running.
          * However, we want to avoid including the user class in the compiler classpath.
          * At compile time, the compiler must be provided the isolated classpath to complete the compilation.
          */
         Class<?> clazz;
-        String className = ast.getLeft().getStringValue();
         try {
             // Note: Class.forName() does not consider classpath
             clazz = ClassLoader.loadClass(getClassPath(), className);
@@ -67,7 +95,7 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
         if (!hasPublicDefaultConstructor(clazz)) {
             throw new Error("expected multitask class to have public default constructor");
         }
-        String clazzOwner = className.replace('.', '/'); // eg. "com/jungle/examples/RunnableTest";
+        String ownerClassName = Compiler.asInternalClassName(className); // eg. "com/jungle/examples/RunnableTest";
 
         // new Thread...
         String threadClassType = "java/lang/Thread";
@@ -75,10 +103,10 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
         mv.visitInsn(Opcodes.DUP);
 
             // new Multitask()
-            mv.visitTypeInsn(Opcodes.NEW, clazzOwner);
+            mv.visitTypeInsn(Opcodes.NEW, ownerClassName);
             mv.visitInsn(Opcodes.DUP);
             mv.visitMethodInsn(
-                    Opcodes.INVOKESPECIAL, clazzOwner, "<init>", "()V", false);
+                    Opcodes.INVOKESPECIAL, ownerClassName, "<init>", "()V", false);
 
         // new Thread(new Multitask())
         mv.visitMethodInsn(

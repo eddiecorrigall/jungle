@@ -20,15 +20,6 @@ public class AssertVisitor extends AbstractClassPathVisitor {
      * It might be possible to use reflection to provide more context on the assertion.
      * For example: which method, which line, which variables, etc.
      */
-    @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
 
     @Nullable
     private ExpressionVisitor expressionVisitor;
@@ -51,7 +42,11 @@ public class AssertVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit assert " + ast);
 
         if (!canVisit(ast)) {
@@ -63,11 +58,11 @@ public class AssertVisitor extends AbstractClassPathVisitor {
         }
 
         // push expression/condition onto operand stack
-        getExpressionVisitor().visit(mv, ast.getLeft());
+        getExpressionVisitor().visit(mv, ast.getLeft(), context);
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (getOperandStackContext().peek() != OperandStackType.INTEGER) {
+        if (context.peek() != OperandStackType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

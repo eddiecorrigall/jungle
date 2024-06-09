@@ -16,16 +16,6 @@ public class CastIntegerVisitor extends AbstractClassPathVisitor {
     private static final FileLogger logger = new FileLogger(CastIntegerVisitor.class.getName());
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -46,7 +36,11 @@ public class CastIntegerVisitor extends AbstractClassPathVisitor {
     }
 
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         logger.debug("visit cast integer " + ast);
 
         if (!canVisit(ast)) {
@@ -57,8 +51,8 @@ public class CastIntegerVisitor extends AbstractClassPathVisitor {
             throw new Error("cast integer missing expression");
         }
 
-        getExpressionVisitor().visit(mv, ast.getLeft());
-        OperandStackType type = getOperandStackContext().pop();
+        getExpressionVisitor().visit(mv, ast.getLeft(), context);
+        OperandStackType type = context.pop();
         switch (type) {
             case INTEGER: {
                 logger.warn("value is already an integer");
@@ -70,6 +64,6 @@ public class CastIntegerVisitor extends AbstractClassPathVisitor {
                 throw new Error("integer cast not supported for " + ast);
             }
         }
-        getOperandStackContext().push(OperandStackType.INTEGER);
+        context.push(OperandStackType.INTEGER);
     }
 }

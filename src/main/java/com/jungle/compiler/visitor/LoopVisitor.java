@@ -17,16 +17,6 @@ public class LoopVisitor extends AbstractClassPathVisitor {
     private static final FileLogger logger = new FileLogger(LoopVisitor.class.getName());
 
     @Nullable
-    private OperandStackContext operandStackContext;
-
-    private OperandStackContext getOperandStackContext() {
-        if (operandStackContext == null) {
-            operandStackContext = OperandStackContext.getInstance();
-        }
-        return operandStackContext;
-    }
-
-    @Nullable
     private ExpressionVisitor expressionVisitor;
 
     @NotNull
@@ -56,8 +46,13 @@ public class LoopVisitor extends AbstractClassPathVisitor {
     public boolean canVisit(@NotNull INode ast) {
         return NodeType.LOOP.equals(ast.getType());
     }
+
     @Override
-    public void visit(@NotNull MethodVisitor mv, @NotNull INode ast) {
+    public void visit(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context
+    ) {
         /*
          loop: IFEQ #end
                "block"
@@ -83,15 +78,15 @@ public class LoopVisitor extends AbstractClassPathVisitor {
 
         // loop-condition
         mv.visitLabel(loopLabel);
-        getExpressionVisitor().visit(mv, ast.getLeft());
-        if (getOperandStackContext().peek() != OperandStackType.INTEGER) {
+        getExpressionVisitor().visit(mv, ast.getLeft(), context);
+        if (context.peek() != OperandStackType.INTEGER) {
             // TODO: shouldn't this be testing for boolean?
             throw new Error("loop condition/expression expected to be type integer");
         }
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
 
         // loop-block
-        getBlockVisitor().visit(mv, ast.getRight());
+        getBlockVisitor().visit(mv, ast.getRight(), context);
         mv.visitJumpInsn(Opcodes.GOTO, loopLabel);
 
         // end

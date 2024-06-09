@@ -123,7 +123,7 @@ public class JungleCLI {
         String outputFileName = cli.getOptionValue("output", "Entrypoint");
         String junglePath = getJunglePath(cli);
         Compiler compiler = new Compiler();
-        compiler.compile(outputFileName, new MainVisitor(junglePath), ast);
+        compiler.compileMain(outputFileName, new MainVisitor(junglePath), ast);
     }
 
     protected static void runCommand(@NotNull CommandLine cli) {
@@ -139,7 +139,7 @@ public class JungleCLI {
         String entrypointClassName = cli.getOptionValue("output", "Entrypoint");
         String junglePath = getJunglePath(cli);
         Compiler compiler = new Compiler();
-        compiler.compile(entrypointClassName, new MainVisitor(junglePath), ast);
+        compiler.compileMain(entrypointClassName, new MainVisitor(junglePath), ast);
         // Run...
         /* Problem:
          * Loading the new class using reflection and invoking main appears to work in some cases.

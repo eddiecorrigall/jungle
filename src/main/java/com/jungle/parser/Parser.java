@@ -348,12 +348,18 @@ public class Parser extends AbstractParser {
   @NotNull
   protected INode parseStatementMultitask() {
     /*
-     * statement_multitask := "multitask" class ;
+     * statement_multitask := "multitask" class [ ":" statement ] ;
      */
-    // TODO: consume a statement block of code instead of a class
     expectKeyword(KEYWORD_MULTITASK);
     consumeWhitespace();
-    return new Node(NodeType.MULTITASK).withLeft(parseClass());
+    Node node = new Node(NodeType.MULTITASK).withLeft(parseClass());
+    consumeWhitespace();
+    if (accepts(TokenType.COLON)) {
+      // inline multitask
+      nextToken();
+      node.withRight(parseStatement());
+    }
+    return node;
   }
 
   @Nullable
@@ -445,7 +451,7 @@ public class Parser extends AbstractParser {
     }
     consumeWhitespace();
     if (accepts(TokenType.EQUALS)) {
-      expect(TokenType.EQUALS);
+      nextToken();
       return new Node(NodeType.ASSIGN)
               .withLeft(new Node(NodeType.IDENTIFIER).withRawValue(symbolValue))
               .withRight(parseExpression());
