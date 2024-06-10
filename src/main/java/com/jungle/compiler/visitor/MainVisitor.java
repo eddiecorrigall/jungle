@@ -103,6 +103,17 @@ public class MainVisitor extends AbstractVisitor {
     }
 
     @Nullable
+    private SleepVisitor sleepVisitor;
+
+    @NotNull
+    private SleepVisitor getSleepVisitor() {
+        if (sleepVisitor == null) {
+            sleepVisitor = new SleepVisitor(getCompilerOptions());
+        }
+        return sleepVisitor;
+    }
+
+    @Nullable
     private SequenceVisitor sequenceVisitor;
 
     @NotNull
@@ -177,6 +188,11 @@ public class MainVisitor extends AbstractVisitor {
 
         if (getMultitaskVisitor().canVisit(ast)) {
             getMultitaskVisitor().visit(mv, ast, context);
+            return;
+        }
+
+        if (getSleepVisitor().canVisit(ast)) {
+            getSleepVisitor().visit(mv, ast, context);
             return;
         }
 

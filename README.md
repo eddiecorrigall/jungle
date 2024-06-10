@@ -174,22 +174,24 @@ Ensure the class for `multitask`:
 - implements the `java.lang.Runnable` interface
 - compiled with the `JUNGLE_CLASSPATH` environment variable with the classpath
 
+---
+
+This program demonstrates: 
+- Multi-threading is possible with this language
+- Threads print to the same standard output
+- Runnable classes are compiled from a single program
+
+The program describes 2 threads:
+1. The first thread pauses program execution for a short duration and then prints out `thread!`
+2. The second thread immediately prints out `Inline...`
+
 ```shell
-# Compile the Java class used by our program
-javac programs/classes/com/example/MultitaskRunnable.java
-
-# Declare or provide the jungle classpath before compiling or running,
-# so that our Runnable class can be validated during compile and found during runtime.
-# The jungle classpath is used to declare dependencies to compile the program and run the program.
-export JUNGLE_CLASSPATH='.:./programs/classes'
-
-# Compile and run the program
-cat programs/multitask.source | jungle run
+cat programs/multitask-inline.source | jungle run
 ```
 
 Expected output:
 ```
-Hello, world!
+Inline... thread!
 ```
 
 ## Environment Variables

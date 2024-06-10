@@ -1,2 +1,13 @@
+# Compile the Java class used by our program
+# `javac programs/classes/com/example/MultitaskRunnable.java`
+
+# Declare or provide the jungle classpath before compiling or running,
+# so that our Runnable class can be validated during compile and found during runtime.
+# The jungle classpath is used to declare dependencies to compile the program and run the program.
+# `export JUNGLE_CLASSPATH='.:./programs/classes'`
+
+# Compile and run the program
+# `cat programs/multitask.source | jungle run`
+
 multitask "com.example.MultitaskRunnable"
 print "Hello"

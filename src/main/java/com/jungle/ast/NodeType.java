@@ -60,6 +60,7 @@ public enum NodeType {
   ASSERT,
   PRINT,
   MULTITASK,
+  SLEEP,
 
   TRUE,
   FALSE;

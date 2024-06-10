@@ -81,11 +81,15 @@ public class Parser extends AbstractParser {
   public INode parseNumberExpression() {
     /*
      * number_expression := number
+     *                    | identifier
      *                    | "(" number_expression ")"
      *                    | ( "+" | "-" | "*" | "/" | "%" ) expression expression
      *                    ;
      */
     consumeWhitespace();
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
+    }
     if (accepts(TokenType.NUMBER)) {
       return parseNumber();
     }
@@ -362,6 +366,16 @@ public class Parser extends AbstractParser {
     return node;
   }
 
+  @NotNull
+  protected INode parseStatementSleep() {
+    /*
+     * statement_sleep := "sleep" expression_number
+     */
+    expectKeyword(KEYWORD_SLEEP);
+    consumeWhitespace();
+    return new Node(NodeType.SLEEP).withLeft(parseNumberExpression());
+  }
+
   @Nullable
   protected INode parseStatementIf() {
     /*
@@ -418,6 +432,7 @@ public class Parser extends AbstractParser {
      *                   | statement_print
      *                   | statement_if
      *                   | statement_multitask
+     *                   | statement_wait
      *                   ;
      */
     consumeWhitespace();
@@ -435,6 +450,9 @@ public class Parser extends AbstractParser {
     }
     if (acceptKeyword(KEYWORD_MULTITASK)) {
       return parseStatementMultitask();
+    }
+    if (acceptKeyword(KEYWORD_SLEEP)) {
+      return parseStatementSleep();
     }
     throw newError("not a keyword statement");
   }

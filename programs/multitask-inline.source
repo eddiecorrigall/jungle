@@ -1,9 +1,5 @@
 multitask "com.example.RunnableTaskOne" : {
-    # Wait a little
-    x = 999999
-    loop (greaterThan x 0) {
-        x = - x 1
-    }
+    sleep 100
     print "thread!\n"
 }
 
