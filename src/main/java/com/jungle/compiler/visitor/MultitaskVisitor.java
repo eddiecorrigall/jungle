@@ -4,6 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.common.ClassLoader;
 import com.jungle.compiler.Compiler;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class MultitaskVisitor extends AbstractClassPathVisitor {
+public class MultitaskVisitor extends AbstractVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(MultitaskVisitor.class.getSimpleName());
 
@@ -23,7 +24,7 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
 
     private MainVisitor getMainVisitor() {
         if (mainVisitor == null) {
-            mainVisitor = new MainVisitor(getClassPath());
+            mainVisitor = new MainVisitor(getCompilerOptions());
         }
         return mainVisitor;
     }
@@ -42,8 +43,8 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
         return true; // TODO
     }
 
-    public MultitaskVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public MultitaskVisitor(@NotNull final ICompilerOptions options) {
+        super(options);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
         if (hasInlineCode) {
             // generate the new class file using inline code
             logger.debug(String.format("compile inline multitask class - %s", className));
-            Compiler compiler = new Compiler();
+            Compiler compiler = new Compiler(getCompilerOptions());
             logger.info("inline code - " + ast.getRight());
             compiler.compileRunnable(className, getMainVisitor(), ast.getRight());
         }
@@ -83,7 +84,7 @@ public class MultitaskVisitor extends AbstractClassPathVisitor {
         Class<?> clazz;
         try {
             // Note: Class.forName() does not consider classpath
-            clazz = ClassLoader.loadClass(getClassPath(), className);
+            clazz = ClassLoader.loadClass(getCompilerOptions().getClassPath(), className);
         } catch (ClassNotFoundException e) {
             throw new Error("multitask class not found - " + className, e);
         } catch (MalformedURLException e) {

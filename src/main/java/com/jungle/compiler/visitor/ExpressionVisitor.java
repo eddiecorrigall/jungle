@@ -1,6 +1,7 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class ExpressionVisitor extends AbstractClassPathVisitor {
+public class ExpressionVisitor extends AbstractVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(ExpressionVisitor.class.getName());
 
@@ -40,7 +41,7 @@ public class ExpressionVisitor extends AbstractClassPathVisitor {
     @NotNull
     private NumericOperatorVisitor getNumericOperatorVisitor() {
         if (numericOperatorVisitor == null) {
-            numericOperatorVisitor = new NumericOperatorVisitor(getClassPath());
+            numericOperatorVisitor = new NumericOperatorVisitor(getCompilerOptions());
         }
         return numericOperatorVisitor;
     }
@@ -51,7 +52,7 @@ public class ExpressionVisitor extends AbstractClassPathVisitor {
     @NotNull
     private CastIntegerVisitor getCastIntegerVisitor() {
         if (castIntegerVisitor == null) {
-            castIntegerVisitor = new CastIntegerVisitor(getClassPath());
+            castIntegerVisitor = new CastIntegerVisitor(getCompilerOptions());
         }
         return castIntegerVisitor;
     }
@@ -61,13 +62,13 @@ public class ExpressionVisitor extends AbstractClassPathVisitor {
     @NotNull
     private BooleanOperatorVisitor getBooleanOperatorVisitor() {
         if (booleanOperatorVisitor == null) {
-            booleanOperatorVisitor = new BooleanOperatorVisitor(getClassPath());
+            booleanOperatorVisitor = new BooleanOperatorVisitor(getCompilerOptions());
         }
         return booleanOperatorVisitor;
     }
 
-    public ExpressionVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public ExpressionVisitor(@NotNull ICompilerOptions options) {
+        super(options);
     }
 
     @Override

@@ -38,18 +38,28 @@ public class JungleCLI {
         }
     }
 
-    public static String DEFAULT_JUNGLEPATH = ".";
+    public static String DEFAULT_JUNGLE_CLASSPATH = ".";
 
     @NotNull
-    protected static String getJunglePath(@NotNull CommandLine cli) {
-        /* The junglepath should be independent of classpath,
-         * since the dependencies of the compiler should be isolated from the program
-         */
-        String cliValue = cli.getOptionValue("junglepath");
+    protected static String getJungleClassPath(@NotNull CommandLine cli) {
+        /* The jungle classpath is used to declare dependencies of the program. */
+        String cliValue = cli.getOptionValue("classpath");
         if (cliValue != null) return cliValue;
-        String environmentValue = System.getenv("JUNGLEPATH");
+        String environmentValue = System.getenv("JUNGLE_CLASSPATH");
         if (environmentValue != null) return environmentValue;
-        return DEFAULT_JUNGLEPATH;
+        return DEFAULT_JUNGLE_CLASSPATH;
+    }
+
+    public static String DEFAULT_JUNGLE_TARGETPATH = ".";
+
+    @NotNull
+    protected static String getJungleTargetPath(@NotNull CommandLine cli) {
+        /* The jungle targetpath is used to specify an output path of the program class files. */
+        String cliValue = cli.getOptionValue("targetpath");
+        if (cliValue != null) return cliValue;
+        String environmentValue = System.getenv("JUNGLE_TARGETPATH");
+        if (environmentValue != null) return environmentValue;
+        return DEFAULT_JUNGLE_TARGETPATH;
     }
 
     protected static void helpCommand(@NotNull Options options) {
@@ -120,10 +130,14 @@ public class JungleCLI {
             System.err.println("failed to close ast reader - " + e.getMessage());
             System.exit(1);
         }
-        String outputFileName = cli.getOptionValue("output", "Entrypoint");
-        String junglePath = getJunglePath(cli);
-        Compiler compiler = new Compiler();
-        compiler.compileMain(outputFileName, new MainVisitor(junglePath), ast);
+        String entrypointClassName = cli.getOptionValue("output", "Entrypoint");
+        String jungleClassPath = getJungleClassPath(cli);
+        String jungleTargetPath = getJungleTargetPath(cli);
+        Compiler compiler = new Compiler(
+            jungleClassPath,
+            jungleTargetPath
+        );
+        compiler.compileMain(entrypointClassName, new MainVisitor(compiler), ast);
     }
 
     protected static void runCommand(@NotNull CommandLine cli) {
@@ -137,9 +151,13 @@ public class JungleCLI {
         INode ast = parser.parse();
         // Compile...
         String entrypointClassName = cli.getOptionValue("output", "Entrypoint");
-        String junglePath = getJunglePath(cli);
-        Compiler compiler = new Compiler();
-        compiler.compileMain(entrypointClassName, new MainVisitor(junglePath), ast);
+        String jungleClassPath = getJungleClassPath(cli);
+        String jungleTargetPath = getJungleTargetPath(cli);
+        Compiler compiler = new Compiler(
+            jungleClassPath,
+            jungleTargetPath
+        );
+        compiler.compileMain(entrypointClassName, new MainVisitor(compiler), ast);
         // Run...
         /* Problem:
          * Loading the new class using reflection and invoking main appears to work in some cases.
@@ -152,7 +170,7 @@ public class JungleCLI {
         
         String[] command = {
             "java",
-            "-classpath", getJunglePath(cli),
+            "-classpath", jungleClassPath,
             entrypointClassName
         };
         Process process;
@@ -177,7 +195,8 @@ public class JungleCLI {
         options.addOption("h", "help", false, "Show help options.");
         options.addOption("k", "keywords", false, "Show keywords.");
         options.addOption("o", "output", true, "Output file name.");
-        options.addOption("p", "junglepath", true, "Class path of the jungle program.");
+        options.addOption("c", "classpath", true, "Class path of the program - source of the program class file dependencies.");
+        options.addOption("t", "targetpath", true, "Target path of the program - destination of the program class files generated.");
 
         CommandLineParser cliParser = new DefaultParser();
         CommandLine cli = null;

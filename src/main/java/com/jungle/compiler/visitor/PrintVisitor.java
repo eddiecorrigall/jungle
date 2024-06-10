@@ -2,6 +2,7 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
 import com.jungle.logger.FileLogger;
@@ -12,7 +13,7 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class PrintVisitor extends AbstractClassPathVisitor {
+public class PrintVisitor extends AbstractVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
 
@@ -22,13 +23,13 @@ public class PrintVisitor extends AbstractClassPathVisitor {
     @NotNull
     private ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor(getClassPath());
+            expressionVisitor = new ExpressionVisitor(getCompilerOptions());
         }
         return expressionVisitor;
     }
 
-    public PrintVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public PrintVisitor(@NotNull ICompilerOptions options) {
+        super(options);
     }
 
     @Override

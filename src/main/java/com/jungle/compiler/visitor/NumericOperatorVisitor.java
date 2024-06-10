@@ -2,6 +2,7 @@ package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.compiler.operand.OperandStackType;
 import com.jungle.compiler.symbol.SymbolType;
@@ -18,7 +19,7 @@ import java.util.Set;
 
 import static com.jungle.ast.NodeType.*;
 
-public class NumericOperatorVisitor extends AbstractClassPathVisitor {
+public class NumericOperatorVisitor extends AbstractVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(NumericOperatorVisitor.class.getName());
 
@@ -36,13 +37,13 @@ public class NumericOperatorVisitor extends AbstractClassPathVisitor {
     @NotNull
     public ExpressionVisitor getExpressionVisitor() {
         if (expressionVisitor == null) {
-            expressionVisitor = new ExpressionVisitor(getClassPath());
+            expressionVisitor = new ExpressionVisitor(getCompilerOptions());
         }
         return expressionVisitor;
     }
 
-    public NumericOperatorVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public NumericOperatorVisitor(@NotNull ICompilerOptions options) {
+        super(options);
     }
 
     @Override

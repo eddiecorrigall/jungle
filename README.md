@@ -8,7 +8,7 @@ A toy programming language built for the Java Virtual Machine.
 ## TODO
 
 - casting: integer, float, character
-- compile a runnable class
+- sleep
 
 ## Features
 
@@ -23,8 +23,8 @@ Most features are inherited from JVM.
 This project is for educational purposes (but mostly to have fun). There are a couple of goals for this language.
 
 - JVM programming accessibility for command-line
-- fully transparent compiling process
-- simplified Java language feature
+- Fully transparent compiling process
+- Simplified Java language feature
     - no object oriented programming
     - no `null`
 
@@ -172,16 +172,16 @@ To use this keyword, supply a `*.class` file/binary path (excluding extension).
 Ensure the class for `multitask`:
 - has a default constructor
 - implements the `java.lang.Runnable` interface
-- compiled with the `JUNGLEPATH` environment variable with the classpath
+- compiled with the `JUNGLE_CLASSPATH` environment variable with the classpath
 
 ```shell
 # Compile the Java class used by our program
 javac programs/classes/com/example/MultitaskRunnable.java
 
-# Declare or provide the junglepath before compiling or running,
+# Declare or provide the jungle classpath before compiling or running,
 # so that our Runnable class can be validated during compile and found during runtime.
-# The junglepath is an isolated classpath for the just the program.
-export JUNGLEPATH='.:./programs/classes'
+# The jungle classpath is used to declare dependencies to compile the program and run the program.
+export JUNGLE_CLASSPATH='.:./programs/classes'
 
 # Compile and run the program
 cat programs/multitask.source | jungle run
@@ -191,6 +191,13 @@ Expected output:
 ```
 Hello, world!
 ```
+
+## Environment Variables
+
+| Name                | Default | For Compile | For Runtime | Description |
+|---------------------|---------|-------------|-------------|---|
+| `JUNGLE_CLASSPATH`  | `.`     | yes         | yes         | Similar to the JVM `CLASSPATH`. Used to specify class dependencies required for compiling and runtime of the program. |
+| `JUNGLE_TARGETPATH` | `.`     | yes         | no          | Used to specify a target output folder for classes generated when compiling. |
 
 ## Compile the Compiler
 

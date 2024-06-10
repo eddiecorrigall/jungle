@@ -3,6 +3,7 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
@@ -14,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
+public class BooleanOperatorVisitor extends AbstractVisitor {
     @NotNull
     private static final FileLogger logger = new FileLogger(BooleanOperatorVisitor.class.getName());
 
@@ -43,13 +44,13 @@ public class BooleanOperatorVisitor extends AbstractClassPathVisitor {
     @NotNull
     private IfVisitor getIfVisitor() {
         if (ifVisitor == null) {
-            ifVisitor = new IfVisitor(getClassPath());
+            ifVisitor = new IfVisitor(getCompilerOptions());
         }
         return ifVisitor;
     }
 
-    public BooleanOperatorVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public BooleanOperatorVisitor(@NotNull ICompilerOptions options) {
+        super(options);
     }
 
     @Override

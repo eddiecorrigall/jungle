@@ -1,6 +1,7 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
-public class MainVisitor extends AbstractClassPathVisitor {
+public class MainVisitor extends AbstractVisitor {
 
     @NotNull
     private static final FileLogger logger = new FileLogger(MainVisitor.class.getSimpleName());
@@ -30,7 +31,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private AssignmentVisitor getAssignmentVisitor() {
         if (assignmentVisitor == null) {
-            assignmentVisitor = new AssignmentVisitor(getClassPath());
+            assignmentVisitor = new AssignmentVisitor(getCompilerOptions());
         }
         return assignmentVisitor;
     }
@@ -41,7 +42,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private BlockVisitor getBlockVisitor() {
         if (blockVisitor == null) {
-            blockVisitor = new BlockVisitor(getClassPath());
+            blockVisitor = new BlockVisitor(getCompilerOptions());
         }
         return blockVisitor;
     }
@@ -52,7 +53,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private AssertVisitor getAssertVisitor() {
         if (assertVisitor == null) {
-            assertVisitor = new AssertVisitor(getClassPath());
+            assertVisitor = new AssertVisitor(getCompilerOptions());
         }
         return assertVisitor;
     }
@@ -63,7 +64,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private PrintVisitor getPrintVisitor() {
         if (printVisitor == null) {
-            printVisitor = new PrintVisitor(getClassPath());
+            printVisitor = new PrintVisitor(getCompilerOptions());
         }
         return printVisitor;
     }
@@ -74,7 +75,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private IfVisitor getIfVisitor() {
         if (ifVisitor == null) {
-            ifVisitor = new IfVisitor(getClassPath());
+            ifVisitor = new IfVisitor(getCompilerOptions());
         }
         return ifVisitor;
     }
@@ -85,7 +86,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private LoopVisitor getLoopVisitor() {
         if (loopVisitor == null) {
-            loopVisitor = new LoopVisitor(getClassPath());
+            loopVisitor = new LoopVisitor(getCompilerOptions());
         }
         return loopVisitor;
     }
@@ -96,7 +97,7 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private MultitaskVisitor getMultitaskVisitor() {
         if (multitaskVisitor == null) {
-            multitaskVisitor = new MultitaskVisitor(getClassPath());
+            multitaskVisitor = new MultitaskVisitor(getCompilerOptions());
         }
         return multitaskVisitor;
     }
@@ -107,15 +108,15 @@ public class MainVisitor extends AbstractClassPathVisitor {
     @NotNull
     private SequenceVisitor getSequenceVisitor() {
         if (sequenceVisitor == null) {
-            sequenceVisitor = new SequenceVisitor(getClassPath());
+            sequenceVisitor = new SequenceVisitor(getCompilerOptions());
         }
         return sequenceVisitor;
     }
 
     // endregion
 
-    public MainVisitor(@NotNull final String classPath) {
-        super(classPath);
+    public MainVisitor(@NotNull final ICompilerOptions options) {
+        super(options);
     }
 
     public boolean canVisit(@NotNull INode ast) {

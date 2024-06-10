@@ -6,7 +6,6 @@ import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 public class IdentifierVisitor implements IVisitor {

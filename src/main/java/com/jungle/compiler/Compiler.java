@@ -4,6 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.error.CompilerError;
 import com.jungle.logger.FileLogger;
 import com.jungle.compiler.visitor.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
@@ -17,9 +18,42 @@ import java.nio.file.Files;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class Compiler {
+public class Compiler implements ICompilerOptions {
     @NotNull
     private static final FileLogger logger = new FileLogger(Compiler.class.getSimpleName());
+
+    @NotNull
+    private final String classPath;
+
+    @Override
+    @NotNull
+    public String getClassPath() {
+        return classPath;
+    }
+
+    @NotNull
+    private final String targetPath;
+
+    @Override
+    @NotNull
+    public String getTargetPath() {
+        return targetPath;
+    }
+
+    public Compiler(
+        @NotNull String classPath,
+        @NotNull String targetPath
+    ) {
+        super();
+        this.classPath = classPath;
+        this.targetPath = targetPath;
+    }
+
+    public Compiler(@NotNull ICompilerOptions options) {
+        super();
+        this.classPath = options.getClassPath();
+        this.targetPath = options.getTargetPath();
+    }
 
     // region Helpers
 
@@ -28,21 +62,21 @@ public class Compiler {
         return className.replace('.', '/');
     }
 
-    public static void writeClassFile(@NotNull String fullClassName, byte[] classData) {
+    protected void writeClassFile(@NotNull String className, byte[] classData) {
         // TODO: new class files should be placed in a target directory
         // ...
-        String classFileString = fullClassName.replace('.', '/') + ".class";
-        logger.debug(String.format("write class file - %s", classFileString));
+        String classFileString = getTargetPath() + '/' + className.replace('.', '/') + ".class";
         File classFile = new File(classFileString);
+        logger.debug(String.format("write class file - %s", classFile.toString()));
+        // Create necessary parent directories for class file
         File classParentFile = classFile.getParentFile();
         if (classParentFile != null) {
-            // Ensure folder path exists
-            classParentFile.mkdir();
+            classParentFile.mkdirs();
         }
         try {
             boolean hasCreatedNewFile = classFile.createNewFile();
             if (!hasCreatedNewFile) {
-                logger.debug(String.format("class already exists - %s", fullClassName));
+                logger.debug(String.format("class already exists - %s", className));
             }
         } catch (IOException e) {
             String message = "failed to create class file";
