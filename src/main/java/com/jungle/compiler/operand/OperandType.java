@@ -1,18 +1,79 @@
-package com.jungle.compiler.symbol;
+package com.jungle.compiler.operand;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 
-public enum SymbolType {
+/**
+ * Types that exist on the operand stack.
+ * 
+ * Used to determine the data type currently on the stack to validate and
+ * make decisions when program is compiled.
+ * 
+ * https://docs.oracle.com/javase/specs/jvms/se6/html/Overview.doc.html
+ */
+
+public enum OperandType {
+    ADDRESS, // return address
+    INDEX,
+
+    // Reference types...
+    ARRAY,
     OBJECT,
-    // Primitives...
+
     BOOLEAN,
+    CHAR,
+
+    // Integral types...
     BYTE,
-    CHARACTER,
     SHORT,
     INTEGER,
     LONG,
-    FLOAT,
-    DOUBLE;
+
+    // Floating-point types...
+    DOUBLE,
+    FLOAT;
+
+    public int getConvertOpcode(@NotNull OperandType that) {
+        switch (this) {
+            case INTEGER: {
+                switch (that) {
+                    case CHAR: return Opcodes.I2C;
+                    case BYTE: return Opcodes.I2B;
+                    case SHORT: return Opcodes.I2S;
+                    case LONG: return Opcodes.I2L;
+                    case FLOAT: return Opcodes.I2F;
+                    case DOUBLE: return Opcodes.I2D;
+                    default: break;
+                }
+            }
+            case LONG: {
+                switch (that) {
+                    case INTEGER: return Opcodes.L2I;
+                    case FLOAT: return Opcodes.L2F;
+                    case DOUBLE: return Opcodes.L2D;
+                    default: break;
+                }
+            }
+            case FLOAT: {
+                switch (that) {
+                    case INTEGER: return Opcodes.F2I;
+                    case LONG: return Opcodes.F2L;
+                    case DOUBLE: return Opcodes.F2D;
+                    default: break;
+                }
+            }
+            case DOUBLE: {
+                switch (that) {
+                    case INTEGER: return Opcodes.D2I;
+                    case LONG: return Opcodes.D2L;
+                    case FLOAT: return Opcodes.D2F;
+                    default: break;
+                }
+            }
+            default: break;
+        }
+        throw new Error("no convert opcode from " + this + " to " + that);
+    }
 
     public int getAddOpcode() {
         switch (this) {
@@ -61,7 +122,7 @@ public enum SymbolType {
 
     public int getStoreOpcode() {
         switch (this) {
-            case CHARACTER: return Opcodes.ISTORE;
+            case CHAR: return Opcodes.ISTORE;
             case INTEGER: return Opcodes.ISTORE;
             case FLOAT: return Opcodes.FSTORE;
             case DOUBLE: return Opcodes.DSTORE;
@@ -72,7 +133,7 @@ public enum SymbolType {
 
     public int getLoadOpcode() {
         switch (this) {
-            case CHARACTER: return Opcodes.ILOAD;
+            case CHAR: return Opcodes.ILOAD;
             case INTEGER: return Opcodes.ILOAD;
             case FLOAT: return Opcodes.FLOAD;
             case DOUBLE: return Opcodes.DLOAD;

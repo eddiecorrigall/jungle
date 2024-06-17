@@ -11,7 +11,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandType;
 
 public class SleepVisitor extends AbstractVisitor {
 
@@ -47,7 +47,7 @@ public class SleepVisitor extends AbstractVisitor {
         getExpressionVisitor().visit(mv, ast.getLeft(), context);
 
         // verify that the expression was an integer type
-        if (context.peek() != OperandStackType.INTEGER) {
+        if (context.peek() != OperandType.INTEGER) {
             throw new Error("sleep expression expected to be type integer");
         }
 

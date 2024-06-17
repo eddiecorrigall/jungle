@@ -4,7 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +80,7 @@ public class LoopVisitor extends AbstractVisitor {
         // loop-condition
         mv.visitLabel(loopLabel);
         getExpressionVisitor().visit(mv, ast.getLeft(), context);
-        if (context.peek() != OperandStackType.INTEGER) {
+        if (context.peek() != OperandType.INTEGER) {
             // TODO: shouldn't this be testing for boolean?
             throw new Error("loop condition/expression expected to be type integer");
         }

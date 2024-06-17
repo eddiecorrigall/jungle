@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -511,6 +512,22 @@ public class ParserTest {
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_CHARACTER, ast.getType());
     assertEquals("X", ast.getRawValue());
+  }
+
+  @Test
+  public void testParseTextLiteral_singleCharacterEscaped() {
+    List<IToken> tokenList = Arrays.asList(
+      new Token(TokenType.TEXT).withValue("\\n"),
+      new Token(TokenType.TERMINAL)
+    );
+    Parser parser = new Parser(tokenList);
+    parser.nextToken();
+
+    INode ast = parser.parseTextLiteral();
+
+    assertNotNull(ast);
+    assertEquals(NodeType.LITERAL_CHARACTER, ast.getType());
+    assertEquals("\n", ast.getRawValue());
   }
 
   @Test

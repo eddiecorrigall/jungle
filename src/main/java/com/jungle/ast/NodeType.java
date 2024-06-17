@@ -13,8 +13,9 @@ public enum NodeType {
   LITERAL_STRING,
 
   CAST_INTEGER,
+  CAST_LONG,
   CAST_FLOAT,
-  CAST_CHARACTER,
+  CAST_DOUBLE,
 
   // region Binary Operators - math
   OPERATOR_ADD,

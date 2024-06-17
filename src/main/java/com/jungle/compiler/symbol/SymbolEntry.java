@@ -2,16 +2,20 @@ package com.jungle.compiler.symbol;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.jungle.compiler.operand.OperandType;
 
 public class SymbolEntry {
     // identifier type
-    private final SymbolType type;
+    @NotNull
+    private final OperandType type;
 
     // index of the local variable array
     private final int index;
 
-    public SymbolEntry(int index, SymbolType type) {
+    public SymbolEntry(int index, @NotNull OperandType type) {
         super();
         this.index = index;
         this.type = type;
@@ -21,7 +25,8 @@ public class SymbolEntry {
         return index;
     }
 
-    public SymbolType getType() {
+    @NotNull
+    public OperandType getType() {
         return type;
     }
 

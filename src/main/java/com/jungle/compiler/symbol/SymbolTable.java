@@ -3,6 +3,8 @@ package com.jungle.compiler.symbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.jungle.compiler.operand.OperandType;
+
 import java.util.*;
 
 /* The purpose of this SymbolTable class is to map an identifier to a local variable array index
@@ -43,7 +45,7 @@ public class SymbolTable {
         return table.get(name);
     }
 
-    public SymbolEntry set(@NotNull String name, @NotNull SymbolType type) {
+    public SymbolEntry set(@NotNull String name, @NotNull OperandType type) {
         SymbolEntry newEntry = new SymbolEntry(getCurrentFrame().size(), type);
         getCurrentFrame().put(name, newEntry);
         return newEntry;

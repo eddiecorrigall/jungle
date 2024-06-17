@@ -3,7 +3,7 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -53,28 +53,28 @@ public class LiteralVisitor implements IVisitor {
         }
 
         Object objectValue;
-        OperandStackType type;
+        OperandType type;
 
         switch (ast.getType()) {
             case LITERAL_BOOLEAN: {
                 objectValue = ast.getBooleanValue();
-                type = OperandStackType.BOOLEAN;
+                type = OperandType.BOOLEAN;
             } break;
             case LITERAL_CHARACTER: {
                 objectValue = ast.getCharacterValue();
-                type = OperandStackType.CHARACTER;
+                type = OperandType.CHAR;
             } break;
             case LITERAL_INTEGER: {
                 objectValue = ast.getIntegerValue();
-                type = OperandStackType.INTEGER;
+                type = OperandType.INTEGER;
             } break;
             case LITERAL_FLOAT: {
                 objectValue = ast.getFloatValue();
-                type = OperandStackType.FLOAT;
+                type = OperandType.FLOAT;
             } break;
             case LITERAL_STRING: {
                 objectValue = ast.getStringValue();
-                type = OperandStackType.REFERENCE_OBJECT;
+                type = OperandType.OBJECT;
             } break;
             default: throw new Error("unhandled literal");
         }

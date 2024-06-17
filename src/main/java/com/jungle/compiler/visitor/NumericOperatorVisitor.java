@@ -4,8 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
-import com.jungle.compiler.symbol.SymbolType;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +50,21 @@ public class NumericOperatorVisitor extends AbstractVisitor {
         return NUMERIC_OPERATORS.contains(node.getType());
     }
 
+    private OperandType convert(
+        @NotNull MethodVisitor mv,
+        @NotNull INode ast,
+        @NotNull OperandStackContext context,
+        @NotNull OperandType fromType,
+        @NotNull OperandType toType
+    ) {
+        if (fromType == OperandType.INTEGER  && toType == OperandType.CHAR) {
+            mv.visitInsn(Opcodes.I2C);
+            context.push(OperandType.CHAR); // final type
+            return OperandType.INTEGER; // computation type
+        }
+        throw new Error("conversion not possible");
+    }
+
     @Override
     public void visit(
         @NotNull MethodVisitor mv,
@@ -74,42 +88,48 @@ public class NumericOperatorVisitor extends AbstractVisitor {
         // prepare for operation...
 
         getExpressionVisitor().visit(mv, ast.getLeft(), context);
-        OperandStackType leftExpressionType = context.pop();
+        OperandType leftExpressionType = context.pop();
 
         getExpressionVisitor().visit(mv, ast.getRight(), context);
-        OperandStackType rightExpressionType = context.pop();
+        OperandType rightExpressionType = context.pop();
+
+        logger.debug("left is " + ast.getLeft());
+        logger.debug("right is " + ast.getRight());
 
         // prepare for operation - cast types...
 
-        OperandStackType operandStackType;
+        OperandType operandType;
 
-        if (leftExpressionType == rightExpressionType) {
-            operandStackType = leftExpressionType;
-            context.push(operandStackType);
-        } else if (OperandStackType.INTEGER == leftExpressionType && OperandStackType.CHARACTER == rightExpressionType) {
-            mv.visitInsn(Opcodes.SWAP); // move integer (left) to top
-            mv.visitInsn(Opcodes.I2C); // convert integer to character
-            mv.visitInsn(Opcodes.SWAP); // restore
-            operandStackType = OperandStackType.INTEGER; // operation
-            context.push(OperandStackType.CHARACTER); // final type
-        } else if (OperandStackType.CHARACTER == leftExpressionType && OperandStackType.INTEGER == rightExpressionType) {
-            mv.visitInsn(Opcodes.I2C); // convert integer (right)
-            operandStackType = OperandStackType.INTEGER; // operation
-            context.push(OperandStackType.CHARACTER); // final type
+        /* TODO:
+         * This conversion may work for the mandelbrot program,
+         * but what about scenarios where the programmer wants to preserve accuracy?
+         * 
+         * We want explicit conversions, right?
+         */
+        if (leftExpressionType.equals(rightExpressionType)) {
+            operandType = leftExpressionType;
+            context.push(operandType);
+        } else if (leftExpressionType == OperandType.INTEGER && rightExpressionType == OperandType.CHAR) {
+            // Note: left ast is previous operand stack item
+            mv.visitInsn(Opcodes.SWAP);
+            operandType = convert(mv, ast, context, OperandType.INTEGER, OperandType.CHAR);
+            // TODO: can swap restore be conditional based on operator?
+            mv.visitInsn(Opcodes.SWAP); // restore order
+        } else if (leftExpressionType == OperandType.CHAR && rightExpressionType == OperandType.INTEGER) {
+            // Note: right ast is next operand stack item
+            operandType = convert(mv, ast, context, OperandType.INTEGER, OperandType.CHAR);
         } else {
             throw new Error("binary operator left or right expression requires type cast " + ast);
         }
 
         // perform operation...
 
-        SymbolType symbolType = operandStackType.getSymbolType();
-
         switch (ast.getType()) {
-            case OPERATOR_ADD: mv.visitInsn(symbolType.getAddOpcode()); break;
-            case OPERATOR_SUBTRACT: mv.visitInsn(symbolType.getSubtractOpcode()); break; // order matters
-            case OPERATOR_MULTIPLY: mv.visitInsn(symbolType.getMultiplyOpcode()); break;
-            case OPERATOR_DIVIDE: mv.visitInsn(symbolType.getDivideOpcode()); break; // order matters
-            case OPERATOR_MODULO: mv.visitInsn(symbolType.getModuloOpcode()); break; // order matters
+            case OPERATOR_ADD: mv.visitInsn(operandType.getAddOpcode()); break;
+            case OPERATOR_SUBTRACT: mv.visitInsn(operandType.getSubtractOpcode()); break; // order matters
+            case OPERATOR_MULTIPLY: mv.visitInsn(operandType.getMultiplyOpcode()); break;
+            case OPERATOR_DIVIDE: mv.visitInsn(operandType.getDivideOpcode()); break; // order matters
+            case OPERATOR_MODULO: mv.visitInsn(operandType.getModuloOpcode()); break; // order matters
             default: throw new Error("unhandled binary operator " + ast);
         }
     }

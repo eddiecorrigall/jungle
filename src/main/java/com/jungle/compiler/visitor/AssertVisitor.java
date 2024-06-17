@@ -4,7 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +63,7 @@ public class AssertVisitor extends AbstractVisitor {
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (context.peek() != OperandStackType.INTEGER) {
+        if (context.peek() != OperandType.INTEGER) {
             throw new Error("assert condition/expression expected to be type integer");
         }
 

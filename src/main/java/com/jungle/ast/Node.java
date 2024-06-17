@@ -3,7 +3,6 @@ package com.jungle.ast;
 import com.jungle.error.LoadError;
 import com.jungle.error.SaveError;
 import com.jungle.logger.FileLogger;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -62,13 +61,11 @@ public class Node implements INode {
   @Override
   @NotNull
   public Character getCharacterValue() {
-    if (getRawValue() == null) {
-      throw new Error("failed to parse value as character - value is null");
-    }
-    if (getRawValue().length() != 1) {
+    String stringValue = getStringValue();
+    if (stringValue.length() != 1) {
       throw new Error("failed to parse character as integer");
     }
-    return StringEscapeUtils.unescapeJava(getRawValue()).charAt(0);
+    return stringValue.charAt(0);
   }
 
   @Override
@@ -103,7 +100,7 @@ public class Node implements INode {
     if (getRawValue() == null) {
       throw new Error("failed to parse value as string - value is null");
     }
-    return StringEscapeUtils.unescapeJava(getRawValue());
+    return getRawValue();
   }
 
   // endregion

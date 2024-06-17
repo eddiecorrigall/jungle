@@ -4,7 +4,7 @@ import com.jungle.ast.INode;
 import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
-import com.jungle.compiler.operand.OperandStackType;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
@@ -62,15 +62,15 @@ public class PrintVisitor extends AbstractVisitor {
 
         // Prints what ever value is on the stack
 
-        OperandStackType operandStackType = context.pop();
+        OperandType operandType = context.pop();
         String descriptor;
-        switch (operandStackType) {
+        switch (operandType) {
             case BOOLEAN: descriptor = "(B)V"; break;
-            case CHARACTER: descriptor = "(C)V"; break;
+            case CHAR: descriptor = "(C)V"; break;
             case INTEGER: descriptor = "(I)V"; break;
             case FLOAT: descriptor = "(F)V"; break;
-            case REFERENCE_OBJECT: descriptor = "(Ljava/lang/Object;)V"; break;
-            default: throw new Error("cannot determine print descriptor from operand stack type " + operandStackType);
+            case OBJECT: descriptor = "(Ljava/lang/Object;)V"; break;
+            default: throw new Error("cannot determine print descriptor from operand stack type " + operandType);
         }
 
         // System.out

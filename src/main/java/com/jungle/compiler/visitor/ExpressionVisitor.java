@@ -47,14 +47,14 @@ public class ExpressionVisitor extends AbstractVisitor {
     }
 
     @Nullable
-    private CastIntegerVisitor castIntegerVisitor;
+    private CastVisitor castVisitor;
 
     @NotNull
-    private CastIntegerVisitor getCastIntegerVisitor() {
-        if (castIntegerVisitor == null) {
-            castIntegerVisitor = new CastIntegerVisitor(getCompilerOptions());
+    private CastVisitor getCastVisitor() {
+        if (castVisitor == null) {
+            castVisitor = new CastVisitor(getCompilerOptions());
         }
-        return castIntegerVisitor;
+        return castVisitor;
     }
 
     @Nullable BooleanOperatorVisitor booleanOperatorVisitor;
@@ -103,8 +103,8 @@ public class ExpressionVisitor extends AbstractVisitor {
             return;
         }
 
-        if (getCastIntegerVisitor().canVisit(ast)) {
-            getCastIntegerVisitor().visit(mv, ast, context);
+        if (getCastVisitor().canVisit(ast)) {
+            getCastVisitor().visit(mv, ast, context);
             return;
         }
 

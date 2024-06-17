@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.common.StringUtils;
 import com.jungle.token.TokenType;
 
 import java.util.function.Supplier;
@@ -153,6 +154,7 @@ public class Parser extends AbstractParser {
     if (textValue == null) {
       throw newError("text token missing value");
     }
+    textValue = StringUtils.unescapeString(textValue);
     // Note: a character literal cannot be empty, but a string literal can be empty
     boolean isSingleCharacter = textValue.length() == 1;
     NodeType type = isSingleCharacter
