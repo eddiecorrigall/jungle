@@ -101,11 +101,11 @@ public class Parser extends AbstractParser {
      *                    ;
      */
     consumeWhitespace();
-    if (accepts(TokenType.SYMBOL)) {
-      return parseIdentifier();
-    }
     if (accepts(TokenType.NUMBER)) {
       return parseNumber();
+    }
+    if (accepts(TokenType.SYMBOL)) {
+      return parseIdentifier();
     }
     if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
       return parseParenthesis(this::parseNumberExpression);
@@ -277,7 +277,7 @@ public class Parser extends AbstractParser {
      *             | "(" expression ")"
      *             | "<" keyword ">" expression
      *             | boolean_expression
-     *             | numeric_expression
+     *             | number_expression
      *             | text_expression
      *             ;
      */
