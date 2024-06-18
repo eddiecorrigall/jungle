@@ -1,20 +1,33 @@
 package com.jungle.parser;
 
 import com.jungle.token.IToken;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.common.MapBuilder;
 import com.jungle.common.StringUtils;
 import com.jungle.token.TokenType;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.jungle.scanner.Scanner.*;
 
 public class Parser extends AbstractParser {
+
+  private static Map<String, NodeType> CONVERT_NODE_TYPE_MAP = new MapBuilder<String, NodeType>()
+    .withEntry(KEYWORD_CONVERT_CHAR, NodeType.CAST_CHAR)
+    .withEntry(KEYWORD_CONVERT_BYTE, NodeType.CAST_BYTE)
+    .withEntry(KEYWORD_CONVERT_SHORT, NodeType.CAST_SHORT)
+    .withEntry(KEYWORD_CONVERT_INTEGER, NodeType.CAST_INTEGER)
+    .withEntry(KEYWORD_CONVERT_LONG, NodeType.CAST_LONG)
+    .withEntry(KEYWORD_CONVERT_FLOAT, NodeType.CAST_FLOAT)
+    .withEntry(KEYWORD_CONVERT_DOUBLE, NodeType.CAST_DOUBLE)
+    .build();
 
   public Parser(@NotNull Iterable<IToken> tokenIterable) {
     super(tokenIterable);
@@ -136,11 +149,11 @@ public class Parser extends AbstractParser {
 
   @NotNull
   protected INode parseStringLiteral() {
-    String textValue = expect(TokenType.TEXT);
-    if (textValue == null) {
-      throw newError("text token missing value");
+    INode textNode = parseTextLiteral();
+    if (textNode.getType() != NodeType.LITERAL_STRING) {
+      throw newError("expected string literal");
     }
-    return new Node(NodeType.LITERAL_STRING).withRawValue(textValue);
+    return textNode;
   }
 
   @Nullable
@@ -262,6 +275,7 @@ public class Parser extends AbstractParser {
     /*
      * expression := identifier
      *             | "(" expression ")"
+     *             | "<" keyword ">" expression
      *             | boolean_expression
      *             | numeric_expression
      *             | text_expression
@@ -273,6 +287,16 @@ public class Parser extends AbstractParser {
     }
     if (accepts(TokenType.BRACKET_ROUND_OPEN)) {
       return parseParenthesis(this::parseExpression);
+    }
+    if (accepts(TokenType.BRACKET_ANGLE_OPEN)) {
+      expect(TokenType.BRACKET_ANGLE_OPEN);
+      String convertKeyword = expect(TokenType.KEYWORD);
+      NodeType convertNodeType = CONVERT_NODE_TYPE_MAP.get(convertKeyword);
+      if (convertNodeType == null) {
+        throw newError("convert keyword not recognized - " + convertKeyword);
+      }
+      expect(TokenType.BRACKET_ANGLE_CLOSE);
+      return new Node(convertNodeType).withLeft(parseExpression());
     }
     boolean isBooleanExpression = acceptKeywords(
             KEYWORD_AND,
@@ -287,10 +311,6 @@ public class Parser extends AbstractParser {
     if (isBooleanExpression) {
       return parseBooleanExpression();
     }
-    boolean isTextExpression = accepts(TokenType.TEXT);
-    if (isTextExpression) {
-      return parseTextExpression();
-    }
     boolean isNumberExpression = accepts(
             TokenType.NUMBER,
             TokenType.PLUS,
@@ -301,6 +321,10 @@ public class Parser extends AbstractParser {
     );
     if (isNumberExpression) {
       return parseNumberExpression();
+    }
+    boolean isTextExpression = accepts(TokenType.TEXT);
+    if (isTextExpression) {
+      return parseTextExpression();
     }
     throw newError("not an expression");
   }

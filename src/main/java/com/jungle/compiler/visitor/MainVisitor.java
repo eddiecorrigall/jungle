@@ -124,6 +124,16 @@ public class MainVisitor extends AbstractVisitor {
         return sequenceVisitor;
     }
 
+    @Nullable
+    private CastVisitor castVisitor;
+
+    @Nullable CastVisitor getCastVisitor() {
+        if (castVisitor == null) {
+            castVisitor = new CastVisitor(getCompilerOptions());
+        }
+        return castVisitor;
+    }
+
     // endregion
 
     public MainVisitor(@NotNull final ICompilerOptions options) {
@@ -193,6 +203,11 @@ public class MainVisitor extends AbstractVisitor {
 
         if (getSleepVisitor().canVisit(ast)) {
             getSleepVisitor().visit(mv, ast, context);
+            return;
+        }
+
+        if (getCastVisitor().canVisit(ast)) {
+            getCastVisitor().visit(mv, ast, context);
             return;
         }
 

@@ -101,8 +101,8 @@ public class IfVisitor extends AbstractVisitor {
         }
 
         getExpressionVisitor().visit(mv, conditionNode, context);
-        if (context.peek() != OperandType.INTEGER) {
-            throw new Error("if condition/expression expected to be type integer");
+        if (!OperandType.INTEGER_OPERATION_TYPES.contains(context.peek())) {
+            throw new Error("if condition/expression expected to be within the integer category");
         }
 
         INode bodyNode = ast.getRight();

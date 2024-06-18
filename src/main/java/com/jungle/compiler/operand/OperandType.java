@@ -1,7 +1,11 @@
 package com.jungle.compiler.operand;
 
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
+
+import com.jungle.common.SetUtils;
 
 /**
  * Types that exist on the operand stack.
@@ -32,6 +36,17 @@ public enum OperandType {
     // Floating-point types...
     DOUBLE,
     FLOAT;
+
+    @NotNull
+    public static final Set<OperandType> INTEGER_OPERATION_TYPES = SetUtils.newSet(
+        OperandType.CHAR,
+        OperandType.BYTE,
+        OperandType.SHORT,
+        OperandType.INTEGER,
+        OperandType.LONG,
+        OperandType.FLOAT,
+        OperandType.DOUBLE
+    );
 
     public int getConvertOpcode(@NotNull OperandType that) {
         switch (this) {

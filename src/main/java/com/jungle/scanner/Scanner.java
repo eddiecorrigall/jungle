@@ -26,6 +26,13 @@ public class Scanner extends AbstractScanner {
   public static final String KEYWORD_LESS_THAN = "lessThan";
   public static final String KEYWORD_TRUE = "true";
   public static final String KEYWORD_FALSE = "false";
+  public static final String KEYWORD_CONVERT_CHAR = "unicode";
+  public static final String KEYWORD_CONVERT_BYTE = "i8";
+  public static final String KEYWORD_CONVERT_SHORT = "i16";
+  public static final String KEYWORD_CONVERT_INTEGER = "i32";
+  public static final String KEYWORD_CONVERT_LONG = "i64";
+  public static final String KEYWORD_CONVERT_FLOAT = "f32";
+  public static final String KEYWORD_CONVERT_DOUBLE = "f64";
 
   // TODO: keyword "in" - if x in 1...3 { }
 
@@ -44,7 +51,14 @@ public class Scanner extends AbstractScanner {
           KEYWORD_GREATER_THAN,
           KEYWORD_LESS_THAN,
           KEYWORD_TRUE,
-          KEYWORD_FALSE
+          KEYWORD_FALSE,
+          KEYWORD_CONVERT_CHAR,
+          KEYWORD_CONVERT_BYTE,
+          KEYWORD_CONVERT_SHORT,
+          KEYWORD_CONVERT_INTEGER,
+          KEYWORD_CONVERT_LONG,
+          KEYWORD_CONVERT_FLOAT,
+          KEYWORD_CONVERT_DOUBLE
   );
 
   @NotNull
@@ -76,6 +90,11 @@ public class Scanner extends AbstractScanner {
   @NotNull
   protected String consumeAlphabetic() {
     return consumeUntil((c) -> !isAlphabetic(c));
+  }
+
+  @NotNull
+  protected String consumeAlphaNumeric() {
+    return consumeUntil((c) -> !(isAlphabetic(c) || isDigit(c)));
   }
 
   @NotNull
@@ -186,7 +205,7 @@ public class Scanner extends AbstractScanner {
           String s = c + consumeNumeric();
           token = new Token(TokenType.NUMBER).withValue(s);
         } else if (isAlphabetic(c)) {
-          String s = c + consumeAlphabetic();
+          String s = c + consumeAlphaNumeric();
           if (isKeyword(s)) {
             token = new Token(TokenType.KEYWORD).withValue(s);
           } else {

@@ -1,0 +1,7 @@
+c = 65
+
+print c  # expected output is '65'
+assert equals c 65
+
+print <unicode> c  # expected output is 'A'
+assert equals c 'A'
