@@ -7,8 +7,11 @@ A toy programming language built for the Java Virtual Machine.
 
 ## TODO
 
-- casting: integer, float, character
-- sleep
+- Read from standard input
+- Accept command-line arguments
+- String parsing
+- Invoke static method in class file
+- Data types: Struct, Set, Map, List, Array
 
 ## Features
 
