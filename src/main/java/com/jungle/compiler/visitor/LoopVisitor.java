@@ -80,8 +80,7 @@ public class LoopVisitor extends AbstractVisitor {
         // loop-condition
         mv.visitLabel(loopLabel);
         getExpressionVisitor().visit(mv, ast.getLeft(), context);
-        if (context.peek() != OperandType.INTEGER) {
-            // TODO: shouldn't this be testing for boolean?
+        if (!OperandType.INTEGER_COMPUTATIONAL_TYPES.contains(context.peek())) {
             throw new Error("loop condition/expression expected to be type integer");
         }
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
