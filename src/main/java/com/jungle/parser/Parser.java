@@ -167,9 +167,8 @@ public class Parser extends AbstractParser {
     if (textValue == null) {
       throw newError("text token missing value");
     }
-    textValue = StringUtils.unescapeString(textValue);
     // Note: a character literal cannot be empty, but a string literal can be empty
-    boolean isSingleCharacter = textValue.length() == 1;
+    boolean isSingleCharacter = StringUtils.unescapeString(textValue).length() == 1;
     NodeType type = isSingleCharacter
             ? NodeType.LITERAL_CHARACTER
             : NodeType.LITERAL_STRING;

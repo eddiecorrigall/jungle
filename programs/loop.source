@@ -1,7 +1,7 @@
 i = 3
 loop (greaterThan i 0) {
   print(i)
-  print('\n')
+  print('...\n')
   sleep 1000
   i = - i 1
 }

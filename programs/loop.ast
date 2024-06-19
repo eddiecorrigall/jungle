@@ -1,20 +1,28 @@
 SEQUENCE
-  ASSIGN
-    IDENTIFIER	i
-    LITERAL_INTEGER	3
   SEQUENCE
-    LOOP
-      OPERATOR_LESS_THAN
-        LITERAL_INTEGER	0
+    SEQUENCE
+      ASSIGN
         IDENTIFIER	i
+        LITERAL_INTEGER	3
+      ;
+    LOOP
+      OPERATOR_GREATER_THAN
+        IDENTIFIER	i
+        LITERAL_INTEGER	0
       BLOCK
         SEQUENCE
           SEQUENCE
-            PRINT
-              IDENTIFIER	i
-              ;
-            PRINT
-              LITERAL_STRING	\n
+            SEQUENCE
+              SEQUENCE
+                PRINT
+                  IDENTIFIER	i
+                  ;
+                ;
+              PRINT
+                LITERAL_STRING	...\n
+                ;
+            SLEEP
+              LITERAL_INTEGER	1000
               ;
           ASSIGN
             IDENTIFIER	i
@@ -22,6 +30,6 @@ SEQUENCE
               IDENTIFIER	i
               LITERAL_INTEGER	1
         ;
-    PRINT
-      LITERAL_STRING	Blast off!\n
-      ;
+  PRINT
+    LITERAL_STRING	Blast off!\n
+    ;

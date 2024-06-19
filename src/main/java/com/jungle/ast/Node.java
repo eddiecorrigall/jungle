@@ -1,5 +1,6 @@
 package com.jungle.ast;
 
+import com.jungle.common.StringUtils;
 import com.jungle.error.LoadError;
 import com.jungle.error.SaveError;
 import com.jungle.logger.FileLogger;
@@ -103,7 +104,7 @@ public class Node implements INode {
     if (getRawValue() == null) {
       throw new Error("failed to parse value as string - value is null");
     }
-    return getRawValue();
+    return StringUtils.unescapeString(getRawValue());
   }
 
   // endregion

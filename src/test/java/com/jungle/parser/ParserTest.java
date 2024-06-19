@@ -527,7 +527,9 @@ public class ParserTest {
 
     assertNotNull(ast);
     assertEquals(NodeType.LITERAL_CHARACTER, ast.getType());
-    assertEquals("\n", ast.getRawValue());
+    assertEquals("\\n", ast.getRawValue());
+    assertEquals("\n", ast.getStringValue());
+    assertEquals(new Character('\n'), ast.getCharacterValue());
   }
 
   @Test
