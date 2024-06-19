@@ -20,6 +20,9 @@ public enum NodeType {
   CAST_FLOAT,
   CAST_DOUBLE,
 
+  // No operation
+  NOOP,
+
   // region Binary Operators - math
   OPERATOR_ADD,
   OPERATOR_SUBTRACT,

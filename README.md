@@ -9,7 +9,7 @@ A toy programming language built for the Java Virtual Machine.
 
 - Read from standard input
 - Accept command-line arguments
-- String parsing
+- String parsing and manipulation
 - Invoke static method in class file
 - Data types: Struct, Set, Map, List, Array
 

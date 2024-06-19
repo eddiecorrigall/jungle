@@ -1,0 +1,18 @@
+# shallow comparison `int String::hashCode()`
+
+assert (equals "" 0)
+assert (equals "A" 65)
+assert (equals "shallow" 2054046228)
+assert (equals 2054046228 "shallow")
+
+# deep comparison using `boolean String::equals(Object)`
+
+assert (equals
+    "abc123"
+    "abc123"
+)
+
+assert (not equals
+    "0-42L"
+    "0-43-"
+)

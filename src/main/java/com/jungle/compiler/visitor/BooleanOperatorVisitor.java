@@ -3,16 +3,17 @@ package com.jungle.compiler.visitor;
 import com.jungle.ast.INode;
 import com.jungle.ast.Node;
 import com.jungle.ast.NodeType;
+import com.jungle.common.SetUtils;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
+import com.jungle.compiler.operand.OperandType;
 import com.jungle.logger.FileLogger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class BooleanOperatorVisitor extends AbstractVisitor {
@@ -26,7 +27,7 @@ public class BooleanOperatorVisitor extends AbstractVisitor {
     private static final INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_BOOLEAN).withRawValue("false");
 
     @NotNull
-    private static final Set<NodeType> BOOLEAN_OPERATORS = new HashSet<>(Arrays.asList(
+    private static final Set<NodeType> BOOLEAN_OPERATORS = SetUtils.newSet(
             // unary
             NodeType.OPERATOR_NOT,
             // binary
@@ -36,7 +37,7 @@ public class BooleanOperatorVisitor extends AbstractVisitor {
             NodeType.OPERATOR_EQUAL,
             NodeType.OPERATOR_LESS_THAN,
             NodeType.OPERATOR_GREATER_THAN
-    ));
+    );
 
     @Nullable
     private IfVisitor ifVisitor;
@@ -47,6 +48,17 @@ public class BooleanOperatorVisitor extends AbstractVisitor {
             ifVisitor = new IfVisitor(getCompilerOptions());
         }
         return ifVisitor;
+    }
+
+    @Nullable
+    private ExpressionVisitor expressionVisitor;
+
+    @NotNull
+    private ExpressionVisitor getExpressionVisitor() {
+        if (expressionVisitor == null) {
+            expressionVisitor = new ExpressionVisitor(getCompilerOptions());
+        }
+        return expressionVisitor;
     }
 
     public BooleanOperatorVisitor(@NotNull ICompilerOptions options) {
@@ -131,19 +143,56 @@ public class BooleanOperatorVisitor extends AbstractVisitor {
                  * if (result == 0) return true
                  * else return false
                  */
+
+                /*
+                 * An equals boolean operator should be able to handle objects and primitives.
+                 * The operator should also be able to handle shallow and deep comparisons of types.
+                 * 
+                 * When the equals operator is visited, then we need to determine the expected operand type.
+                 * However, this requires use to visit the left and right expressions.
+                 * If the types are both objects, then we can compare the objects using `boolean Object::equals(Object)`.
+                 * Otherwise, we need to evaluate a new expression but the challenge is that the left and right AST has already been evaluated.
+                 * 
+                 * Solution: For now, we push the types back onto the stack and introduce a no-op which allows us to assume the values are already on the operand stack.
+                 * 
+                 * TODO: Should the IfVisitor be re-written to assume the expression is already compiled?
+                 */
+
                 if (ast.getRight() == null) {
                     throw new Error("boolean operator missing right expression");
                 }
-                getIfVisitor().visit(
+
+                getExpressionVisitor().visit(mv, ast.getLeft(), context);
+                OperandType leftType = context.pop();
+
+                getExpressionVisitor().visit(mv, ast.getRight(), context);
+                OperandType rightType = context.pop();
+
+                if (leftType == OperandType.OBJECT && rightType == OperandType.OBJECT) {
+                    // Deep comparison
+                    // invoke int Object::equals()
+                    mv.visitMethodInsn(
+                        Opcodes.INVOKEVIRTUAL,
+                        "java/lang/Object",
+                        "equals",
+                        "(Ljava/lang/Object;)Z",
+                        false
+                    );
+                    context.push(OperandType.INTEGER); // final type
+                } else {
+                    Node conditionNode = new Node(NodeType.OPERATOR_SUBTRACT).withLeft(Node.NOOP).withRight(Node.NOOP);
+                    context.push(rightType);
+                    context.push(leftType);
+                    getExpressionVisitor().visit(mv, conditionNode, context);
+                    getIfVisitor().visit(
                         mv,
                         CompareTo.NONZERO, // when non-0 (true), jump to else
-                        new Node(NodeType.OPERATOR_SUBTRACT)
-                                .withLeft(ast.getLeft())
-                                .withRight(ast.getRight()),
+                        Node.NOOP, // use what is currently on the stack
                         PUSH_TRUE_NODE,
                         PUSH_FALSE_NODE,
                         context
-                );
+                    );
+                }
             } break;
             case OPERATOR_LESS_THAN: {
                 /*

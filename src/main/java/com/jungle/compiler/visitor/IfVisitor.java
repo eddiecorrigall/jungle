@@ -101,21 +101,15 @@ public class IfVisitor extends AbstractVisitor {
         }
 
         OperandType conditionType = null;
-        try {
-            getExpressionVisitor().visit(mv, conditionNode, context);
-        } catch (Throwable t) {
-            boolean hasEvaluatedCondition = !context.isEmpty();
-            if (hasEvaluatedCondition) {
-                conditionType = context.peek();
-                // Expression may not be an integer like primitive
-                switch (conditionType) {
-                    case OBJECT: {
-                        throw new Error("not implemented");
-                    }
-                    default: break;
-                }
+
+        if (conditionNode.getType() == NodeType.NOOP) {
+            logger.debug("assuming that the condition result is already on the operand stack");
+        } else {
+            try {
+                getExpressionVisitor().visit(mv, conditionNode, context);
+            } catch (Throwable t) {
+                throw new Error("if condition/expression cannot be evaluated", t);
             }
-            throw new Error("if condition/expression cannot be evaluated", t);
         }
 
         conditionType = context.peek();

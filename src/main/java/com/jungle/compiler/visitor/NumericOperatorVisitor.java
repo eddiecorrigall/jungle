@@ -57,9 +57,21 @@ public class NumericOperatorVisitor extends AbstractVisitor {
         @NotNull OperandType fromType,
         @NotNull OperandType toType
     ) {
-        if (fromType == OperandType.INTEGER  && toType == OperandType.CHAR) {
+        if (fromType == OperandType.INTEGER && toType == OperandType.CHAR) {
             mv.visitInsn(Opcodes.I2C);
             context.push(OperandType.CHAR); // final type
+            return OperandType.INTEGER; // computation type
+        }
+        if (fromType == OperandType.OBJECT && toType == OperandType.INTEGER) {
+            // invoke int Object::hashCode() on both left and right objects
+            mv.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                "java/lang/Object",
+                "hashCode",
+                "()I",
+                false
+            );
+            context.push(OperandType.INTEGER); // final type
             return OperandType.INTEGER; // computation type
         }
         throw new Error("conversion not possible");
@@ -106,10 +118,7 @@ public class NumericOperatorVisitor extends AbstractVisitor {
          * 
          * We want explicit conversions, right?
          */
-        if (leftExpressionType.equals(rightExpressionType)) {
-            operandType = leftExpressionType;
-            context.push(operandType);
-        } else if (leftExpressionType == OperandType.INTEGER && rightExpressionType == OperandType.CHAR) {
+        if (leftExpressionType == OperandType.INTEGER && rightExpressionType == OperandType.CHAR) {
             // Note: left ast is previous operand stack item
             mv.visitInsn(Opcodes.SWAP);
             operandType = convert(mv, ast, context, OperandType.INTEGER, OperandType.CHAR);
@@ -118,6 +127,18 @@ public class NumericOperatorVisitor extends AbstractVisitor {
         } else if (leftExpressionType == OperandType.CHAR && rightExpressionType == OperandType.INTEGER) {
             // Note: right ast is next operand stack item
             operandType = convert(mv, ast, context, OperandType.INTEGER, OperandType.CHAR);
+        } else if (leftExpressionType == OperandType.OBJECT) {
+            // Shallow comparison
+            mv.visitInsn(Opcodes.SWAP); // switch to object
+            operandType = convert(mv, ast, context, OperandType.OBJECT, OperandType.INTEGER);
+            mv.visitInsn(Opcodes.SWAP); // restore order
+        } else if (rightExpressionType == OperandType.OBJECT) {
+            // Shallow comparison
+            operandType = convert(mv, ast, context, OperandType.OBJECT, OperandType.INTEGER);
+        }
+         else if (leftExpressionType.equals(rightExpressionType)) {
+            operandType = leftExpressionType;
+            context.push(operandType);
         } else {
             throw new Error("binary operator left or right expression requires type cast " + ast);
         }

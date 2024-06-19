@@ -14,6 +14,9 @@ import java.util.Stack;
 
 public class Node implements INode {
   @NotNull
+  public static final Node NOOP = new Node(NodeType.NOOP);
+
+  @NotNull
   private final NodeType type;
 
   @Nullable

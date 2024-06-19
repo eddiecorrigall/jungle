@@ -1,6 +1,7 @@
 package com.jungle.compiler.visitor;
 
 import com.jungle.ast.INode;
+import com.jungle.ast.NodeType;
 import com.jungle.compiler.ICompilerOptions;
 import com.jungle.compiler.operand.OperandStackContext;
 import com.jungle.logger.FileLogger;
@@ -86,6 +87,11 @@ public class ExpressionVisitor extends AbstractVisitor {
 
         if (!canVisit(ast)) {
             throw new Error("expected expression");
+        }
+
+        if (ast.getType() == NodeType.NOOP) {
+            logger.debug("no-op");
+            return;
         }
 
         if (getIdentifierVisitor().canVisit(ast)) {
