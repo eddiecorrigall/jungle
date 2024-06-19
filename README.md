@@ -68,9 +68,10 @@ echo '
     loop (greaterThan i 0) {
         print i
         print "...\n"
+        sleep 1000
         i = - i 1
     }
-    print("Blast off!\n")
+    print "Blast off!\n"
 ' | jungle run
 ```
 
