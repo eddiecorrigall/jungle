@@ -20,10 +20,10 @@ public class BooleanOperatorVisitor extends AbstractVisitor {
     private static final FileLogger logger = new FileLogger(BooleanOperatorVisitor.class.getName());
 
     @NotNull
-    private static final INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("1");
+    private static final INode PUSH_TRUE_NODE = new Node(NodeType.LITERAL_BOOLEAN).withRawValue("true");
 
     @NotNull
-    private static final INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_INTEGER).withRawValue("0");
+    private static final INode PUSH_FALSE_NODE = new Node(NodeType.LITERAL_BOOLEAN).withRawValue("false");
 
     @NotNull
     private static final Set<NodeType> BOOLEAN_OPERATORS = new HashSet<>(Arrays.asList(

@@ -38,14 +38,12 @@ public enum OperandType {
     FLOAT;
 
     @NotNull
-    public static final Set<OperandType> INTEGER_OPERATION_TYPES = SetUtils.newSet(
+    public static final Set<OperandType> INTEGER_COMPUTATIONAL_TYPES = SetUtils.newSet(
+        OperandType.BOOLEAN,
         OperandType.CHAR,
         OperandType.BYTE,
         OperandType.SHORT,
-        OperandType.INTEGER,
-        OperandType.LONG,
-        OperandType.FLOAT,
-        OperandType.DOUBLE
+        OperandType.INTEGER
     );
 
     public int getConvertOpcode(@NotNull OperandType that) {

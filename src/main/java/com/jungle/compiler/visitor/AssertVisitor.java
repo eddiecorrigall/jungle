@@ -63,8 +63,9 @@ public class AssertVisitor extends AbstractVisitor {
 
         // if (![int expression]) throw new AssertionError("Detailed Message");
 
-        if (context.peek() != OperandType.INTEGER) {
-            throw new Error("assert condition/expression expected to be type integer");
+        OperandType conditionType = context.peek();
+        if (!OperandType.INTEGER_COMPUTATIONAL_TYPES.contains(conditionType)) {
+            throw new Error("assert condition/expression expected to be integer-like");
         }
 
         // if int value on operand stack is not-equal to zero then throw error
