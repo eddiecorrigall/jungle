@@ -100,13 +100,37 @@ public class IfVisitor extends AbstractVisitor {
             throw new Error("expected if condition/expression");
         }
 
+        OperandType conditionType = null;
         try {
             getExpressionVisitor().visit(mv, conditionNode, context);
         } catch (Throwable t) {
-            throw new Error("if condition/expression is not resolvable", t);
+            boolean hasEvaluatedCondition = !context.isEmpty();
+            if (hasEvaluatedCondition) {
+                conditionType = context.peek();
+                // Expression may not be an integer like primitive
+                switch (conditionType) {
+                    case OBJECT: {
+                        throw new Error("not implemented");
+                    }
+                    default: break;
+                }
+            }
+            throw new Error("if condition/expression cannot be evaluated", t);
         }
-        if (!OperandType.INTEGER_OPERATION_TYPES.contains(context.peek())) {
-            throw new Error("if condition/expression expected to be within the integer category");
+
+        conditionType = context.peek();
+
+        boolean isConditionTypeFloating = (
+            conditionType == OperandType.FLOAT ||
+            conditionType == OperandType.DOUBLE
+        );
+        if (isConditionTypeFloating) {
+            logger.warn("you may need to convert from a floating-point expression to an integer expression");
+            throw new Error("if condition/expression cannot evaluate floating-point values");
+        }
+
+        if (!OperandType.INTEGER_COMPUTATIONAL_TYPES.contains(conditionType)) {
+            throw new Error("if condition/expression expected to be integer-like");
         }
 
         INode bodyNode = ast.getRight();

@@ -28,6 +28,10 @@ public class OperandStackContext {
         this.symbolTable = new SymbolTable();
     }
 
+    public boolean isEmpty() {
+        return operandTypeStack.isEmpty();
+    }
+
     @NotNull
     public OperandType peek() {
         return operandTypeStack.peek();
