@@ -130,7 +130,7 @@ public class NumericOperatorVisitor extends AbstractVisitor {
             case OPERATOR_MULTIPLY: mv.visitInsn(operandType.getMultiplyOpcode()); break;
             case OPERATOR_DIVIDE: mv.visitInsn(operandType.getDivideOpcode()); break; // order matters
             case OPERATOR_MODULO: mv.visitInsn(operandType.getModuloOpcode()); break; // order matters
-            default: throw new Error("unhandled binary operator " + ast);
+            default: throw new Error("unhandled operation " + ast);
         }
     }
 }

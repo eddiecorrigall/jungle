@@ -100,7 +100,11 @@ public class IfVisitor extends AbstractVisitor {
             throw new Error("expected if condition/expression");
         }
 
-        getExpressionVisitor().visit(mv, conditionNode, context);
+        try {
+            getExpressionVisitor().visit(mv, conditionNode, context);
+        } catch (Throwable t) {
+            throw new Error("if condition/expression is not resolvable", t);
+        }
         if (!OperandType.INTEGER_OPERATION_TYPES.contains(context.peek())) {
             throw new Error("if condition/expression expected to be within the integer category");
         }
