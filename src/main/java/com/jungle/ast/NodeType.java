@@ -48,7 +48,7 @@ public enum NodeType {
 
   /* new Node(IF)
    *   .withLeft("expression")
-   *   .withRight("block"")
+   *   .withRight("block")
    */
   IF,
 

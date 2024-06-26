@@ -100,8 +100,6 @@ public class IfVisitor extends AbstractVisitor {
             throw new Error("expected if condition/expression");
         }
 
-        OperandType conditionType = null;
-
         if (conditionNode.getType() == NodeType.NOOP) {
             logger.debug("assuming that the condition result is already on the operand stack");
         } else {
@@ -112,18 +110,14 @@ public class IfVisitor extends AbstractVisitor {
             }
         }
 
-        conditionType = context.peek();
+        OperandType conditionType = context.peek();
 
-        boolean isConditionTypeFloating = (
-            conditionType == OperandType.FLOAT ||
-            conditionType == OperandType.DOUBLE
-        );
-        if (isConditionTypeFloating) {
-            logger.warn("you may need to convert from a floating-point expression to an integer expression");
+        if (conditionType == OperandType.FLOAT || conditionType == OperandType.DOUBLE) {
+            logger.warn("you may need to convert from a floating-point expression to integer-like");
             throw new Error("if condition/expression cannot evaluate floating-point values");
         }
 
-        if (!OperandType.INTEGER_COMPUTATIONAL_TYPES.contains(conditionType)) {
+        if (OperandType.INTEGER_COMPUTATIONAL_TYPES.contains(conditionType) == false) {
             throw new Error("if condition/expression expected to be integer-like");
         }
 
@@ -223,5 +217,17 @@ enum CompareTo {
     LESS_THAN_ZERO,
     LESS_OR_EQUAL_THAN_ZERO,
     GREATER_THAN_ZERO,
-    GREATER_OR_EQUAL_THAN_ZERO,
+    GREATER_OR_EQUAL_THAN_ZERO;
+
+    public int getOpcode() {
+        switch (this) {
+            case ZERO: return Opcodes.IFEQ;
+            case NONZERO: return Opcodes.IFNE;
+            case LESS_THAN_ZERO: return Opcodes.IFLT;
+            case LESS_OR_EQUAL_THAN_ZERO: return Opcodes.IFLE;
+            case GREATER_THAN_ZERO: return Opcodes.IFGT;
+            case GREATER_OR_EQUAL_THAN_ZERO: return Opcodes.IFGE;
+            default: throw new Error("unhandled if comparison");
+        }
+    }
 }
